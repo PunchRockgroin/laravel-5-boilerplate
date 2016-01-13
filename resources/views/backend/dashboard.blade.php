@@ -17,6 +17,7 @@
         </div><!-- /.box-header -->
         <div class="box-body">
             {!! getLanguageBlock('backend.lang.welcome') !!}
+            {{ $boom }}
         </div><!-- /.box-body -->
     </div><!--box box-success-->
 @endsection

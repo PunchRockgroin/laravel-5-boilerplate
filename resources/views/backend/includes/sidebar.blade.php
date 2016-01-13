@@ -34,6 +34,21 @@
             <li class="{{ Active::pattern('admin/dashboard') }}">
                 <a href="{!! route('admin.dashboard') !!}"><span>{{ trans('menus.backend.sidebar.dashboard') }}</span></a>
             </li>
+            
+            <li class="{{ Active::pattern('admin/files') }} treeview">
+                <a href="#">
+                    <span>{{ trans('fileentity.backend.sidebar.title') }}</span>
+                    <i class="fa fa-angle-left pull-right"></i>
+                </a>
+                <ul class="treeview-menu {{ Active::pattern('admin/files*', 'menu-open') }}" style="display: none; {{ Active::pattern('admin/files*', 'display: block;') }}">
+                    <li class="{{ Active::pattern('admin/files/') }}">
+                        <a href="{!! route('admin.fileentity.index') !!}"><span>{{ trans('fileentity.backend.sidebar.index') }}</span></a>
+                    </li>
+                    <li class="{{ Active::pattern('admin/files/create') }}">
+                        <a href="{!! route('admin.fileentity.create') !!}"><span>{{ trans('fileentity.backend.sidebar.create') }}</span></a>
+                    </li>
+                </ul>
+            </li>
 
             @permission('view-access-management')
                 <li class="{{ Active::pattern('admin/access/*') }}">

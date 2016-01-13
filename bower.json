@@ -1,0 +1,21 @@
+{
+  "name": "hopper",
+  "version": "2.0.0",
+  "homepage": "https://github.com/rappasoft/laravel-5-boilerplate",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "admin-lte": "~2.2.1",
+    "bootstrap-switch": "~3.3.2",
+    "modernizr": "~2.8.3",
+    "dropzone": "~4.2.0",
+    "pusher": "~3.0.0",
+    "AdminLTE": "admin-lte#~2.3.2"
+  }
+}

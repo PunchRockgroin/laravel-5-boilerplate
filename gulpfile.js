@@ -2,7 +2,7 @@ var elixir = require('laravel-elixir');
 
 elixir(function(mix) {
  mix
-     .phpUnit()
+//     .phpUnit()
 
     /**
      * Copy needed files from /node directories
@@ -20,6 +20,8 @@ elixir(function(mix) {
        'node_modules/bootstrap-sass/assets/javascripts/bootstrap.min.js',
        'public/js/vendor/bootstrap'
      )
+     
+     .copy('resources/assets/brand/hpe/font', 'public/build/fonts/hpe')
 
      /**
       * Process frontend SCSS stylesheets
@@ -58,19 +60,27 @@ elixir(function(mix) {
       * Combine pre-processed backend CSS files
       */
      .styles([
+         '../bower_components/dropzone/dist/min/dropzone.min.css',
          'backend/app.css'
      ], 'public/css/backend.css')
 
      /**
       * Combine backend scripts
       */
+     
+
      .scripts([
-         'plugin/sweetalert/sweetalert.min.js',
-         'plugins.js',
-         'backend/app.js',
-         'backend/plugin/toastr/toastr.min.js',
-         'backend/custom.js'
-     ], 'public/js/backend.js')
+         'assets/js/plugin/sweetalert/sweetalert.min.js',
+         'assets/js/plugins.js',
+         'assets/bower_components/bootstrap-switch/dist/js/bootstrap-switch.min.js',
+         'assets/bower_components/AdminLTE/plugins/datatables/jquery.dataTables.min.js',
+         'assets/bower_components/AdminLTE/plugins/datatables/dataTables.bootstrap.min.js',
+         'assets/bower_components/AdminLTE/plugins/datatables/extensions/Responsive/js/dataTables.responsive.min.js',
+         'assets/bower_components/dropzone/dist/min/dropzone.min.js',
+         'assets/js/backend/app.js',
+         'assets/js/backend/plugin/toastr/toastr.min.js',
+         'assets/js/backend/custom.js'
+     ], 'public/js/backend.js', 'resources')
 
     /**
       * Apply version control

@@ -22,7 +22,7 @@ return [
 	|
 	| The application name for use within the UI of the application
 	*/
-    'name' => 'Laravel 5 Bootstrap',
+    'name' => 'Hopper',
 
     /*
     |--------------------------------------------------------------------------
@@ -137,7 +137,8 @@ return [
          */
         Illuminate\Auth\AuthServiceProvider::class,
         Illuminate\Broadcasting\BroadcastServiceProvider::class,
-        Illuminate\Bus\BusServiceProvider::class,
+//        Illuminate\Bus\BusServiceProvider::class,
+        Collective\Bus\BusServiceProvider::class,
         Illuminate\Cache\CacheServiceProvider::class,
         Illuminate\Foundation\Providers\ConsoleSupportServiceProvider::class,
         Illuminate\Cookie\CookieServiceProvider::class,
@@ -156,6 +157,7 @@ return [
         Illuminate\Translation\TranslationServiceProvider::class,
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
+        Barryvdh\Queue\AsyncServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -177,11 +179,22 @@ return [
         Laracasts\Utilities\JavaScript\JavaScriptServiceProvider::class,
         HieuLe\Active\ActiveServiceProvider::class,
         Laravel\Socialite\SocialiteServiceProvider::class,
+        
+        Maatwebsite\Excel\ExcelServiceProvider::class,
+        Vinkla\Pusher\PusherServiceProvider::class,
+        JasonLewis\ResourceWatcher\Integration\LaravelServiceProvider::class,
+        Maknz\Slack\SlackServiceProvider::class,
+        Yajra\Datatables\DatatablesServiceProvider::class,
 
         /*
          * Has to override the Collective\Html\HtmlServiceProvider form singleton
          */
         App\Providers\MacroServiceProvider::class,
+        
+        /*
+         * Hopper and Related Services
+         */
+        App\Providers\HopperServiceProvider::class,
     ],
 
     /*
@@ -238,6 +251,15 @@ return [
         'Gravatar'    => Creativeorange\Gravatar\Facades\Gravatar::class,
         'Html'        => Collective\Html\HtmlFacade::class,
         'Socialite'   => Laravel\Socialite\Facades\Socialite::class,
+        
+        
+        'Dropbox' =>  GrahamCampbell\Dropbox\Facades\Dropbox::class,
+        'Excel' => Maatwebsite\Excel\Facades\Excel::class,
+        'LaravelPusher' => Vinkla\Pusher\Facades\Pusher::class,
+        'Slack' => Maknz\Slack\Facades\Slack::class,
+        'Datatables' => Yajra\Datatables\Datatables::class,
+        
+        'Hopper' => App\Services\Hopper\Facades\Hopper::class,
     ],
 
 ];
