@@ -24,6 +24,7 @@
     </div><!--box box-success-->
     
     @include('backend.fileentity.partials.form')
+    
     @include('backend.fileentity.partials.file_upload')
     
     {!! Form::close() !!}

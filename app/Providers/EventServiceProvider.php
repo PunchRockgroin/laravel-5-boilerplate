@@ -29,6 +29,22 @@ class EventServiceProvider extends ServiceProvider
         \App\Events\Frontend\Auth\UserRegistered::class => [
             \App\Listeners\Frontend\Auth\UserRegisteredListener::class,
         ],
+        
+        /**
+        * Backend Events
+        */
+       \App\Events\Backend\Hopper\EventSessionUpdated::class => [
+            \App\Listeners\Backend\Hopper\EventSessionUpdatedHandler::class,
+       ],
+       \App\Events\Backend\Hopper\FileUploaded::class => [
+            \App\Listeners\Backend\Hopper\FileUploadedHandler::class,
+       ],
+       \App\Events\Backend\Hopper\MasterUpdated::class => [
+            \App\Listeners\Backend\Hopper\MasterUpdatedHandler::class,
+       ],
+       \App\Events\Backend\Hopper\WorkingUpdated::class => [
+               \App\Listeners\Backend\Hopper\WorkingUpdatedHandler::class,
+       ],
     ];
 
     /**

@@ -19,7 +19,8 @@ $(function() {
 $(function() {
     if ($('div#file-upload').length) {
         var baseUrl = "",
-                token = $('meta[name="_token"]').attr('content')
+                token = $('meta[name="_token"]').attr('content'),
+                $currentFileNameInput = $('input[name="filename"]'), currentFileName
 //                currentFile = $('input[name="_currentfile"]').val(),
 //                nextVersion = $('select[name="_nextVersion"]').val(),
 //                sessionID = $('input[name="session_id"]').val()
@@ -38,9 +39,18 @@ $(function() {
             init: function () {
                 this.on("addedfile", function (file) {
 //                    channel = pusher.subscribe('hopper_channel');
+                    currentFileName = $currentFileNameInput.val();
                     $('.checkin-button').prop('disabled', true);
                 });
                 this.on("success", function (file, response) {
+                    
+                    $currentFileNameInput.val(response.newFileName);
+                    $.each(response.metadata, function(i, value){
+                         $('input[name="'+i+'"]').val(value);
+                    })
+//                    $('input[name="mime"]').val(response.metadata.mime);
+//                    $('input[name="path"]').val(response.metadata.path);
+//                    $('input[name="storage_disk"]').val(response.metadata.storage_disk);
 //                        console.log(response);
 //                  
 //                    $('label[for="movemastertoworking-pseudo"]').html('Copy Current Master to Working?');
@@ -81,7 +91,8 @@ $(function() {
                 });
             },
             params: {
-                _token: token
+                _token: token,
+                currentFileName : $currentFileNameInput.val()
             }
         });
         Dropzone.options.fileEntityUploadDz = {
