@@ -66,7 +66,7 @@ return [
         ],
         'async' => array(
             'driver' => 'async',
-            'table' => 'queue_jobs',
+            'table' => 'jobs',
             'queue' => 'default',
             'expire' => 60,
         ),

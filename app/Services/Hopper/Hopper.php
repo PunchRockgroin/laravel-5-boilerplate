@@ -29,5 +29,15 @@ class Hopper implements HopperContract
         return 'Houston, we have ignition';
 
     }
+    
+    
+    public function groupedHistory($history = [], $date = 'd-M-y'){
+        $History = collect($history);
+        $GroupedHistory = $History->groupBy(function($item) use ($date){
+          return \Carbon\Carbon::parse($item['timestamp']['date'])->format($date);   
+        });
+        return $GroupedHistory;
+        
+    }
 
 }

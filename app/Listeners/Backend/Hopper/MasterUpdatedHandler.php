@@ -20,7 +20,6 @@ class MasterUpdatedHandler
     {
         //
         $this->hopperFile = new HopperFile();
-        $this->driver_storage_path = \Storage::disk('hopper')->getDriver()->getAdapter()->getPathPrefix();
     }
 
     /**
@@ -33,12 +32,10 @@ class MasterUpdatedHandler
     {
         //
         
-        \Log::info('Master File: ' . basename( $event->newFilePath ) );  
+        \Log::info('Master File: ' . $event->oldFilePath . ' to ' . $event->newFilePath );  
         
-        $fd = fopen($this->driver_storage_path.$event->oldFilePath, "rb");
-        \Storage::disk('hopper')
-                    ->put($event->newFilePath, $fd);
-        fclose($fd);
+        $this->hopperFile->copyfile($event->oldFilePath, $event->newFilePath);
+        
         
     }
 }

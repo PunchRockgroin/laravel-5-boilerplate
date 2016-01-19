@@ -10,7 +10,8 @@
 @endsection
 
 @section('content')
-    {!! Form::open(['route' => 'admin.fileentity.store', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'post']) !!}
+    {!! Form::open(['route' => 'admin.fileentity.store', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'put']) !!}
+    {!! Form::hidden('behavior', 'create') !!} 
     <div class="box box-success">
         <div class="box-header with-border">
             <h3 class="box-title"></h3>
@@ -22,10 +23,11 @@
             
         </div><!-- /.box-body -->
     </div><!--box box-success-->
+    @include('backend.fileentity.partials.file_upload')
     
     @include('backend.fileentity.partials.form')
     
-    @include('backend.fileentity.partials.file_upload')
+    
     
     {!! Form::close() !!}
 @endsection

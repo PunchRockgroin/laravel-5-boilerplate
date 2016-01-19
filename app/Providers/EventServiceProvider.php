@@ -36,6 +36,9 @@ class EventServiceProvider extends ServiceProvider
        \App\Events\Backend\Hopper\EventSessionUpdated::class => [
             \App\Listeners\Backend\Hopper\EventSessionUpdatedHandler::class,
        ],
+       \App\Events\Backend\Hopper\FileEntityUpdated::class => [
+            \App\Listeners\Backend\Hopper\FileEntityUpdatedHandler::class,
+       ],
        \App\Events\Backend\Hopper\FileUploaded::class => [
             \App\Listeners\Backend\Hopper\FileUploadedHandler::class,
        ],

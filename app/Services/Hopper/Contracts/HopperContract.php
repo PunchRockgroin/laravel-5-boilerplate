@@ -7,5 +7,7 @@ Interface HopperContract
 
     public function blastOff();
 
+    
+    public function groupedHistory();
 
 }

@@ -6,7 +6,7 @@ use App\Events\Backend\Hopper\FileUploaded;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-use App\Services\HopperFile;
+use App\Services\Hopper\HopperFile;
 
 class FileUploadedHandler implements ShouldQueue
 {
@@ -34,13 +34,12 @@ class FileUploadedHandler implements ShouldQueue
         //
         \Log::info('File Uploaded: '.$event->newFileName);
          
-        try{
-            $this->hopperFile->_moveHopperTemporaryToHopperWorking($event->newFileName);
-        }catch(Exception $e){
-               \Log::error($exception);
-            \Debugbar::addException($e);
-        }
-//        $this->hopperfile->_moveHopperTemporaryToHopperWorking($newFileName);
+//        try{
+//            $this->hopperFile->_moveHopperTemporaryToHopperWorking($event->newFileName);
+//        }catch(Exception $e){
+//               \Log::error($exception);
+//            \Debugbar::addException($e);
+//        }
         
     }
 }

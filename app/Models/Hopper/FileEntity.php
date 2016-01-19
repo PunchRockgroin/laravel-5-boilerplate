@@ -14,10 +14,20 @@ class FileEntity extends Model
         'storage_disk',
         'path',
         'status',
-        'metadata',
+        'data',
         'history',
         'filename_history',
     );
+    
+    /**
+     * The attributes that should be casted to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'history' => 'array',
+        'filename_history' => 'array',
+    ];
     
     public function event_session()
     {

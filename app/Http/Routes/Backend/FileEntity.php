@@ -1,11 +1,17 @@
 <?php
 
-Route::get('files', 'FileEntityController@index')->name('admin.fileentity.index');
-Route::get('files/create', 'FileEntityController@create')->name('admin.fileentity.create');
-Route::post('files/store', 'FileEntityController@store')->name('admin.fileentity.store');
-Route::get('files/show/{id}', 'FileEntityController@show')->name('admin.fileentity.show');
-Route::get('files/edit/{id}', 'FileEntityController@edit')->name('admin.fileentity.edit');
-Route::post('files/update/{id}', 'FileEntityController@update')->name('admin.fileentity.update');
-Route::get('files/destroy/{id}', 'FileEntityController@destroy')->name('admin.fileentity.destroy');
+//Route::model('fileentity', 'FileEntity');
 
 Route::post('files/upload', 'FileEntityController@upload')->name('admin.fileentity.upload');
+Route::any('files/data', 'FileEntityController@anyData')->name('admin.fileentity.data');
+
+//Resource Routes
+Route::resource('files', 'FileEntityController', ['names' => [
+    'index' => 'admin.fileentity.index',
+    'create' => 'admin.fileentity.create',
+    'store' => 'admin.fileentity.store',
+    'show' => 'admin.fileentity.show',
+    'edit' => 'admin.fileentity.edit',
+    'update' => 'admin.fileentity.update',
+    'destroy' => 'admin.fileentity.destroy',
+]]);

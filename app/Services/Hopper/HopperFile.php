@@ -1,8 +1,9 @@
 <?php
 namespace App\Services\Hopper;
 
-use Symfony\Component\Process\Process;
-use Symfony\Component\Process\ProcessBuilder;
+use Illuminate\Foundation\Bus\DispatchesJobs;
+//use Symfony\Component\Process\Process;
+//use Symfony\Component\Process\ProcessBuilder;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 use Validator;
@@ -14,30 +15,68 @@ use Illuminate\Support\Facades\Config;
 use Carbon\Carbon as Carbon;
 use Vinkla\Pusher\PusherManager;
 
-use App\Models\Hopper\EventSession;
-use App\Models\Hopper\Visit;
+//use App\Models\Hopper\EventSession;
+//use App\Models\Hopper\Visit;
 use App\Models\Hopper\FileEntity;
 
+use App\Services\Hopper\HopperDBX;
+
+//use App\Jobs\Hopper\CopyFile;
+
 class HopperFile {
+    
+    use DispatchesJobs;
     
     protected $storagepath;
     protected $pusher;
     protected $driver_storage_path;
     
     protected $hopper_temporary_name;
+    protected $hopper_working_name;
+    protected $hopper_master_name;
+    protected $hopper_archive_name;
+    
     
     function __construct() {
+        
+
         $this->storagepath = config('hopper.local_storage');    
         $this->driver_storage_path = $this->getDriverStoragePath();
         
         $this->hopper_temporary_name = env('HOPPER_TEMPORARY_NAME', 'temporary/');
         $this->hopper_working_name = env('HOPPER_WORKING_NAME', 'Working/');
         $this->hopper_master_name = env('HOPPER_MASTER_NAME', '1_Master/');
+        $this->hopper_archive_name = env('HOPPER_ARCHIVE_NAME', 'ZZ_Archive/');
     }
     
     
     public function getDriverStoragePath($disk = 'hopper'){
         return Storage::disk($disk)->getDriver()->getAdapter()->getPathPrefix();
+    }
+    
+    
+    public function copyfile($oldFilePath, $newFilePath, $disk = 'hopper'){
+            $oldFile_exists = Storage::disk($disk)->exists($oldFilePath);
+            $newFile_exists = Storage::disk($disk)->exists($newFilePath);
+            if(!$oldFile_exists){
+                return false;
+            }
+            $fd = fopen($this->getDriverStoragePath($disk).$oldFilePath, "rb");     
+            if($newFile_exists && Storage::disk($disk)->delete($newFilePath)){
+                Storage::disk($disk)
+                        ->put($newFilePath, $fd);
+            }else{
+                Storage::disk($disk)
+                        ->put($newFilePath, $fd);
+            }
+            fclose($fd);
+            return $newFilePath;
+    }
+    
+    public function movefile($oldFilePath, $newFilePath, $disk = 'hopper'){
+        if($this->copyfile($oldFilePath, $newFilePath, $disk)){
+            Storage::disk($disk)->delete($oldFilePath);
+        } 
     }
     
     
@@ -62,10 +101,13 @@ class HopperFile {
     public function uploadToTemporary($file, $newFileName) {
         try
         {
-          $upload_success = Storage::disk('hopper')->put($this->hopper_temporary_name . $newFileName, $file);
+           $upload_success = Storage::disk('hopper')->put($this->hopper_temporary_name . $newFileName, $file);
            $filemeta = Storage::disk('hopper')->getMetaData($this->hopper_temporary_name . $newFileName);
            $filemeta['storage_disk'] = 'hopper';
-           $filemeta['mime'] = Storage::disk('hopper')->mimeType( $this->hopper_temporary_name . $newFileName);;          
+           $filemeta['mime'] = Storage::disk('hopper')->mimeType( $this->hopper_temporary_name . $newFileName);
+           $this->dispatch(
+                new \App\Jobs\Hopper\CopyFile($this->hopper_temporary_name . $newFileName,$this->hopper_master_name . $newFileName)
+            );
            return $filemeta;
         }
         catch(Exception $e)
@@ -88,10 +130,12 @@ class HopperFile {
     
     public function moveTemporaryNewFileToWorking($newFileName) {
         if (config('hopper.working_storage') === 'dropbox') {
-            return $this->_moveDBXTemporaryToDBXWorking($newFileName);
+            $hopperDBX = new HopperDBX();
+            return $hopperDBX->moveTemporaryToWorking($newFileName);
         } else {
             if (config('hopper.dropbox_copy')) {
-                $dbWorking = $this->_moveDBXTemporaryToDBXWorking($newFileName);
+                $hopperDBX = new HopperDBX();
+                $dbWorking = $hopperDBX->moveTemporaryToWorking($newFileName);
             }
             return $this->_moveHopperTemporaryToHopperWorking($newFileName);
         }
@@ -103,67 +147,29 @@ class HopperFile {
         //If there is a new file name and it exists in temporary and not in working
         if ($newFileName && $newFile_exists && !$newFile_exists_in_working) {
             //Move that file out of Temporary and into Working
-            Storage::disk('hopper')
-                    ->copy($this->hopper_temporary_name . $newFileName, $this->hopper_working_name . $newFileName);
-
+            event(new \App\Events\Backend\Hopper\MasterUpdated($this->hopper_temporary_name. $newFileName, $this->hopper_working_name . $newFileName));
             return $newFileName;
         } elseif ($newFileName && $newFile_exists && $newFile_exists_in_working) { //If there is a new file name and it exists in temporary and in working
             // Delete the File in Working
             if (Storage::disk('hopper')->delete($this->hopper_working_name . $newFileName)) {
                 //Copy the temporary file over to Working
-                Storage::disk('hopper')
-                        ->copy($this->hopper_temporary_name . $newFileName, $this->hopper_working_name . $newFileName);
+                event(new \App\Events\Backend\Hopper\MasterUpdated($this->hopper_temporary_name. $newFileName, $this->hopper_working_name . $newFileName));
             }
             
         } else {
             return false;
         }
     }
-    
-    public function _moveDBXTemporaryToDBXWorking($newFileName) {
-        if (!config('hopper.dropbox_enable')) {
-            return false;
-        }
-        Dropbox::createFolder('/Working');
-        //Does the file exist in temporary
-        $fileExists = Dropbox::getMetadata('/temporary/' . $newFileName);
-        //Does the file exist in temporary
-        $fileExists_in_working = Dropbox::getMetadata('/Working/' . $newFileName);
-//        debugbar()->info($fileExists);
-        //If the file exists and does't exist in working
-        if ($fileExists !== null && $fileExists_in_working === null) {
-            //Move the file from temporary to working
-            $dropboxData = Dropbox::move('/temporary/' . $newFileName, '/Working/' . $newFileName);
-//            \Log::info('File Transfered To Dropbox: ' . $newFileName);
 
-            return $dropboxData;
-        } elseif ($fileExists !== null && $fileExists_in_working !== null) { //If the file exists and does exist in working
-             //Delete the file first
-            $deletedFile = Dropbox::delete('/Working/' . $newFileName);
-            //If it's deleted
-            if ($deletedFile['is_deleted']) {
-                //Move the file from temporary to working
-                $dropboxData = Dropbox::move('/temporary/' . $newFileName, '/Working/' . $newFileName);
-//                \Log::info('File Transfered To Dropbox: ' . $newFileName);
-            }
-            return $dropboxData;
-        }
-        return false;
-    }
-    
-    public function moveDBXTemporaryToWorking($newFileName) {
-        if (!config('hopper.dropbox_enable')) {
-            return false;
-        }
-        return $this->_moveDBXTemporaryToDBXWorking($newFileName);
-    }
 
     public function copyTemporaryNewFileToMaster($newFileName) {
         if (config('hopper.master_storage') === 'dropbox') {
-            return $this->_copyDBXTemporaryToDBXMaster($newFileName);
+            $hopperDBX = new HopperDBX();
+            return $hopperDBX->copyTemporaryToMaster($newFileName);
         } else {
             if (config('hopper.dropbox_copy')) {
-                $dbMaster = $this->_copyDBXTemporaryToDBXMaster($newFileName);
+                $hopperDBX = new HopperDBX();
+                $dbMaster = $hopperDBX->copyTemporaryToMaster($newFileName);
             }
             return $this->_copyHopperTemporaryNewFileToHopperMaster($newFileName);
         }
@@ -175,12 +181,14 @@ class HopperFile {
         //If there is a new file name and it exists in Temporary and not in Master
         if ($newFileName && $newFile_exists && !$newFile_exists_in_master) {
              //Copy the file from Temporary to master
+//             dispatch(new \App\Jobs\Hopper\CopyFile($this->hopper_temporary_name. $newFileName, $this->hopper_master_name . $newFileName));
             event(new \App\Events\Backend\Hopper\MasterUpdated($this->hopper_temporary_name. $newFileName, $this->hopper_master_name . $newFileName)); 
             return $newFileName;
         } elseif ($newFile_exists && $newFile_exists_in_master) {  //If there is a new file name and it exists in Temporary and in Master
             //Delete the file from master	
             if (Storage::disk('hopper')->delete($this->hopper_master_name. $newFileName)) {
                 //Copy the file from Temporary to Master
+//                dispatch(new \App\Jobs\Hopper\CopyFile($this->hopper_temporary_name. $newFileName, $this->hopper_master_name . $newFileName));
                 event(new \App\Events\Backend\Hopper\MasterUpdated($this->hopper_temporary_name . $newFileName, $this->hopper_master_name . $newFileName)); 
             }
         } else {
@@ -188,46 +196,17 @@ class HopperFile {
         }
     }
 
-    public function _copyDBXTemporaryToDBXMaster($newFileName) {
-        if (!config('hopper.dropbox_enable')) {
-            return false;
-        }
-        $newFile_exists = Dropbox::getMetadata('/temporary/' . $newFileName);
-        $newFile_exists_in_master = Dropbox::getMetadata('/1_Master/' . $newFileName);
-        //If there is a new file name and it exists in Temporary and not in Master
-        if ($newFileName && $newFile_exists !== null && $newFile_exists_in_master === null) {
-            //Copy the file from Temporary to Master
-            $dropboxData = Dropbox::copy('/temporary/' . $newFileName, '/1_Master/' . $newFileName);
-            return $dropboxData;
-        } elseif ($newFile_exists !== null && $newFile_exists_in_master !== null) {  //If there is a new file name and it exists in Temporary and in Master
-             //Delete the file from master
-            $deletedFile = Dropbox::delete('/1_Master/' . $newFileName);
-            if ($deletedFile['is_deleted']) {  //If the file is deleted
-                //Copy the file from Temporary to Master
-                $dropboxData = Dropbox::copy('/temporary/' . $newFileName, '/1_Master/' . $newFileName);
-                return $dropboxData;
-            }
-        }
-        if ($dropboxData !== null) {
-            \Log::info('File Transfered from Dropbox Temporary to Dropbox Master: ' . $dropboxData['path']);
-        }
-        return false;
-    }
 
-    public function copyDBXTemporaryToDBXMaster($newFileName) {
-        if (!config('hopper.dropbox_enable')) {
-            return false;
-        }
-        return $this->_copyDBXTemporaryToDBXMaster($newFileName);
-    }
 
     public function copyMasterToWorking($currentMaster, $updateVersionTo = false) {
         if (config('hopper.master_storage') === 'dropbox' && config('hopper.working_storage') === 'dropbox') {
-            $dbMaster = $this->_copyMasterDBXToWorkingDBX($currentMaster, $updateVersionTo);
+            $hopperDBX = new HopperDBX();
+            $dbMaster = $hopperDBX->copyMasterToWorking($currentMaster, $updateVersionTo);
             $newMaster = $currentMaster;
         } else {
             if (config('hopper.dropbox_copy')) {
-                $dbMaster = $this->_copyMasterDBXToWorkingDBX($currentMaster, $updateVersionTo);
+                $hopperDBX = new HopperDBX();
+                $dbMaster = $hopperDBX->copyMasterToWorking($currentMaster, $updateVersionTo);
             }
 //            event(new \App\Events\Backend\Hopper\MasterUpdated($oldFilePath, $newFilePath, $uuid = null));
             $newMaster = $this->_copyMasterHopperToWorkingHopper($currentMaster, $updateVersionTo);
@@ -278,70 +257,18 @@ class HopperFile {
         return $fileData;
     }
 
-    public function _copyMasterDBXToWorkingDBX($currentMaster, $updateVersionTo = false) {
-        $master_exists = Dropbox::getMetadata('/1_Master/' . $currentMaster);
-        $master_exists_in_working = Dropbox::getMetadata('/working/' . $currentMaster);
-        //If we are updating Master Version and the Master Exists    
-        if ($updateVersionTo && $master_exists !== null) {
-            //Get a new file name
-            $newFileName = $this->renameFileVersion($currentMaster, $updateVersionTo);
-             //Check if the old Master exists in Working
-            if (Dropbox::getMetadata('/working/' . $currentMaster) !== null) { 
-                 //Delete the master in Working
-                $deletedFile = Dropbox::delete('/working/' . $currentMaster);
-                if ($deletedFile['is_deleted']) {
-                    //Copy the master over
-                    $dropboxData['old_master'] = Dropbox::copy('/1_Master/' . $currentMaster, '/working/' . $currentMaster);
-                    return $dropboxData;
-                }
-            }else{
-                $dropboxData['old_master'] = Dropbox::copy('/1_Master/' . $currentMaster, '/working/' . $currentMaster);
-            }
-            //Check if the new Master exists in Working
-            if (Dropbox::getMetadata('/working/' . $newFileName) !== null) {
-                //Delete the master in Working
-                $deletedFile = Dropbox::delete('/working/' . $newFileName);
-                if ($deletedFile['is_deleted']) {
-                    $dropboxData['new_master'] = Dropbox::copy('/1_Master/' . $currentMaster, '/working/' . $newFileName);
-                    return $dropboxData;
-                }
-            }else{
-                $dropboxData['new_master'] = Dropbox::copy('/1_Master/' . $currentMaster, '/working/' . $newFileName);
-            }
 
-            return $newFileName;
-        } else if (($master_exists !== null)) {
-            if (Dropbox::getMetadata('/working/' . $currentMaster) !== null) {
-                $deletedFile = Dropbox::delete('/working/' . $currentMaster);
-                if ($deletedFile['is_deleted']) {
-                    $dropboxData['old_master'] = Dropbox::copy('/1_Master/' . $currentMaster, '/working/' . $currentMaster);
-                    return $dropboxData;
-                }
-            }else{
-                $dropboxData['old_master'] = Dropbox::copy('/1_Master/' . $currentMaster, '/working/' . $currentMaster);
-            }
-            return $dropboxData;
-        } else {
-            return false;
-        }
-        return false;
-    }
 
-    public function copyDBXMasterToWorking($currentMaster, $updateVersionTo = false) {
-        if (!config('hopper.dropbox_enable')) {
-            return false;
-        }
-        $newMaster = $this->_copyMasterDBXToWorkingDBX($currentMaster, $updateVersionTo);
-        return $newMaster;
-    }
 
     public function copyMasterToMaster($currentMaster, $updateVersionTo = false) {
         if (config('hopper.master_storage') === 'dropbox' && config('hopper.working_storage') === 'dropbox') {
-            $dbMaster = $this->_copyMasterDBXToMasterDBX($currentMaster, $updateVersionTo);
+            $hopperDBX = new HopperDBX();
+            $dbMaster = $hopperDBX->copyMasterToMaster($currentMaster, $updateVersionTo);
             $newMaster = $currentMaster;
         } else {
             if (config('hopper.dropbox_copy')) {
-                $dbMaster = $this->_copyMasterDBXToMasterDBX($currentMaster, $updateVersionTo);
+                $hopperDBX = new HopperDBX();
+                $dbMaster = $hopperDBX->copyMasterToMaster($currentMaster, $updateVersionTo);
 //                debugbar()->info($dbMaster);
             }
             $newMaster = $this->_copyMasterHopperToMasterHopper($currentMaster, $updateVersionTo);
@@ -370,26 +297,47 @@ class HopperFile {
             return false;
         }
     }
-
-    public function _copyMasterDBXToMasterDBX($currentMaster, $updateVersionTo = false) {
-        $master_exists = Dropbox::getMetadata('/1_Master/' . $currentMaster);
-        $master_exists_in_working = Dropbox::getMetadata('/working/' . $currentMaster);
-        //If we are updating Master Version and the Master Exists  
-        if ($updateVersionTo && $master_exists !== null) {
-            //Get a new file name
-            $newFileName = $this->renameFileVersion($currentMaster, $updateVersionTo);
-            //Check if the new Master exists in Master
-            if (Dropbox::getMetadata('/1_Master/' . $newFileName) !== null) {
-                //Don't do anything
-                return true;
-//                }
-            }else{
-                $dropboxData['new_master'] = Dropbox::copy('/1_Master/' . $currentMaster, '/1_Master/' . $newFileName);
+    
+    public function moveMasterToArchive($currentMaster) {
+        if (config('hopper.master_storage') === 'dropbox' && config('hopper.working_storage') === 'dropbox') {
+            $hopperDBX = new HopperDBX();
+            $dbMaster = $hopperDBX->moveMasterToArchive($currentMaster);
+            $newMaster = $currentMaster;
+        } else {
+            if (config('hopper.dropbox_copy')) {
+                $hopperDBX = new HopperDBX();
+                $dbMaster = $hopperDBX->moveMasterToArchive($currentMaster);
+//                debugbar()->info($dbMaster);
             }
-
-            return $newFileName;
+            $newMaster = $this->_moveMasterHopperToArchiveHopper($currentMaster);
         }
-        return false;
+        return $newMaster;
+    }
+
+    public function _moveMasterHopperToArchiveHopper($currentMaster) {
+        $master_exists = Storage::disk('hopper')->exists($this->hopper_master_name . $currentMaster);
+        //If the Master Exists    
+        if ($master_exists) {
+            //Get a new file name
+            $master_exists_in_master = Storage::disk('hopper')->exists($this->hopper_archive_name . $currentMaster);
+//			debugbar()->info('Update'); 
+			if ($master_exists_in_master && Storage::disk('hopper')->delete($this->hopper_archive_name  . $currentMaster) ) {
+                            $this->dispatch(
+                                 new \App\Jobs\Hopper\CopyFile($this->hopper_master_name  . $currentMaster, $this->hopper_archive_name  . $currentMaster)
+                             );
+				//event(new \App\Events\Backend\Hopper\MasterUpdated($this->hopper_master_name  . $currentMaster, $this->hopper_archive_name  . $currentMaster));
+            } else {
+                //Copy the Current Master to a new filename
+                $this->dispatch(
+                    new \App\Jobs\Hopper\CopyFile($this->hopper_master_name  . $currentMaster, $this->hopper_archive_name  . $currentMaster)
+                );
+//		event(new \App\Events\Backend\Hopper\MasterUpdated($this->hopper_master_name  . $currentMaster, $this->hopper_archive_name  . $currentMaster));						 
+            }
+            return $currentMaster;
+        } else {
+			
+            return false;
+        }
     }
     
     

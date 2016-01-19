@@ -61,6 +61,10 @@ elixir(function(mix) {
       */
      .styles([
          '../bower_components/dropzone/dist/min/dropzone.min.css',
+         '../bower_components/dropzone/dist/min/basic.min.css',
+         '../bower_components/admin-lte/plugins/datatables/extensions/Responsive/css/dataTables.responsive.css',
+         '../bower_components/admin-lte/plugins/datatables/dataTables.bootstrap.css',
+         '../bower_components/bootstrap-switch/dist/css/bootstrap3/bootstrap-switch.min.css',
          'backend/app.css'
      ], 'public/css/backend.css')
 

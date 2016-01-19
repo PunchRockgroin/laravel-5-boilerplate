@@ -20,12 +20,18 @@ $(function() {
     if ($('div#file-upload').length) {
         var baseUrl = "",
                 token = $('meta[name="_token"]').attr('content'),
-                $currentFileNameInput = $('input[name="filename"]'), currentFileName
+                $fileNameInput = $('input[name="filename"]'), fileName,
+                $currentFileNameInput = $('input[name="currentfilename"]'), currentFileName,
+                $behavior = $('input[name="behavior"]'), behavior,
+                $nextVersionInput = $('select[name="next_version"]'), next_version
 //                currentFile = $('input[name="_currentfile"]').val(),
 //                nextVersion = $('select[name="_nextVersion"]').val(),
 //                sessionID = $('input[name="session_id"]').val()
                 ;
         
+                behavior = $behavior.val() || false;
+                currentFileName = $currentFileNameInput.val() || false;
+                next_version = $nextVersionInput.val() || false;
                         
         Dropzone.autoDiscover = false;
         var fileEntityUploadDz = new Dropzone("div#file-upload", {
@@ -39,12 +45,13 @@ $(function() {
             init: function () {
                 this.on("addedfile", function (file) {
 //                    channel = pusher.subscribe('hopper_channel');
-                    currentFileName = $currentFileNameInput.val();
+                    fileName = $fileNameInput.val();
+                    next_version = $nextVersionInput.val() || false;
                     $('.checkin-button').prop('disabled', true);
                 });
                 this.on("success", function (file, response) {
                     
-                    $currentFileNameInput.val(response.newFileName);
+                    $fileNameInput.val(response.newFileName);
                     $.each(response.metadata, function(i, value){
                          $('input[name="'+i+'"]').val(value);
                     })
@@ -92,7 +99,10 @@ $(function() {
             },
             params: {
                 _token: token,
-                currentFileName : $currentFileNameInput.val()
+                filename : $fileNameInput.val(),
+                currentFileName : currentFileName,
+                next_version : $nextVersionInput.val() || false,
+                behavior : $behavior.val() || false,
             }
         });
         Dropzone.options.fileEntityUploadDz = {

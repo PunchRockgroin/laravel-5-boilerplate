@@ -24,7 +24,11 @@ return [
             'filename' => [
                 'label' => 'File Name',
                 'placeholder' => 'Use <session_id>_etc',
-                'helpblock' => 'Enter a filename',
+                'help_block' => 'Enter a filename',
+            ],
+            'next_version' => [
+                'label' => 'Next Version',
+                'help_block' => 'Choose the next version number',
             ],
             
         ],

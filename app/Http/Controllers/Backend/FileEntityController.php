@@ -10,6 +10,7 @@ use Event;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 use App\Models\Hopper\FileEntity;
+use Yajra\Datatables\Datatables;
 use App\Services\Hopper\Contracts\HopperContract as Hopper;
 use App\Services\Hopper\HopperFile;
 
@@ -21,8 +22,29 @@ class FileEntityController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function index() {
+        
+        $fileEntities = FileEntity::all();
+        
+        debugbar()->info($fileEntities);
+        
         $data = [];
         return view('backend.fileentity.index', $data);
+    }
+    
+    /**
+     * Process datatables ajax request.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function anyData()
+    {
+        
+        return Datatables::of(FileEntity::select('*'))
+                ->addColumn('operations',
+                    '<a class="btn btn-primary btn-xs" href="{{ route( \'admin.fileentity.edit\', array( $id )) }}">Edit</a> '
+                  . '<a class="btn btn-info btn-xs" href="{{ route( \'admin.fileentity.show\', array( $id )) }}">Show</a> '
+                )
+                ->make(true);
     }
 
     /**
@@ -32,6 +54,7 @@ class FileEntityController extends Controller {
      */
     public function create() {
         $data = [];
+        
         return view('backend.fileentity.create', $data);
     }
 
@@ -48,15 +71,22 @@ class FileEntityController extends Controller {
         
         $this->validate($request, [
             'newfile' => 'required',
+            'filename' => 'required',
         ],
         [
-            'newfile.required' => 'A file is required to create a new file'
+            'newfile.required' => 'A file is required to create a new file',
+            'filename.required' => 'A filename is required to create a new file'
         ]);
 
+        
             
         $hopperfile->copyTemporaryNewFileToMaster($request->filename);
         
-        return redirect()->back()->withFlashSuccess('File Created');
+        $FileEntity = FileEntity::create($request->all());
+        
+        event(new \App\Events\Backend\Hopper\FileEntityUpdated($id, 'create', 'Created', $FileEntity->filename));
+        
+        return redirect()->back()->withFlashSuccess('File '.$FileEntity->filename.' Created');
     }
 
     /**
@@ -76,8 +106,28 @@ class FileEntityController extends Controller {
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id) {
-        $data = [];
+    public function edit($id, Hopper $hopper, HopperFile $hopperfile) {
+
+        $FileEntity = FileEntity::findOrFail($id);
+        
+        $currentVersion = $hopperfile->getCurrentVersion($FileEntity->filename);
+        $nextVersion = $currentVersion + 1;
+        
+//        $FileHistory = collect($FileEntity->history);
+//        $GroupedFileHistory = $FileHistory->groupBy(function($item)
+//        {
+//          return \Carbon\Carbon::parse($item['timestamp']['date'])->format('d-M-y');   
+//        });
+        
+        $GroupedFileHistory = $hopper->groupedHistory($FileEntity->history);
+        debugbar()->info($GroupedFileHistory);
+        
+        $data = [
+            'FileEntity' => $FileEntity,
+            'currentVersion' => $currentVersion,
+            'nextVersion' => $nextVersion,
+            'GroupedFileHistory' => $GroupedFileHistory,
+        ];
         return view('backend.fileentity.edit', $data);
     }
 
@@ -88,9 +138,37 @@ class FileEntityController extends Controller {
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id) {
-        //
-        return redirect()->back()->with('flash_info','File Updated');
+    public function update(Request $request, $id, HopperFile $hopperfile) {
+        debugbar()->info($request->all());
+        
+//        $this->validate($request, [
+//            'newfile' => 'required',
+//        ],
+//        [
+//            'newfile.required' => 'A file is required to create a new file'
+//        ]);
+
+        $FileEntity = FileEntity::findOrFail($id);
+
+//        $request->history[] = $History;
+        $FileEntity->update($request->all());
+        
+        event(new \App\Events\Backend\Hopper\FileEntityUpdated($id, 'update', 'Updated'));
+        
+        if($request->currentfilename !== $request->filename){
+            $hopperfile->copyTemporaryNewFileToMaster($request->filename);
+            event(new \App\Events\Backend\Hopper\FileEntityUpdated($id, 'copy', 'Moved to master', null, $request->filename));
+            $hopperfile->moveMasterToArchive($request->currentfilename);
+            event(new \App\Events\Backend\Hopper\FileEntityUpdated($id, 'move', 'Moved to archive', null, $request->currentfilename));
+        }
+        
+        
+        
+        
+        
+        
+        
+        return redirect()->back()->with('flash_info','File '.$FileEntity->filename.' Updated');
     }
 
     /**
@@ -106,6 +184,9 @@ class FileEntityController extends Controller {
 
     public function upload(Request $request, HopperFile $hopperFile) {
 //        \Debugbar::disable();
+        
+        debugbar()->info($request->all());
+        
         $dropboxData = [];
         $file = $request->file('file');
         if (!$file->isValid()) {
@@ -127,17 +208,21 @@ class FileEntityController extends Controller {
 
 
         $uploadedFileName = $file->getClientOriginalName();
-        if (!empty($request->currentFileName)) {
-            $newFileName = $request->currentFileName;
-            \Debugbar::info($request->currentFileName);
+        if (!empty($request->filename)) {
+            $newFileName = $request->filename;
+//            \Debugbar::info($request->filename);
         } else {
             $newFileName = $uploadedFileName;
         }
 
-        //$newFileName = $hopperFile->renameFileVersion($currentFileName, $request->nextVersion, $file->getClientOriginalExtension());
-        //$upload_success = true;       
+        if (filter_var($request->currentFileName, FILTER_VALIDATE_BOOLEAN) && filter_var($request->next_version, FILTER_VALIDATE_BOOLEAN)){
+            $newFileName = $hopperFile->renameFileVersion($request->currentFileName, $request->next_version, $file->getClientOriginalExtension());
+        }
+        
+       
+          
         $upload = $hopperFile->uploadToTemporary(File::get($file), $newFileName);
-        debugbar()->info($upload);
+        
         if ($upload instanceof \Exception) {
             return response()->json([
                         'success' => false,
@@ -146,8 +231,8 @@ class FileEntityController extends Controller {
 //                        'sessionID' => $request->sessionID,
                             ], 400);
         } else {
-            // Event::fire(new \App\Events\Backend\Hopper\FileUploaded($request->except('file'), $newFileName));
-            //Event::fire(new \App\Events\Backend\Hopper\FileUploaded($request->except('file'), $newFileName));
+//            Event::fire(new \App\Events\Backend\Hopper\FileUploaded($request->except('file'), $newFileName));
+            
             return response()->json([
                         'success' => true,
 //                        'oldFileName' => $request->currentFileName,
