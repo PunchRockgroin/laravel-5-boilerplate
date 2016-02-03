@@ -15,6 +15,9 @@ return [
 
     'general' => [
         'all' => 'Alla',
+        'yes' => 'Ja',
+        'no' => 'Nej',
+        'custom' => 'Specifika',
         'actions' => 'Hantera',
         'buttons' => [
             'save' => 'Spara',

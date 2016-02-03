@@ -15,6 +15,9 @@ return [
 
     'general' => [
         'all' => 'Tous',
+        'yes' => 'Oui',
+        'no' => 'Non',
+        'custom' => 'Custom', // TODO TRANSLATION
         'actions' => 'Actions',
         'buttons' => [
             'save' => 'Enregistrer',
