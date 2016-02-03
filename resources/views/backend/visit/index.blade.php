@@ -1,11 +1,11 @@
 @extends('backend.layouts.master')
 
-@section('title', app_name() .' | '. trans('fileentity.backend.sidebar.title') .' | '. trans('fileentity.backend.sidebar.index'))
+@section('title', app_name() .' | '. trans('visit.backend.sidebar.title') .' | '. trans('visit.backend.sidebar.index'))
 
 @section('page-header')
     <h1>
         {!! app_name() !!}
-        <small>{{ trans('fileentity.backend.admin.title') }} &raquo; {{ trans('fileentity.backend.admin.index') }}</small>
+        <small>{{ trans('visit.backend.admin.title') }} &raquo; {{ trans('visit.backend.admin.index') }}</small>
     </h1>
 @endsection
 
@@ -18,7 +18,7 @@
             </div><!-- /.box tools -->
         </div><!-- /.box-header -->
         <div class="box-body">
-            {!! $html->table(['class' => 'table responsive table-bordered table-striped', 'width' => '100%' ]) !!}
+             {!! $html->table(['class' => 'table responsive table-bordered table-striped', 'width' => '100%' ]) !!}
         </div><!-- /.box-body -->
     </div><!--box box-success-->
 @endsection
@@ -26,5 +26,5 @@
 
 
 @push('after-scripts-end')
-{!! $html->scripts() !!}
+    {!! $html->scripts() !!}
 @endpush

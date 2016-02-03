@@ -17,6 +17,72 @@ $(function() {
 });
 
 $(function() {
+//    $('.repeat').each(function() {
+//        var obj = $(this),
+//            objD = obj.data(),
+//            options = {
+//                wrapper : '.repeater-wrapper',
+//                container : '.repeater-container',
+//                row_count_placeholder : '__row-count-placeholder__',
+//                after_add : function(container, new_row, default_after_add) {
+//                $(new_row).find('.date-range-picker').daterangepicker({
+//                        "singleDatePicker": true,
+//                        "showWeekNumbers": false,
+//                        "timePicker": true,
+//                        "timePickerIncrement": 1,
+//                        "opens": "center",
+//                        "drops": "up",
+//                        "locale": {
+//                            format: 'MM/DD/YYYY h:mm A'
+//                        }
+//                    });
+//                default_after_add(container, new_row);
+//                }
+//            },
+//            o = $.extend(true, {}, options, objD );
+//        $(this).repeatable_fields(o);
+//    });
+
+
+    $('.repeater').repeater({
+            defaultValues: {
+            },
+            show: function () {
+                $(this).show();
+                $('.repeater').find('.date-range-picker').daterangepicker({
+                        "singleDatePicker": true,
+                        "showWeekNumbers": false,
+                        "timePicker": true,
+                        "timePickerIncrement": 1,
+                        "opens": "center",
+                        "drops": "up",
+                        "locale": {
+                            format: 'MM/DD/YYYY h:mm A'
+                        }
+                    });
+            },
+            hide: function (deleteElement) {
+                if(confirm('Are you sure you want to delete this element?')) {
+                    $(this).hide(deleteElement);
+                }
+            },
+            ready: function (setIndexes) {
+                $('.repeater').find('.date-range-picker').daterangepicker({
+                        "singleDatePicker": true,
+                        "showWeekNumbers": false,
+                        "timePicker": true,
+                        "timePickerIncrement": 1,
+                        "opens": "center",
+                        "drops": "up",
+                        "locale": {
+                            format: 'MM/DD/YYYY h:mm A'
+                        }
+                    });
+            }
+        });
+});
+
+$(function() {
     if ($('div#file-upload').length) {
         var baseUrl = "",
                 token = $('meta[name="_token"]').attr('content'),
@@ -40,6 +106,7 @@ $(function() {
             paramName: "file", // The name that will be used to transfer the file
             maxFilesize: 500, // MB
             maxFiles: 1,
+
             acceptedFiles: '.ppt,.pptx,.pdf,.pptm',
 //                addRemoveLinks: true, 
             init: function () {
@@ -48,6 +115,7 @@ $(function() {
                     fileName = $fileNameInput.val();
                     next_version = $nextVersionInput.val() || false;
                     $('.checkin-button').prop('disabled', true);
+                    console.log(behavior);
                 });
                 this.on("success", function (file, response) {
                     
@@ -55,6 +123,13 @@ $(function() {
                     $.each(response.metadata, function(i, value){
                          $('input[name="'+i+'"]').val(value);
                     })
+                    switch(behavior){
+                        case 'create_eventsession':
+                        case 'update_eventsession':
+                            $nextVersionInput.val(response.next_version);
+                        break;    
+                    }
+
 //                    $('input[name="mime"]').val(response.metadata.mime);
 //                    $('input[name="path"]').val(response.metadata.path);
 //                    $('input[name="storage_disk"]').val(response.metadata.storage_disk);
@@ -111,4 +186,111 @@ $(function() {
             }
         };
     }
+    
+    
+    if ($('div#visit-upload').length) {
+        var baseUrl = "",
+                token = $('meta[name="_token"]').attr('content'),
+                
+                fileName = $('input[name="filename"]').val(),
+                fileName = $('input[name="filename"]').val(),
+                sessionID = $('input[name="session_id"]').val(),
+                lastenter
+                ;
+        
+                        
+        Dropzone.autoDiscover = false;
+        var visitDropzone = new Dropzone(document.body, {
+            url: baseUrl + "/admin/files/upload",
+            previewsContainer: "div#visit-upload",
+            previewTemplate: document.querySelector('#preview-template').innerHTML,
+            paramName: "file", // The name that will be used to transfer the file
+            maxFilesize: 500, // MB
+            maxFiles: 1,
+                        clickable: false,
+            acceptedFiles: '.ppt,.pptx,.pdf,.pptm',
+//                addRemoveLinks: true, 
+            init: function () {
+                this.on("dragleave", function( event ){
+                    if (lastenter === event.target) {
+//                        console.log('dragleave');
+                        $('.dz-overtop').removeClass('dragging');
+                    }
+//                    
+                });
+                this.on("dragenter", function( event ){
+                    lastenter = event.target;
+                    $('.dz-overtop').addClass('dragging');
+                });
+                this.on("dragstart", function( event ){
+//                    console.log('dragstart');
+//                    $('.dz-overtop').addClass('dragging');
+                });
+                this.on("addedfile", function (file) {
+                    $('.dz-overtop').removeClass('dragging');
+                    $('#visit-upload').addClass('dz-started');
+//                    channel = pusher.subscribe('hopper_channel');
+                    //$('.checkin-button').prop('disabled', true);
+                });
+                this.on("success", function (file, response) {
+//                        console.log(response);
+                    
+                    $.each(response.metadata, function(i, value){
+                         $('input[name="'+i+'"]').val(value);
+                    })
+                    var $el = $(file.previewElement);
+                    $el.find('.info-box-icon')
+                            .toggleClass('bg-aqua bg-green')
+                            .find('i')
+                            .toggleClass('fa-cog fa-spin fa-check-circle-o');
+                    $el.find('.renamed-to')
+                            .html('uploaded')
+                            ;
+//                    $el.find('.dz-wait')
+//                            .html('<div class="alert alert-info"><i class="fa fa-cog fa-spin"></i> Please wait while we transfer the file to Dropbox...</div>')
+//                            ;
+                    $el.append('<input type="hidden" name="newfile" value="' + response.newFileName + '" \>');
+                    
+                    
+//                    channel.bind('dropbox_action', function(data) {
+//                             
+//                            if(data.filename === response.newFileName){
+//                                $el.find('.dz-wait').html('<div class="alert alert-success"><i class="fa fa-check">'+data.message+'</div>');
+//                            }
+////                            
+//
+//                    });
+//                        console.log($el);
+                });
+                this.on("error", function (file, response) {
+//                        console.log(response);
+                    var $el = $(file.previewElement);
+                    $el.find('.info-box-icon')
+                            .toggleClass('bg-aqua bg-red')
+                            .find('i')
+                            .toggleClass('fa-cog fa-spin fa-times-circle-o');
+                    $el.find('.dz-error')
+                            .wrapInner('<div class="alert alert-danger" />');
+//                        console.log($el);
+                });
+                this.on("reset", function(){
+                    $('#visit-upload').removeClass('dz-started');
+                });
+            },
+            params: {
+                _token: token,
+                filename : fileName,
+                currentFileName : fileName,
+                next_version : false
+                
+            }
+        });
+        Dropzone.options.visitDropzone = {
+            accept: function (file, done) {
+
+            }
+        };
+    }
+    
+    
 });

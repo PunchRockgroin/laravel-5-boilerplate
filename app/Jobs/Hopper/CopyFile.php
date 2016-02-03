@@ -44,9 +44,9 @@ class CopyFile extends Job implements SelfHandling, ShouldQueue
     {
         if ($this->attempts() > 3) {
             \Log::error("File Copy Job Failed: ");
-            
+            throw new \Exception; 
         }
-        $this->hopperFile->copyfile($this->oldFilePath, $event->newFilePath);
+        $this->hopperFile->copyfile($this->oldFilePath, $this->newFilePath);
         \Log::info('Copy File: '.$this->oldFilePath .' to ' . $this->newFilePath);
         
 //        if(!empty($this->fileEntity)){

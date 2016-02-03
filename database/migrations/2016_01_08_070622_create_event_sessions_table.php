@@ -25,7 +25,7 @@ class CreateEventSessionsTable extends Migration
             $table->string('approval_revrec', 10)->default("N/A");
             $table->string('approval_legal', 10)->default("N/A");
             $table->text('dates_rooms')->nullable();
-            
+            $table->text('history')->nullable();
             $table->timestamps();
         });
     }

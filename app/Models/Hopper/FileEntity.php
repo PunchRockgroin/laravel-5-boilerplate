@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class FileEntity extends Model
 {
     protected $fillable = array(
+        'event_session_id',
         'filename',
         'mime',
         'session_id',
@@ -31,6 +32,6 @@ class FileEntity extends Model
     
     public function event_session()
     {
-        return $this->belongsTo('App\EventSession');
+        return $this->belongsTo('App\Models\Hopper\EventSession');
     }
 }

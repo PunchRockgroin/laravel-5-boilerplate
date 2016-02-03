@@ -23,7 +23,9 @@ use App\Services\Hopper\HopperDBX;
 
 //use App\Jobs\Hopper\CopyFile;
 
-class HopperFile {
+use App\Services\Hopper\Contracts\HopperFileContract;
+
+class HopperFile implements HopperFileContract{
     
     use DispatchesJobs;
     
@@ -31,10 +33,10 @@ class HopperFile {
     protected $pusher;
     protected $driver_storage_path;
     
-    protected $hopper_temporary_name;
-    protected $hopper_working_name;
-    protected $hopper_master_name;
-    protected $hopper_archive_name;
+    public $hopper_temporary_name;
+    public $hopper_working_name;
+    public $hopper_master_name;
+    public $hopper_archive_name;
     
     
     function __construct() {
@@ -190,6 +192,7 @@ class HopperFile {
                 //Copy the file from Temporary to Master
 //                dispatch(new \App\Jobs\Hopper\CopyFile($this->hopper_temporary_name. $newFileName, $this->hopper_master_name . $newFileName));
                 event(new \App\Events\Backend\Hopper\MasterUpdated($this->hopper_temporary_name . $newFileName, $this->hopper_master_name . $newFileName)); 
+                return $this->hopper_master_name . $newFileName;
             }
         } else {
             return false;

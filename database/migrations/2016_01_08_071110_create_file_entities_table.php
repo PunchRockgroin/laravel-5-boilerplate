@@ -14,6 +14,7 @@ class CreateFileEntitiesTable extends Migration
     {
         Schema::create('file_entities', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('event_session_id')->unsigned()->index()->nullable();
             $table->string('filename');
             $table->string('mime')->nullable();
             $table->string('session_id')->nullable();

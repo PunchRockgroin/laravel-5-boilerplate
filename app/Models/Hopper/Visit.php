@@ -8,6 +8,7 @@ class Visit extends Model
 {
     protected $fillable = array(
         'event_session_id',
+        'file_entity_id',
         'session_id',
         'checkin_username',
         'visitors',
@@ -22,6 +23,11 @@ class Visit extends Model
 
     public function event_session()
     {
-        return $this->belongsTo('App\EventSession');
+        return $this->belongsTo('App\Models\Hopper\EventSession');
+    }
+    
+    public function file_entity()
+    {
+        return $this->hasOne('App\Models\Hopper\FileEntity', 'id');
     }
 }

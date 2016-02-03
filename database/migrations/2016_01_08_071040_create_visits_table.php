@@ -25,6 +25,7 @@ class CreateVisitsTable extends Migration
             $table->string('design_username')->nullable();            
             $table->tinyInteger('difficulty')->nullable();
             $table->text('design_notes')->nullable();
+            $table->text('history')->nullable();
             $table->timestamps();
         });
     }

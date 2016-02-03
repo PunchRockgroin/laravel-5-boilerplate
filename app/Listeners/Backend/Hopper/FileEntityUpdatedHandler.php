@@ -42,15 +42,13 @@ class FileEntityUpdatedHandler implements ShouldQueue {
 //          }
 //        }
         
-        $user = 'Hopper';
-        if(!empty(\Auth::user()->email)){
-            $user = \Auth::user()->email;
-        }
+
+        
 
         try {
             $History = [
                 'event' => $event->event,
-                'user' => $user,
+                'user' => $event->user,
                 'filename' => $event->filename,
                 'notes' => $event->notes,
                 'tasks' => $event->tasks,

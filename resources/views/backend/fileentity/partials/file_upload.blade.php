@@ -2,14 +2,14 @@
     <div class="box-header with-border">
         <h3 class="box-title">File Upload</h3>
     </div><!-- /.box-header -->
-
     <div class="box-body">
-       
-       
             <div class="dropzone dz-clickable dz-default" id="file-upload">
-                <div class="fallback">
+                <div class="fallback hidden">
                     <input name="file" type="file" multiple />
                 </div> 
+                <div class="dz-message">
+                    <span class="h2"><i class="fa fa-cloud-upload"></i> Drop File Here</span>
+                </div>
             </div>
             <div id="preview-template" style="display: none;"> 
 

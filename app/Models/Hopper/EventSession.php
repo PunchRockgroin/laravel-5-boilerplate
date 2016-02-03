@@ -32,13 +32,23 @@ class EventSession extends Model
         'dates_rooms' => 'object',
     ];
     
+    /**
+    * Get the route key for the model.
+    *
+    * @return string
+    */
+    public function getRouteKeyName()
+    {
+        return 'session_id';
+    }
+    
 
     public function visits() {
-        return $this->hasMany('App\Visit');
+        return $this->hasMany('App\Models\Hopper\Visit');
     }
     
     public function file_entity() {
-        return $this->hasOne('App\FileEntity');
+        return $this->hasOne('App\Models\Hopper\FileEntity');
     }
 
     
@@ -62,4 +72,15 @@ class EventSession extends Model
     public function checkedInBoolean(){
         return (boolval($this->attributes['checked_in']));
     }
+    
+    
+//    public function getDatesRoomsAttribute($value)
+//    {
+//        $value_array = json_decode($value);
+//        foreach($value_array as $key => $date_room){
+////             debugbar()->info($date_room->date);
+//            $value_array[$key]->date = \Carbon\Carbon::parse($date_room->date)->timezone(config('hopper.event_timezone', 'UTC'))->format('m/d/y h:i A');
+//        }
+//        return $value_array;
+//    }
 }

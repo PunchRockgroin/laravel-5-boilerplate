@@ -18,6 +18,8 @@ class DashboardController extends Controller
         $data = [];
         $data['boom'] = $hopper->blastOff();
         
+        
+        
         return view('backend.dashboard', $data);
     }
 }

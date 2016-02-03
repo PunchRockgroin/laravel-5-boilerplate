@@ -10,7 +10,7 @@
 @endsection
 
 @section('content')
-    {!! Form::open(['route' => 'admin.fileentity.store', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'put']) !!}
+    {!! Form::open(['route' => 'admin.fileentity.store', 'role' => 'form']) !!}
     {!! Form::hidden('behavior', 'create') !!} 
     <div class="box box-success">
         <div class="box-header with-border">

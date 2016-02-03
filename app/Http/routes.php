@@ -37,6 +37,8 @@ Route::group(['middleware' => 'web'], function() {
                 require (__DIR__ . '/Routes/Backend/LogViewer.php');
                 
                 require (__DIR__ . '/Routes/Backend/FileEntity.php');
+                require (__DIR__ . '/Routes/Backend/EventSession.php');
+                require (__DIR__ . '/Routes/Backend/Visit.php');
             });
         });
     });
