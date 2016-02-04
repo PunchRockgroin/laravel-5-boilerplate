@@ -77,7 +77,6 @@ elixir(function(mix) {
 
      .scripts([
          
-         'assets/bower_components/AdminLTE/plugins/jQueryUI/jquery-ui.js',
          'assets/bower_components/moment/moment.js',
          'assets/bower_components/bootstrap-daterangepicker/daterangepicker.js',
          'assets/bower_components/AdminLTE/plugins/datatables/jquery.dataTables.min.js',
