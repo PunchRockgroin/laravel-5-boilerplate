@@ -19,6 +19,7 @@ class EventSession extends Model
         'dates_rooms',
         'presentation_owner',
         'check_in_datetime',
+        'history',
     );
     
     protected $dates = ['created_at', 'updated_at', 'check_in_datetime'];
@@ -29,7 +30,8 @@ class EventSession extends Model
      * @var array
      */
     protected $casts = [
-        'dates_rooms' => 'object',
+        'dates_rooms' => 'object',   
+        'history' => 'array',
     ];
     
     /**

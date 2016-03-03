@@ -6,8 +6,6 @@ use App\Events\Event;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
-use Illuminate\Http\Request;
-use App\Services\Hopper\HopperFile;
 
 class FileEntityUpdated extends Event
 {
@@ -16,7 +14,6 @@ class FileEntityUpdated extends Event
     public $id;
     public $event;
     public $request;
-    public $hopperFile;
     public $filename;
     public $notes;
     public $tasks;
@@ -27,7 +24,7 @@ class FileEntityUpdated extends Event
      *
      * @return void
      */
-    public function __construct($id, $event, $notes = '', $filename = '', $tasks = [], $user = 'Hopper', $request = null)
+    public function __construct($id, $event, $notes = '', $filename = null, $tasks = [], $user = 'Hopper', $request = null)
     {
         //
 //        $this->request = $request;

@@ -13,7 +13,6 @@
         "creativeorange/gravatar": "~1.0",
         "davejamesmiller/laravel-breadcrumbs": "^3.0",
         "hieu-le/active": "~2.0",
-<<<<<<< HEAD
         "arcanedev/log-viewer": "~3.0",
         "guzzlehttp/guzzle": "^6.1",
         "predis/predis": "^1.0",
@@ -25,9 +24,6 @@
         "laravelcollective/bus": "5.2.*",
         "barryvdh/laravel-async-queue": "~0.4@dev",
         "yajra/laravel-datatables-oracle": "~6.0"
-=======
-        "arcanedev/log-viewer": "~3.0"
->>>>>>> db08ee39f030e93ceeb136bed0d27d529dddb159
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

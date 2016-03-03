@@ -9,7 +9,7 @@ use App\Services\Hopper\HopperFile;
 
 class FileEntityUpdatedHandler implements ShouldQueue {
 
-    protected $hopperFile;
+    protected $hopperfile;
 
     /**
      * Create the event listener.
@@ -18,7 +18,7 @@ class FileEntityUpdatedHandler implements ShouldQueue {
      */
     public function __construct() {
         //
-        $this->hopperFile = new HopperFile();
+        $this->hopperfile = new HopperFile();
     }
 
     /**
@@ -41,31 +41,51 @@ class FileEntityUpdatedHandler implements ShouldQueue {
 //            }
 //          }
 //        }
-        
-
-        
+                
 
         try {
             $History = [
                 'event' => $event->event,
-                'user' => $event->user,
-                'filename' => $event->filename,
                 'notes' => $event->notes,
+                'filename' => $event->filename,
                 'tasks' => $event->tasks,
+                'user' => $event->user,
                 'timestamp' => \Carbon\Carbon::now(),
             ];
 
             $FileEntity = \App\Models\Hopper\FileEntity::find($event->id);
-            $OldHistory = $FileEntity->history;
-            $OldHistory[] = $History;
-
-            $FileEntity->update(['history' => $OldHistory]);
-//            $this->hopperFile->_moveHopperTemporaryToHopperWorking($event->newFileName);
+            if(count($FileEntity)){
+                $OldHistory = $FileEntity->history;
+                $OldHistory[] = $History;
+                $updateData = ['history' => $OldHistory];
+                
+                if(!empty($event->tasks)){
+                    $this->performTasks($event->tasks, $updateData);
+                }
+                
+                $FileEntity->update($updateData);
+            }
+            
+//            $this->hopperfile->_moveHopperTemporaryToHopperWorking($event->newFileName);
         } catch (Exception $e) {
             \Log::error($e);
 //            \Debugbar::addException($e);
         }
 //        $this->hopperfile->_moveHopperTemporaryToHopperWorking($newFileName);
+    }
+    
+    
+    private function performTasks($tasks, &$updateData){
+        
+        foreach($tasks as $task => $taskdata){
+            switch ($task) {
+                case 'update_path':
+                    $updateData['path'] = $taskdata;
+                    break;
+                default:
+                    break;
+            }  
+        }
     }
 
 }

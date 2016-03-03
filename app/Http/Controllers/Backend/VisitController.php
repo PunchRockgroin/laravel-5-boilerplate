@@ -21,7 +21,7 @@ class VisitController extends Controller
     
     public function __construct(\Illuminate\Support\MessageBag $messagebag)
     {
-        $this->messagebag = $messagebag;
+        $this->messagebag = $messagebag;        
     }
     
     /**
@@ -63,6 +63,7 @@ class VisitController extends Controller
         $data = [
             'html' => $html
         ];
+        event(new \App\Events\Backend\Hopper\Heartbeat(auth()->user(), request()->route(), \Carbon\Carbon::now()->toIso8601String()));
         return view('backend.visit.index', $data);
     }
 
@@ -106,10 +107,10 @@ class VisitController extends Controller
      */
     public function edit(Visit $visit, HopperVisit $hoppervisit)
     {
-        $data = $hoppervisit->edit($visit);
-        //debugbar()->info($visit->event_session->approval_brand);
-        debugbar()->info($data);
+        $data = $hoppervisit->edit($visit);       
         
+        
+        event(new \App\Events\Backend\Hopper\Heartbeat(auth()->user(), request()->route(), \Carbon\Carbon::now()->toIso8601String()));
         return view('backend.visit.edit', $data);
     }
 
@@ -152,5 +153,33 @@ class VisitController extends Controller
     public function destroy($id)
     {
         //
+    }
+    
+    /**
+     * Find Visit by ID from form.
+     *
+     * 
+     * @return \Illuminate\Http\Response
+     */
+    public function find(Request $request)
+    {
+        $visit_id = $request->get('visit_id');
+        
+        if(empty($visit_id)){
+            return redirect(route('admin.visit.index'))
+                    ->withErrors(['Alert', 'Please enter a valid visit ID']);
+        }
+        $visit = Visit::find($visit_id);
+        if(count($visit)){
+            return redirect( route('admin.visit.edit', ['id' => $visit_id]) );
+        }
+        $sessionid_visit = Visit::where('session_id', '=' , strtoupper($visit_id))->get();
+        if(count($sessionid_visit)){
+            return redirect(route('admin.visit.edit', ['id'=> $sessionid_visit->last()->id]));
+        }
+        
+        return redirect(route('admin.visit.index'))
+                    ->withErrors(['Alert', 'Could not find Visit ID: '. $visit_id]);
+        
     }
 }

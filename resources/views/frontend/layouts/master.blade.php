@@ -1,4 +1,6 @@
+@extends('super')
 <!DOCTYPE html>
+@section('supercontent')
 <html lang="en">
     <head>
         <meta charset="utf-8">

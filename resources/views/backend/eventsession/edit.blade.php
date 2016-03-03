@@ -17,4 +17,10 @@
     @include('backend.eventsession.partials.form')   
     
     {!! Form::close() !!}
+    
+    @if(isset($History))
+        
+        @include('backend.eventsession.partials.timeline')
+    
+    @endif
 @endsection

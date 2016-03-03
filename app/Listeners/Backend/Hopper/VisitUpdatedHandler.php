@@ -12,7 +12,7 @@ use Session;
 
 use App\Services\Hopper\Contracts\HopperFileContract;
 
-class EventSessionUpdatedHandler 
+class VisitUpdatedHandler 
 {
     
     protected $hopperfile;
@@ -30,10 +30,10 @@ class EventSessionUpdatedHandler
     /**
      * Handle the event.
      *
-     * @param  EventSessionUpdated  $event
+     * @param  VisitUpdated  $event
      * @return void
      */
-    public function handle(EventSessionUpdated $event) {
+    public function handle(VisitUpdated $event) {
         //
 
 //        if(!empty($event->tasks)){
@@ -52,19 +52,18 @@ class EventSessionUpdatedHandler
             $History = [
                 'event' => $event->event,
                 'user' => $event->user,
+                'filename' => $event->filename,
                 'notes' => $event->notes,
                 'tasks' => $event->tasks,
                 'timestamp' => \Carbon\Carbon::now(),
             ];
-
-            $EventSession = \App\Models\Hopper\EventSession::find($event->id);
-            if(count($EventSession)){
-                $OldHistory = $EventSession->history;
-                $OldHistory[] = $History;
-                $EventSession->update(['history' => $OldHistory]);
-            }                
             
-
+            $Visit = \App\Models\Hopper\Visit::find($event->id);
+            if(count($Visit)){
+                $OldHistory = $Visit->history;
+                $OldHistory[] = $History;
+                $Visit->update(['history' => $OldHistory]);
+            }
         } catch (Exception $e) {
             \Log::error($e);
 //            \Debugbar::addException($e);

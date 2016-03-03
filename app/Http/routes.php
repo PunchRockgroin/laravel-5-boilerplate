@@ -39,7 +39,19 @@ Route::group(['middleware' => 'web'], function() {
                 require (__DIR__ . '/Routes/Backend/FileEntity.php');
                 require (__DIR__ . '/Routes/Backend/EventSession.php');
                 require (__DIR__ . '/Routes/Backend/Visit.php');
+                require (__DIR__ . '/Routes/Backend/Hopper.php');
             });
         });
+        
+        /**
+        * Unauthenticated Broadcasting
+        */
+        Route::group(['prefix' => 'heartbeat'], function(){
+            require (__DIR__ . '/Routes/Backend/Heartbeat.php');
+            
+        });
     });
+    
+
+    
 });

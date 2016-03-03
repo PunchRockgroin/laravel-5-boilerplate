@@ -6,35 +6,24 @@ use App\Events\Event;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
-class EventSessionUpdated extends Event
+class Heartbeat extends Event
 {
     use SerializesModels;
     
-    public $id;
-    public $event;
-    public $request;
-    public $notes;
-    public $tasks;
     public $user;
+    public $timestamp;
+    public $data;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct($id, $event, $notes = '', $tasks = [], $user = 'Hopper', $request = null)
+    public function __construct($user, $timestamp = null, $data = [])
     {
-        
-        
-        $this->id = $id;
-        $this->event = $event;
-        $this->request = $request;
-        $this->notes = $notes;
-        $this->tasks = $tasks;
         $this->user = $user;
-        if(\Auth::check()){
-            $this->user = auth()->user()->name;
-        }
+        $this->timestamp = $timestamp;
+        $this->data = $data;
     }
 
     /**

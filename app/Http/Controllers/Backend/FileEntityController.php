@@ -20,6 +20,12 @@ use App\Services\Hopper\HopperFileEntity;
 
 class FileEntityController extends Controller {
 
+    private $messagebag;
+    
+    public function __construct(\Illuminate\Support\MessageBag $messagebag)
+    {
+        $this->messagebag = $messagebag;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -53,6 +59,7 @@ class FileEntityController extends Controller {
         $data = [
             'html' => $html
         ];
+        event(new \App\Events\Backend\Hopper\Heartbeat(auth()->user(), request()->route(), \Carbon\Carbon::now()->toIso8601String()));
         return view('backend.fileentity.index', $data);
     }
     
@@ -79,7 +86,7 @@ class FileEntityController extends Controller {
      */
     public function create() {
         $data = [];
-        
+        event(new \App\Events\Backend\Hopper\Heartbeat(auth()->user(), request()->route(), \Carbon\Carbon::now()->toIso8601String()));
         return view('backend.fileentity.create', $data);
     }
 
@@ -117,10 +124,11 @@ class FileEntityController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function show($id) {
-        $FileEntity = FileEntity::findOrFail($id);
+        $FileEntity = FileEntity::with('event_session')->findOrFail($id);
         $data = [
             'FileEntity' => $FileEntity
         ];
+        event(new \App\Events\Backend\Hopper\Heartbeat(auth()->user(), request()->route(), \Carbon\Carbon::now()->toIso8601String()));
         return view('backend.fileentity.show', $data);
     }
 
@@ -131,9 +139,11 @@ class FileEntityController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function edit(HopperFileEntity $hopperfileentity, $id) {
-
-        $FileEntity = FileEntity::findOrFail($id);                
+        
+        $FileEntity = FileEntity::with('event_session')->findOrFail($id);                
         $data = $hopperfileentity->edit($FileEntity);
+        
+        event(new \App\Events\Backend\Hopper\Heartbeat(auth()->user(), request()->route(), \Carbon\Carbon::now()->toIso8601String()));
         
         return view('backend.fileentity.edit', $data);
     }
@@ -186,10 +196,7 @@ class FileEntityController extends Controller {
         }
 
         $extension = $file->getClientOriginalExtension(); // getting file extension
-
-
-
-
+        
         $uploadedFileName = $file->getClientOriginalName();
         if (!empty($request->filename)) {
             $newFileName = $request->filename;

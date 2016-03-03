@@ -19,7 +19,19 @@ class Visit extends Model
         'design_username',
         'difficulty',
         'design_notes',
+        'history',
     );
+    
+    /**
+     * The attributes that should be casted to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'event_session_id' => 'integer',
+        'file_entity_id' => 'integer',
+        'history' => 'array',        
+    ];
 
     public function event_session()
     {
@@ -28,6 +40,6 @@ class Visit extends Model
     
     public function file_entity()
     {
-        return $this->hasOne('App\Models\Hopper\FileEntity', 'id');
+        return $this->hasOne('App\Models\Hopper\FileEntity', 'id', 'file_entity_id');
     }
 }

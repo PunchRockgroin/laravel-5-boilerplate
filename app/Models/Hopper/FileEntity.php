@@ -26,8 +26,10 @@ class FileEntity extends Model
      * @var array
      */
     protected $casts = [
+        'event_session_id' => 'integer',
         'history' => 'array',
         'filename_history' => 'array',
+        
     ];
     
     public function event_session()

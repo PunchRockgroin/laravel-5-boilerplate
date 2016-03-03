@@ -23,7 +23,50 @@ class HopperServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        view()->composer(['backend.layouts.master'], function(){
+            
+            $heartbeat_detector_enable = false;
+            $heartbeat_detector_routes = ['admin.dashboard'];
+            
+//            if(in_array(request()->route()->getName(), $heartbeat_detector_routes)){
+//                $heartbeat_detector_enable = true;
+//            }
+            
+            javascript()->put([
+                'hopper' => [
+                    'userid' => auth()->user()->id,
+                    'username' => auth()->user()->name,
+                    'email' => auth()->user()->email,
+                    'heartbeat_status' => route('backend.heartbeat.status'),
+                    'heartbeat_data' => route('admin.dashboard.data'),
+                    'heartbeat_detector_enable' => (in_array(request()->route()->getName(), $heartbeat_detector_routes) ? true : false),
+                ],
+            ]);
+        });
+        //Views we track
+        view()->composer([
+            'backend.fileentity.edit',
+            'backend.visit.edit',
+        ], function(){
+            javascript()->put([
+                'heartbeat' => [
+                    'user' => auth()->user()->email,
+                    'url' => route('backend.heartbeat.index'),
+                    'route' => request()->route()->getName(),
+                    'parameters' => request()->segments()
+                ],
+            ]);
+        
+        });
+                
+        //Announce the creation of a new Event Session
+        \App\Models\Hopper\EventSession::created(function ($eventsession) {
+            event(new \App\Events\Backend\Hopper\EventSessionUpdated($eventsession->id, 'created', 'I was born'));
+        });
+        //Announce the creation of a new File Entity
+        \App\Models\Hopper\FileEntity::created(function ($fileentity) {
+            event(new \App\Events\Backend\Hopper\FileEntityUpdated($fileentity->id, 'create', 'Created', 'I was born: ' . $fileentity->filename));
+        });
     }
 
     /**

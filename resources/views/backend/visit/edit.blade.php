@@ -1,11 +1,11 @@
 @extends('backend.layouts.master')
 
-@section('title', app_name() .' | '. trans('visit.backend.admin.title') .' | '. trans('visit.backend.admin.edit'))
+@section('title', app_name() .' | '. trans('visit.backend.admin.title') .' | '. trans('visit.backend.admin.edit')) 
 
 @section('page-header')
 <h1>
     {!! app_name() !!}
-    <small>{{ trans('visit.backend.admin.title') }} &raquo; {{ $visit->event_session->session_id }} &raquo; {{ trans('visit.backend.admin.edit') }}</small>
+    <small>{{ trans('visit.backend.admin.title') }} &raquo; Visit ID {{ $visit->id }} for {{ $visit->event_session->session_id }} &raquo; {{ trans('visit.backend.admin.edit') }}</small>
 </h1>
 @endsection
 
@@ -55,7 +55,10 @@
                     <span class="info-box-text">Room/Date/Time</span>
                     @inject('Hopper', 'App\Services\Hopper\Contracts\HopperContract')
                     @foreach($visit->event_session->dates_rooms as $date_room)
-                    <div><span class="info-box-number">{!! $Hopper->parseDateTimeForDisplay($date_room->date) !!} {!! $date_room->room_name !!} <span class="small">({!! $date_room->room_id !!})</span></span></div>
+                    <div><span class="info-box-number"><span class="small">
+                                {!! $date_room->room_name !!}  <span class="small">({!! $date_room->room_id !!})</span>
+                                {!! $Hopper->parseDateTimeForDisplay($date_room->date) !!} 
+                                </span></span></div>
                         
                     @endforeach
                 </div>
@@ -63,11 +66,11 @@
             </div>
 
             <div class="info-box">
-                <span class="info-box-icon bg-{!! ($visit->event_session->approval_branding === 'YES' ? 'green' : 'red') !!}"><i class="fa fa-check-circle"></i></span>
+                <span class="info-box-icon bg-{!! ($visit->event_session->approval_brand === 'YES' ? 'green' : 'red') !!}"><i class="fa fa-check-circle"></i></span>
 
                 <div class="info-box-content">
                     <span class="info-box-text">Branding Status</span>
-                    <span class="info-box-number">{!! ($visit->event_session->approval_branding === 'YES' ? 'APPROVED' : 'DISAPPROVED') !!}</span>
+                    <span class="info-box-number">{!! ($visit->event_session->approval_brand === 'YES' ? 'APPROVED' : 'DISAPPROVED') !!}</span>
                 </div>
                 <!-- /.info-box-content -->
             </div>

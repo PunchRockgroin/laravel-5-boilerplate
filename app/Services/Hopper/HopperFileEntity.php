@@ -21,7 +21,7 @@ use Vinkla\Pusher\PusherManager;
 //use App\Models\Hopper\Visit;
 use App\Models\Hopper\FileEntity;
 
-use App\Services\Hopper\Hopper;
+use App\Services\Hopper\Contracts\HopperContract;
 use App\Services\Hopper\HopperDBX;
 
 //use App\Jobs\Hopper\CopyFile;
@@ -37,6 +37,20 @@ class HopperFileEntity extends HopperFile{
 //    public $hopper_archive_name;
     
     
+    protected $hopper;
+
+    /**
+     * @param HopperContract    $hopper
+     */
+    public function __construct(
+    HopperContract $hopper
+    ) {
+        $this->hopper = $hopper;
+        
+    }
+    
+    
+    
     public function show($id = null){
         if(empty($id)){
             return false;
@@ -45,18 +59,15 @@ class HopperFileEntity extends HopperFile{
     }
 
     public function edit(FileEntity $FileEntity){
-        
-        $data = [];
-        $hopper = new Hopper();
-        $currentVersion = $this->getCurrentVersion($FileEntity->filename);
+                
+        $currentVersion = $this->hopper->getCurrentVersion($FileEntity->filename);
         $nextVersion = $currentVersion + 1;
-        $GroupedFileHistory = $hopper->groupedHistory($FileEntity->history);
         
         $data = [
             'FileEntity' => $FileEntity,
             'currentVersion' => $currentVersion,
             'nextVersion' => $nextVersion,
-            'GroupedFileHistory' => $GroupedFileHistory,
+            'History' => $this->hopper->groupedHistory($FileEntity->history),
         ];
         
         if(count($FileEntity->event_session)){
@@ -70,12 +81,8 @@ class HopperFileEntity extends HopperFile{
     public function store($data = []) {
         
         if(!empty($data)){
-            
             $this->copyTemporaryNewFileToMaster($data['filename']);
-        
             $FileEntity = FileEntity::create($data);
-        
-            event(new \App\Events\Backend\Hopper\FileEntityUpdated($FileEntity->id, 'create', 'Created', $FileEntity->filename));
             return $FileEntity;
         }
         
@@ -84,26 +91,78 @@ class HopperFileEntity extends HopperFile{
 
     public function update(Request $request, FileEntity $FileEntity){
         
-         switch ($request->action){
-            default:
-                
-                break;
-         }
-        
-        $FileEntity->update($request->all());
-        
-        //$id, $event, $notes = '', $filename = '', $tasks = [], $user = null, $request = null
-        event(new \App\Events\Backend\Hopper\FileEntityUpdated($FileEntity->id, 'update', 'Updated', null, null));
+        $FileEntity = $this->_update($request->all());
         
         if(isset($request->currentfilename) && isset($request->filename) && ($request->currentfilename !== $request->filename) ){
-            $this->copyTemporaryNewFileToMaster($request->filename);
-            event(new \App\Events\Backend\Hopper\FileEntityUpdated($FileEntity->id, 'copy', 'Moved '.$request->filename.' to master', null, $request->filename));
+            $path = $this->copyTemporaryNewFileToMaster($request->filename);
+            event(new \App\Events\Backend\Hopper\FileEntityUpdated($FileEntity->id, 'copy', 'Moved '.$request->filename.' to master', $request->filename, ['update_path' => $path]));
             $this->moveMasterToArchive($request->currentfilename);
             event(new \App\Events\Backend\Hopper\FileEntityUpdated($FileEntity->id, 'move', 'Moved '.$request->currentfilename.' to archive', null, $request->currentfilename));
         }
+//        elseif(isset($request->behavior) && isset($request->filename) && $request->behavior === 'update_visit'){
+//            $this->copyTemporaryNewFileToMaster($request->filename);
+//            event(new \App\Events\Backend\Hopper\FileEntityUpdated($FileEntity->id, 'copy', 'Moved updated visit file '.$request->filename.' to master', null, $request->filename));
+//            $this->moveMasterToArchive($request->filename);
+//            event(new \App\Events\Backend\Hopper\FileEntityUpdated($FileEntity->id, 'move', 'Moved outdated '.$request->filename.' to archive', null, $request->filename));
+//        }
         
         return $FileEntity;
         
+    }
+    
+    public function _update($data = [], FileEntity $FileEntity){
+        $FileEntity->update($data);
+        event(new \App\Events\Backend\Hopper\FileEntityUpdated($FileEntity->id, 'update', 'Updated', null, null));
+        return $FileEntity;
+    }
+    
+    public function parseForExport($FileEntities){
+        if($FileEntities->isEmpty()){
+            return $FileEntities;
+        }
+         
+        foreach($FileEntities as $key => $FileEntity){
+            unset($FileEntities[$key]->id);
+            unset($FileEntities[$key]->history);       
+        }
+        return $FileEntities;            
+    }
+    
+    
+    public function import(){
+        $count = 0;
+        $hopperfile = new \App\Services\Hopper\HopperFile();
+        $filesInMaster = $hopperfile->getAllInMaster();
+        $filesInMaster = $hopperfile->mapFileMeta($filesInMaster);
+
+        $filesInMasterChunk = $filesInMaster->chunk(2);
+
+        foreach($filesInMasterChunk as $chunk){
+            foreach($chunk as $newFileEntity){
+               $eventsession = null;
+               $fileentity = FileEntity::firstOrNew(['filename' => $newFileEntity['filename']]);
+               $fileentity->fill($newFileEntity);
+               //Is there an event session available based on filename;
+               $fileparts = $this->getFileParts($fileentity->filename);
+               //Is this a legit file
+               if(isset($fileparts['sessionID'])){
+                   $eventsession = \App\Models\Hopper\EventSession::where('session_id', $fileparts['sessionID'])->first();            
+               }else{
+                   //not legit, leave loop
+                   break;
+               }
+               if($eventsession){
+                   $fileentity->fill([
+                       'event_session_id' => $eventsession->id,
+                       'session_id' => $eventsession->session_id
+                   ]);
+               }
+               $fileentity->save();
+               $count++;
+            }
+        }
+        
+        return $count;
     }
     
 }

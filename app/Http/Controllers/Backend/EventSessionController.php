@@ -10,6 +10,8 @@ use App\Http\Controllers\Controller;
 use Yajra\Datatables\Html\Builder; // import class on controller
 
 use App\Services\Hopper\HopperEventSession;
+use App\Services\Hopper\HopperFileEntity;
+use App\Services\Hopper\HopperVisit;
 
 use App\Models\Hopper\EventSession;
 
@@ -25,12 +27,15 @@ class EventSessionController extends Controller
         //
         
         if ($request->ajax()) {
-            $eventsessions = EventSession::select(['id', 'session_id', 'speakers', 'created_at', 'updated_at']);
+            $eventsessions = EventSession::select(['id', 'session_id', 'speakers', 'onsite_phone', 'presentation_owner', 'created_at', 'updated_at']);
             return \Datatables::of($eventsessions)
                     ->editColumn('created_at', '{!! $created_at->diffForHumans() !!}')
                     ->editColumn('updated_at', function ($eventsession) {
                         return $eventsession->updated_at->format('Y/m/d');
                     })
+//                    ->setRowClass(function ($eventsession) {
+//                        return $eventsession->checked_in === 'NO' ? 'alert-success' : '';
+//                    })  
                     ->editColumn('action', function ($eventsession) {
                         $content = '';
                         $content .= '<a class="btn btn-primary btn-xs" href="'. route('admin.eventsession.edit', [$eventsession->session_id]).'">Edit</a> ';
@@ -43,16 +48,21 @@ class EventSessionController extends Controller
         
         
         $html = $htmlbuilder
-        ->addColumn(['data' => 'id', 'name' => 'id', 'title' => 'ID'])
+//        ->addColumn(['data' => 'id', 'name' => 'id', 'title' => 'ID'])
         ->addColumn(['data' => 'session_id', 'name' => 'session_id', 'title' => 'Session ID'])
         ->addColumn(['data' => 'speakers', 'name' => 'speakers', 'title' => 'Speakers'])
-        ->addColumn(['data' => 'created_at', 'name' => 'created_at', 'title' => 'Created At'])
-        ->addColumn(['data' => 'updated_at', 'name' => 'updated_at', 'title' => 'Updated At'])
+        ->addColumn(['data' => 'onsite_phone', 'name' => 'onsite_phone', 'title' => 'On-site Phone'])
+        ->addColumn(['data' => 'presentation_owner', 'name' => 'presentation_owner', 'title' => 'Presenation Owner'])
+                
+//        ->addColumn(['data' => 'created_at', 'name' => 'created_at', 'title' => 'Created At'])
+//        ->addColumn(['data' => 'updated_at', 'name' => 'updated_at', 'title' => 'Updated At'])
+              
         ->addAction();
         
         $data = [
             'html' => $html
         ];
+        event(new \App\Events\Backend\Hopper\Heartbeat(auth()->user(), request()->route(), \Carbon\Carbon::now()->toIso8601String()));
         return view('backend.eventsession.index', $data);
     }
     
@@ -80,6 +90,7 @@ class EventSessionController extends Controller
     public function create(HopperEventSession $hoppereventsession)
     {
         $data = $hoppereventsession->create([]); //Placeholder
+        event(new \App\Events\Backend\Hopper\Heartbeat(auth()->user(), request()->route(), \Carbon\Carbon::now()->toIso8601String()));
         return view('backend.eventsession.create', $data);
     }
 
@@ -120,6 +131,7 @@ class EventSessionController extends Controller
         $data = [
             'EventSession' => $eventsession
         ];
+        event(new \App\Events\Backend\Hopper\Heartbeat(auth()->user(), request()->route(), \Carbon\Carbon::now()->toIso8601String()));
         return view('backend.eventsession.show', $data);
     }
 
@@ -134,7 +146,7 @@ class EventSessionController extends Controller
 
         $data = $hoppereventsession->edit($eventsession);
 //        debugbar()->info($data);
-        
+        event(new \App\Events\Backend\Hopper\Heartbeat(auth()->user(), request()->route(), \Carbon\Carbon::now()->toIso8601String()));
         return view('backend.eventsession.edit', $data);
     }
 
@@ -145,11 +157,11 @@ class EventSessionController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, EventSession $eventsession, HopperEventSession $hoppereventsession)
+    public function update(Request $request, EventSession $eventsession, HopperEventSession $hoppereventsession, HopperVisit $hoppervisit)
     {
         $messagebag = new \Illuminate\Support\MessageBag();
         
-        $hoppereventsession->updateCheckInStatus($request, $messagebag);
+        $hoppereventsession->updateCheckInStatus($request, $messagebag, $eventsession->id);
         
 //        debugbar()->info($request->all());
         
@@ -179,7 +191,7 @@ class EventSessionController extends Controller
         if($request->action === 'create_visit' || $request->action === 'check_in' ){
             
             $request->merge( ['checkin_username'=> \Auth::user()->name ] );
-            $visit = $hoppereventsession->createNewVisit($request);
+            $visit = $hoppereventsession->createNewVisit($request, $hoppervisit);
             
             $messagebag->add('create_visit', "<strong class='lead'>Visit Created</strong>");
             $messagebag->add('create_visit', "View this visit now: " . route('admin.visit.edit', ['id' => $visit->id] ));

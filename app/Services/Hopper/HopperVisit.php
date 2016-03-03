@@ -10,6 +10,9 @@ use App\Models\Hopper\Visit;
 use App\Services\Hopper\Contracts\HopperContract;
 use App\Services\Hopper\Contracts\HopperFileContract;
 
+use App\Services\Hopper\HopperFileEntity;
+
+use App\Events\Backend\Hopper\EventSessionUpdated;
 
 class HopperVisit{
     
@@ -20,7 +23,8 @@ class HopperVisit{
 
 
     /**
-     * @param HopperContract               $hopper
+     * @param HopperContract        $hopper
+     * @param HopperFileContract    $hopperfile
      */
     public function __construct(
         HopperContract $hopper,
@@ -90,7 +94,8 @@ class HopperVisit{
                 'nextVersion' => $nextVersion,
             ]);
         }
-        debugbar()->info($data);
+        event(new EventSessionUpdated($visit->event_session->id, 'visit_behavior', 'Began Visit'));
+//        debugbar()->info($data);
         return $data;
     }
 
@@ -107,6 +112,7 @@ class HopperVisit{
         $visit->update($data);
         
         $this->updateLinkedEventSession($data, $visit);
+        $this->updateLinkedFileEntity($data, $visit);
         
         
         return $visit;
@@ -115,14 +121,64 @@ class HopperVisit{
     
     
     public function updateLinkedEventSession($data, Visit $visit){
-        
         if(!isset($data['action'])){ return; }
         
-        if($data['action'] === 'approve_brand'){
-            $visit->event_session->update(['approval_brand' => 'YES']);
+        switch($data['action']){
+            case 'approve_brand':
+                $visit->event_session->update(['approval_brand' => 'YES']);
+                event(new EventSessionUpdated($visit->event_session->id, 'visit_behavior', 'Approved branding'));
+                break;
+            case 'disapprove_brand':
+                $visit->event_session->update(['approval_brand' => 'NO']);
+                event(new EventSessionUpdated($visit->event_session->id, 'visit_behavior', 'Rejected branding'));
+                break;
+            default:
+                //event(new EventSessionUpdated($visit->event_session->id, 'visit_behavior', 'Visit Updated'));
+                break;
         }
-        elseif($data['action'] === 'disapprove_brand'){
-            $visit->event_session->update(['approval_brand' => 'NO']);
+        
+    }
+            
+    public function updateLinkedFileEntity($data, Visit $visit){
+           
+          if(isset($data['behavior']) && isset($data['filename']) && isset($data['newfile']) && $data['behavior'] === 'update_visit'){
+                
+                $path = $this->hopperfile->copyTemporaryNewFileToMaster($data['filename']);
+                //$id, $event, $notes = '', $filename = null, $tasks = [], $user = 'Hopper', $request = null
+                event(new \App\Events\Backend\Hopper\FileEntityUpdated($visit->file_entity->id, 'visit_behavior', 'Moved updated visit file '.$data['filename'].' to master', $data['filename'], ['update_path' => $path]));
+                
+                $this->hopperfile->moveMasterToArchive($data['filename']);
+                event(new \App\Events\Backend\Hopper\FileEntityUpdated($visit->file_entity->id, 'visit_behavior', 'Moved updated visit file '.$data['filename'].' to archive', $data['filename']));
+                
+          }
+        
+//        if(!isset($data['action'])){ return; }
+        
+//        switch($data['action']){
+//            case 'approve_brand':
+//                $visit->event_session->update(['approval_brand' => 'YES']);
+//                event(new EventSessionUpdated($visit->event_session->id, 'visit_behavior', 'Approved branding'));
+//                break;
+//            case 'disapprove_brand':
+//                $visit->event_session->update(['approval_brand' => 'NO']);
+//                event(new EventSessionUpdated($visit->event_session->id, 'visit_behavior', 'Rejected branding'));
+//                break;
+//            default:
+//                event(new EventSessionUpdated($visit->event_session->id, 'visit_behavior', 'Visit Updated'));
+//                break;
+//        }
+        
+    }
+    
+    public function parseForExport($Visits){
+        if($Visits->isEmpty()){
+            return $Visits;
         }
+         
+        foreach($Visits as $key => $Visit){
+            unset($Visits[$key]->id);
+            unset($Visits[$key]->history);       
+        }
+        return $Visits;            
     }
 }

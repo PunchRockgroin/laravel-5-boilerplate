@@ -1,6 +1,9 @@
-<!doctype html>
+@extends('super')
+<!DOCTYPE html>
+@section('supercontent')
 <html class="no-js" lang="">
     <head>
+        @include('backend.includes.head')
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -17,7 +20,7 @@
         @yield('before-styles-end')
         {!! Html::style(elixir('css/backend.css')) !!}
         @yield('after-styles-end')
-
+        
         <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
         <!--[if lt IE 9]>
@@ -25,7 +28,7 @@
         <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
         <![endif]-->
     </head>
-    <body class="skin-{!! config('backend.theme') !!}">
+    <body id='Hopper' class="skin-{!! config('backend.theme') !!}">
     <div class="wrapper">
         @include('backend.includes.header')
         @include('backend.includes.sidebar')
@@ -60,3 +63,4 @@
     @yield('after-scripts-end')
     </body>
 </html>
+@stop

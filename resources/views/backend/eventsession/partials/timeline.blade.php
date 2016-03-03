@@ -24,7 +24,7 @@
             <div class="timeline-item">
                 <span class="time"><i class="fa fa-clock-o"></i> {!! \Carbon\Carbon::parse($HistoryEvent['timestamp']['date'])->toTimeString() !!}</span>
 
-                <h3 class="timeline-header"> <strong>{!! $HistoryEvent['user'] !!}</strong>  performed {!! strtoupper($HistoryEvent['event']) !!} {!! $HistoryEvent['filename'] !!} </h3>
+                <h3 class="timeline-header"> <strong>{!! $HistoryEvent['user'] !!}</strong>  performed {!! strtoupper($HistoryEvent['event']) !!} </h3>
 
                 <div class="timeline-body">
                     {!! $HistoryEvent['notes'] !!}

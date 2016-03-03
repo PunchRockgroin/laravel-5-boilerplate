@@ -11,11 +11,12 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Services\Hopper\HopperFile;
 use Illuminate\Support\Facades\Storage;
 
-class MoveFile extends Job implements SelfHandling, ShouldQueue
+class CopyFile extends Job implements SelfHandling, ShouldQueue
 {
     use InteractsWithQueue, SerializesModels;
     
     protected $hopperfile;
+    protected $driver_storage_path;
     protected $oldFilePath;
     protected $newFilePath;
     protected $fileEntity;
@@ -40,12 +41,12 @@ class MoveFile extends Job implements SelfHandling, ShouldQueue
      */
     public function handle()
     {
-        if ($this->attempts() > 2) {
-            \Log::error("File Copy Job Failed: ".$this->oldFilePath .' to ' . $this->newFilePath);
+        if ($this->attempts() > 3) {
+            \Log::error("File Move Job Failed: ".$this->oldFilePath .' to ' . $this->newFilePath);
             throw new \Exception; 
         }
-        $this->hopperfile->copyfile($this->oldFilePath, $this->newFilePath);
-        \Log::info('Copy File: '.$this->oldFilePath .' to ' . $this->newFilePath);
+        $this->hopperfile->movefile($this->oldFilePath, $this->newFilePath);
+        \Log::info('Move File: '.$this->oldFilePath .' to ' . $this->newFilePath);
         
     }
 }
