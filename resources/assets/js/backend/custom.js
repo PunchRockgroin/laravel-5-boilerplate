@@ -180,22 +180,43 @@ var channel;
     });
 });
 
+var getNextVersion = function(postdata, $target){
+    var baseUrl = "";
+    var response = false;
+    $.post(baseUrl + "/admin/files/nextversion", postdata).done( function(resp){
+        if(resp.message === 'ok'){
+            $target.val(resp.payload.newfilename);
+            
+        }else{
+            console.log(resp.payload.message);
+        }
+        return resp.payload;
+    });
+};
+
 $(function () {
     if ($('div#file-upload').length) {
         var baseUrl = "",
-                token = $('meta[name="_token"]').attr('content'),
-                $fileNameInput = $('input[name="filename"]'), fileName,
-                $currentFileNameInput = $('input[name="currentfilename"]'), currentFileName,
-                $behavior = $('input[name="behavior"]'), behavior,
-                $nextVersionInput = $('select[name="next_version"]'), next_version
-//                currentFile = $('input[name="_currentfile"]').val(),
-//                nextVersion = $('select[name="_nextVersion"]').val(),
-//                sessionID = $('input[name="session_id"]').val()
-                ;
-
+            token = $('meta[name="_token"]').attr('content'),
+            $fileNameInput = $('input[name="filename"]'), fileName,
+            $currentFileNameInput = $('input[name="currentfilename"]'), currentFileName,
+            $nextVersionInput = $('select[name="next_version"]'), next_version,
+            $behavior = $('input[name="behavior"]'), behavior
+            ;
         behavior = $behavior.val() || false;
         currentFileName = $currentFileNameInput.val() || false;
         next_version = $nextVersionInput.val() || false;
+            
+        $nextVersionInput.on('change', function(){
+//         next_version = $nextVersionInput.val() || false;
+            getNextVersion({
+                _token: token,
+                filename: $fileNameInput.val(),
+                currentFileName: $currentFileNameInput.val() || false,
+                next_version: $nextVersionInput.val() || false
+            }, $fileNameInput);
+        });
+        
 
         Dropzone.autoDiscover = false;
         var fileEntityUploadDz = new Dropzone("div#file-upload", {
@@ -212,27 +233,22 @@ $(function () {
                     fileName = $fileNameInput.val();
                     next_version = $nextVersionInput.val() || false;
                     $('.checkin-button').prop('disabled', true);
-                    console.log(behavior);
+//                    console.log(behavior);
                 });
                 this.on("success", function (file, response) {
-
+                    $('.file-update-section').removeClass('hidden');
                     $fileNameInput.val(response.newFileName);
+                    $('input[name="temporaryfilename"]').val(response.temporaryfilename);
                     $.each(response.metadata, function (i, value) {
                         $('input[name="' + i + '"]').val(value);
                     })
                     switch (behavior) {
                         case 'create_eventsession':
                         case 'update_eventsession':
-                            $nextVersionInput.val(response.next_version);
+//                            $nextVersionInput.val(response.next_version);
                             break;
                     }
 
-//                    $('input[name="mime"]').val(response.metadata.mime);
-//                    $('input[name="path"]').val(response.metadata.path);
-//                    $('input[name="storage_disk"]').val(response.metadata.storage_disk);
-//                        console.log(response);
-//                  
-//                    $('label[for="movemastertoworking-pseudo"]').html('Copy Current Master to Working?');
                     var $el = $(file.previewElement);
                     $el.find('.info-box-icon')
                             .toggleClass('bg-aqua bg-green')

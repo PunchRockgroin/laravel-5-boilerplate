@@ -163,6 +163,12 @@ class EventSessionController extends Controller
     {
         $messagebag = new \Illuminate\Support\MessageBag();
 		
+		if(isset($request->temporaryfilename) && isset($request->filename) && ($request->temporaryfilename !== $request->filename)){
+			//Rename temporary file to the new filename before anything else
+			$hopperfile = new \App\Services\Hopper\HopperFile;
+			$hopperfile->updateTemporary($request->temporaryfilename, $request->filename); 
+		}
+		
 		//If it's a blind update and things haven't changed, notify
 		if($request->blind_update === "YES" && ($request->currentfilename === $request->filename)){
 			$messagebag->add('file_warning', "<strong class=''>You did not attach a file to update to</strong>");

@@ -223,10 +223,27 @@ class FileEntityController extends Controller {
             return response()->json([
                         'success' => true,
                         'newFileName' => $newFileName,
+                        'temporaryfilename' => $newFileName,
                         'next_version' => str_pad($next_version, 2, '0', STR_PAD_LEFT),
                         'metadata' => $upload,
                             ], 200);
         }
     }
+	
+	public function nextVersion(Request $request, HopperFile $hopperFile) {
+		$data = [];
+//		if($request->currenFileName){
+			try {
+				$extension = pathinfo($request->currentFileName, PATHINFO_EXTENSION);
+				$newFileName = $hopperFile->renameFileVersion($request->currentFileName, $request->next_version, $extension);
+				$data['newfilename'] = $newFileName;
+				return response()->json(['message' => 'ok', 'payload' => $data]);
+			} catch ( Exception $exc ) {
+				$data['message'] = $exc->getTraceAsString();
+				return response()->json(['message' => 'error', 'payload' => $data]);
+			}
+//		}
+//		return response()->json(['message' => 'error', 'payload' => 'No Data']);
+	}
 
 }

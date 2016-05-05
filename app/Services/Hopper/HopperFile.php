@@ -48,6 +48,10 @@ class HopperFile implements HopperFileContract {
     public function getDriverStoragePath($disk = 'hopper') {
         return Storage::disk($disk)->getDriver()->getAdapter()->getPathPrefix();
     }
+	
+	public function exists($target, $disk = 'hopper'){
+		return Storage::disk($disk)->exists($target);
+	}
 
     public function copyfile($oldFilePath, $newFilePath, $disk = 'hopper') {
         $oldFile_exists = Storage::disk($disk)->exists($oldFilePath);
@@ -73,6 +77,10 @@ class HopperFile implements HopperFileContract {
         if ($this->copyfile($oldFilePath, $newFilePath, $disk)) {
             Storage::disk($disk)->delete($oldFilePath);
         }
+    }
+	
+    public function renamefile($oldFilePath, $newFilePath, $disk = 'hopper') {
+			Storage::disk($disk)->move($oldFilePath, $newFilePath);
     }
 
     public function validateFile($request) {
@@ -103,6 +111,30 @@ class HopperFile implements HopperFileContract {
 //                    new \App\Jobs\Hopper\CopyFile($this->hopper_temporary_name . $newFileName, $this->hopper_master_name . $newFileName)
 //            );
             return $filemeta;
+        } catch (Exception $e) {
+            return $e;
+        }
+    }
+    
+	public function updateTemporary($from, $to) {
+        try {
+            $from_exists = Storage::disk('hopper')->exists($this->hopper_temporary_name . $from);
+			$to_exists = Storage::disk('hopper')->exists($this->hopper_temporary_name . $to);
+			//If there is a new file name and it exists in temporary and the newfile also exists
+			if ($from_exists && !$to_exists) {
+				//Update Filename
+				$this->renamefile($this->hopper_temporary_name . $from, $this->hopper_temporary_name . $to);
+				return true;
+			} elseif ($from_exists && $to_exists) { //If there is a new file name and it exists in temporary and the target exitst too
+				// Delete the File in Temporary
+				if (Storage::disk('hopper')->delete($this->hopper_temporary_name . $to)) {
+					//Copy the temporary file over
+					$this->renamefile($this->hopper_temporary_name . $from, $this->hopper_temporary_name . $to);
+					return true;
+				}
+			} else {
+				return false;
+			}
         } catch (Exception $e) {
             return $e;
         }

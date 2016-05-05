@@ -3,7 +3,6 @@
         <h3 class="box-title">{{ $eventsession->session_id or '' }} Event Session Data</h3>
     </div><!-- /.box-header -->
     <div class="box-body">
-
         <div class="form-group">
             {!! Form::label('session_id', trans('eventsession.backend.form.session_id.label'), ['class' => 'control-label']) !!}
             <div class="">

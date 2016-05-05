@@ -145,10 +145,9 @@ class HopperEventSession {
         
         if (!$request->has('checkin_username')) {
             $request->merge(['checkin_username' => \Auth::user()->name]);
-        }
+        }		
         $request->merge(['file_entity_id' => $request->primary_file_entity_id]);
         $visit = $hoppervisit->store($request->all());
-        
         event(new EventSessionUpdated($request->event_session_id, 'visit_created', 'Created a new Visit: ' . $visit->id));
 		//Copy the current file in Master to Working
 //		$this->hopperfile->copyMasterToWorking($request->currentfilename);

@@ -3,6 +3,7 @@
 //Route::model('fileentity', 'FileEntity');
 
 Route::post('files/upload', 'FileEntityController@upload')->name('admin.fileentity.upload');
+Route::post('files/nextversion', 'FileEntityController@nextVersion')->name('admin.fileentity.nextversion');
 Route::any('files/data', 'FileEntityController@anyData')->name('admin.fileentity.data');
 
 //Resource Routes

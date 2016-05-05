@@ -93,7 +93,7 @@ class HopperFileEntity extends HopperFile{
     }
 
     public function update(Request $request, FileEntity $FileEntity){
-        
+        	
         
         if(isset($request->currentfilename) && isset($request->filename) && ($request->currentfilename !== $request->filename) ){
 			if(isset($request->action) && ( $request->action === 'create_visit' || $request->action === 'check_in' ) ){

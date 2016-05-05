@@ -15,6 +15,8 @@ Interface HopperFileContract
     
     public function uploadToTemporary($file, $newFileName);
     
+	public function updateTemporary($from, $to);
+    
     public function moveTemporaryNewFileToWorking($newFileName);
     
     public function copyTemporaryNewFileToMaster($newFileName, $delete = false);
