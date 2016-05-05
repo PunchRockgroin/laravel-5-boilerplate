@@ -55,8 +55,8 @@ var hopperVue = new Vue({
                 this.$set('inVisit', response.data.payload.inVisit);
 //                var arr = Object.keys(response.data.payload.groups).map(function (key) {return response.data.payload.groups[key]});
                 var otherUsers = [];
-                _.forEach(response.data.payload.groups, function(value) {
-                    _.forEach(value, function(subvalue){
+                _.forEach(response.data.payload.groups, function (value) {
+                    _.forEach(value, function (subvalue) {
                         otherUsers.push(subvalue);
                     });
                 });
@@ -77,7 +77,7 @@ var hopperVue = new Vue({
 
 if (typeof window.hopper !== "undefined" && typeof window.hopper.heartbeat_detector_enable !== "undefined" && window.hopper.heartbeat_detector_enable === true) {
     hopperVue.getDashboardData();
-    setInterval(function(){
+    setInterval(function () {
         hopperVue.getDashboardData();
     }, 10000);
 }
@@ -107,7 +107,7 @@ $(function () {
 
 $(function () {
 
-
+var channel;
 
 
 
@@ -139,6 +139,7 @@ $(function () {
 //            o = $.extend(true, {}, options, objD );
 //        $(this).repeatable_fields(o);
 //    });
+
 
 
     $('.repeater').repeater({
@@ -387,5 +388,18 @@ $(function () {
         };
     }
 
+    $("input.bootstrap-checkbox-switch").bootstrapSwitch().on('switchChange.bootstrapSwitch', function (event, state) {
+        var $el = $(this),
+                name = $el.attr('name'),
+                onValue = $el.data('onText'),
+                offValue = $el.data('offText'),
+                switchTarget = name.replace('-pseudo', '');
+//             console.log(switchTarget);
+        if (state) {
+            $('input[name="' + switchTarget + '"]').val(onValue);
+        } else {
+            $('input[name="' + switchTarget + '"]').val(offValue);
+        }
 
+    });
 });

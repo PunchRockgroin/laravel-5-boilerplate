@@ -22,6 +22,7 @@ use Vinkla\Pusher\PusherManager;
 use App\Models\Hopper\FileEntity;
 
 use App\Services\Hopper\Contracts\HopperContract;
+use App\Services\Hopper\Contracts\HopperFileContract;
 use App\Services\Hopper\HopperDBX;
 
 //use App\Jobs\Hopper\CopyFile;
@@ -38,15 +39,17 @@ class HopperFileEntity extends HopperFile{
     
     
     protected $hopper;
+    protected $hopperfile;
 
     /**
      * @param HopperContract    $hopper
      */
     public function __construct(
-    HopperContract $hopper
+    HopperContract $hopper,
+	HopperFileContract $hopperfile 
     ) {
         $this->hopper = $hopper;
-        
+        $this->hopperfile = $hopperfile;
     }
     
     
@@ -81,7 +84,7 @@ class HopperFileEntity extends HopperFile{
     public function store($data = []) {
         
         if(!empty($data)){
-            $this->copyTemporaryNewFileToMaster($data['filename']);
+            $this->hopperfile->copyTemporaryNewFileToMaster($data['filename']);
             $FileEntity = FileEntity::create($data);
             return $FileEntity;
         }
@@ -91,14 +94,25 @@ class HopperFileEntity extends HopperFile{
 
     public function update(Request $request, FileEntity $FileEntity){
         
-        $FileEntity = $this->_update($request->all());
         
         if(isset($request->currentfilename) && isset($request->filename) && ($request->currentfilename !== $request->filename) ){
-            $path = $this->copyTemporaryNewFileToMaster($request->filename);
+			if(isset($request->action) && ( $request->action === 'create_visit' || $request->action === 'check_in' ) ){
+				$this->hopperfile->copyMasterToWorking($request->currentfilename);
+				event(new \App\Events\Backend\Hopper\FileEntityUpdated($FileEntity->id, 'copy', 'Copied '.$request->currentfilename.' to working', $request->currentfilename));
+			}
+            $path = $this->hopperfile->copyTemporaryNewFileToMaster($request->filename);
             event(new \App\Events\Backend\Hopper\FileEntityUpdated($FileEntity->id, 'copy', 'Moved '.$request->filename.' to master', $request->filename, ['update_path' => $path]));
-            $this->moveMasterToArchive($request->currentfilename);
-            event(new \App\Events\Backend\Hopper\FileEntityUpdated($FileEntity->id, 'move', 'Moved '.$request->currentfilename.' to archive', null, $request->currentfilename));
-        }
+            $this->hopperfile->moveMasterToArchive($request->currentfilename);
+            event(new \App\Events\Backend\Hopper\FileEntityUpdated($FileEntity->id, 'move', 'Moved '.$request->currentfilename.' to archive', $request->currentfilename));
+        }elseif(isset($request->currentfilename) && isset($request->filename) && ($request->currentfilename === $request->filename) ){
+			if(isset($request->action) && ( $request->action === 'create_visit' || $request->action === 'check_in' ) ){
+//				$this->hopperfile->moveMasterToMaster($request->currentfilename, $request->next_version);
+				$request->replace([
+					'filename' => $this->hopperfile->renameFileVersion($request->filename, $request->next_version)
+				]);
+			}
+		}
+		$FileEntity = $this->_update($request->all(), $FileEntity);
 //        elseif(isset($request->behavior) && isset($request->filename) && $request->behavior === 'update_visit'){
 //            $this->copyTemporaryNewFileToMaster($request->filename);
 //            event(new \App\Events\Backend\Hopper\FileEntityUpdated($FileEntity->id, 'copy', 'Moved updated visit file '.$request->filename.' to master', null, $request->filename));

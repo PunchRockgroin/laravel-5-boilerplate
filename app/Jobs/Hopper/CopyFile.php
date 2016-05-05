@@ -11,7 +11,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Services\Hopper\HopperFile;
 use Illuminate\Support\Facades\Storage;
 
-class MoveFile extends Job implements SelfHandling, ShouldQueue
+class CopyFile extends Job implements SelfHandling, ShouldQueue
 {
     use InteractsWithQueue, SerializesModels;
     

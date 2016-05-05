@@ -1,4 +1,12 @@
 @include('backend.fileentity.partials.file_upload')
+<div class="form-group">
+            {!! Html::checkboxswitch(
+                                    'blind_update',
+                                    'Is this an instance where the visitor brought in a file, but we are simply updating the version in Master?',
+                                    'NO',
+                                    [ 'data-on-color'=>'warning', 'data-off-color'=>'default',]
+                                ) !!}
+        </div>
 <div class="box box-success">
     <div class="box-header with-border">
         <h3 class="box-title">Event Session File Data</h3>
@@ -38,6 +46,7 @@
                 {!! Form::text('path', isset($FileEntity) ? $FileEntity->path : null,['class' => 'form-control']) !!}
             </div>
         </div>
+        
     </div>
     <div class="box-footer">
         <div class='clearfix'>

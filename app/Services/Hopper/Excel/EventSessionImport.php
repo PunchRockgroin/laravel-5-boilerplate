@@ -3,6 +3,7 @@ namespace App\Services\Hopper\Excel;
 
 use App\Models\Hopper\EventSession;
 
+
 /**
  * Description of EventSessionImport
  *
@@ -14,10 +15,9 @@ class EventSessionImport extends \Maatwebsite\Excel\Files\ExcelFile {
     
     public function __construct(
             \Illuminate\Foundation\Application $app,
-            \Maatwebsite\Excel\Excel $excel,
-            \App\Services\Hopper\HopperEventSession $hoppereventsession) {
+            \Maatwebsite\Excel\Excel $excel) {
         parent::__construct($app, $excel);
-        $this->hoppereventsession = $hoppereventsession;
+
     }
         
 
@@ -35,25 +35,24 @@ class EventSessionImport extends \Maatwebsite\Excel\Files\ExcelFile {
     
     
     public function importChunked($chunk = 250){
-        $count = 0;
-        $this->chunk($chunk, function($results) use (&$count)
+
+        $this->chunk($chunk, function($results)
             {
-                $results->each(function($row) use (&$count) {
+                $results->each(function($row){
                     if (!empty($row['id'])) {
                         $row['id'] = (int) $row['id'];
                     }
                     if (!empty($row['dates_rooms'])) {
-                        $row['dates_rooms'] = $this->hoppereventsession->setFromDateTimesString($row['dates_rooms']);
+                        $row['dates_rooms'] = \App\Services\Hopper\HopperEventSession::modifyFromDateTimesString($row['dates_rooms']);
                     }
                     $searchParams = [
                         'session_id' => $row['session_id'],
-                    ];
-//                    debugbar()->info($row->all());                
+                    ];   
                     EventSession::firstOrNew($searchParams)->fill($row->all())->save();
-                    $count++;
+
                 });
-            }, false);
-        return $count;
+            });
+        return true;
     }
 
 }

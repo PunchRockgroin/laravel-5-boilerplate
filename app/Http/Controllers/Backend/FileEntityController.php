@@ -176,9 +176,9 @@ class FileEntityController extends Controller {
     }
 
     public function upload(Request $request, HopperFile $hopperFile) {
-//        \Debugbar::disable();
-        $next_version = 00;
-        debugbar()->info($request->all());
+        $next_version = 00; //Set initial next version
+		$extension = '';
+        //debugbar()->info($request->all());
         
         $dropboxData = [];
         $file = $request->file('file');
@@ -190,28 +190,26 @@ class FileEntityController extends Controller {
                             ], 400);
         }
 
-        $validate = $hopperFile->validateFile($request);
+        $validate = $hopperFile->validateFile($request); // Validate File
         if ($validate instanceof Illuminate\Support\MessageBag) {
             return response()->json($validate->first(), 400);
         }
 
-        $extension = $file->getClientOriginalExtension(); // getting file extension
-        
-        $uploadedFileName = $file->getClientOriginalName();
+        $extension = $file->getClientOriginalExtension(); // Get File Extension
+        $uploadedFileName = $file->getClientOriginalName(); // Get File Name
+		
         if (!empty($request->filename)) {
             $newFileName = $request->filename;
-//            \Debugbar::info($request->filename);
         } else {
             $newFileName = $uploadedFileName;
         }
+		
         $next_version = HopperFile::getCurrentVersion($newFileName) + 1;
         if ($request->currentFileName !== 'false' && $request->next_version !== 'false'){
             $newFileName = $hopperFile->renameFileVersion($request->currentFileName, $request->next_version, $file->getClientOriginalExtension());
             $next_version = HopperFile::getCurrentVersion($newFileName) + 1;
         }
-        
-        debugbar()->info(str_pad($next_version, 2, '0', STR_PAD_LEFT));
-       
+              
           
         $upload = $hopperFile->uploadToTemporary(File::get($file), $newFileName);
         
@@ -219,20 +217,14 @@ class FileEntityController extends Controller {
             return response()->json([
                         'success' => false,
                         'message' => $upload->getMessage(),
-                        
-//                        'sessionID' => $request->sessionID,
                             ], 400);
         } else {
-//            Event::fire(new \App\Events\Backend\Hopper\FileUploaded($request->except('file'), $newFileName));
-            
+            Event::fire(new \App\Events\Backend\Hopper\FileUploaded($request->except('file'), $newFileName));            
             return response()->json([
                         'success' => true,
-//                        'oldFileName' => $request->currentFileName,
                         'newFileName' => $newFileName,
                         'next_version' => str_pad($next_version, 2, '0', STR_PAD_LEFT),
-                        'metadata' => $upload
-//                        'dropboxData' => $dropboxData,
-//                        'sessionID' => $request->sessionID,
+                        'metadata' => $upload,
                             ], 200);
         }
     }

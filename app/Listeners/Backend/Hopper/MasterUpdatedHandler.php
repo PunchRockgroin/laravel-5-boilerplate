@@ -34,7 +34,7 @@ class MasterUpdatedHandler
         
         \Log::info('Master File: ' . $event->oldFilePath . ' to ' . $event->newFilePath );  
         
-        $this->hopperFile->copyfile($event->oldFilePath, $event->newFilePath);
+//        $this->hopperFile->copyfile($event->oldFilePath, $event->newFilePath);
         
         
     }

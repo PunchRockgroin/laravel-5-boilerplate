@@ -14,16 +14,18 @@ class HopperEventSession {
 
     protected $hopper;
     protected $hopperfile;
+    protected $hopperfileentity;
 
     /**
      * @param HopperContract            $hopper
      * @param HopperFileContract        $hopperfile
      */
     public function __construct(
-    HopperContract $hopper, HopperFileContract $hopperfile
+    HopperContract $hopper, HopperFileContract $hopperfile, \App\Services\Hopper\HopperFileEntity $hopperfileentity
     ) {
         $this->hopper = $hopper;
         $this->hopperfile = $hopperfile;
+        $this->hopperfileentity = $hopperfileentity;
     }
 
     /**
@@ -71,12 +73,14 @@ class HopperEventSession {
     public function edit(EventSession $eventsession) {
 
         $this->parseDateTimeforEdit($eventsession);
+        
+        $this->hopperfile->purgeDupesToArchive();
 
         $data = [
             'eventsession' => $eventsession,
             'History' => $this->hopper->groupedHistory($eventsession->history),
         ];
-        debugbar()->info($data);
+//        debugbar()->info($data);
 
         //Is there an file entity attached?
         $file_entity = $eventsession->file_entity;
@@ -142,23 +146,88 @@ class HopperEventSession {
         if (!$request->has('checkin_username')) {
             $request->merge(['checkin_username' => \Auth::user()->name]);
         }
-
+        $request->merge(['file_entity_id' => $request->primary_file_entity_id]);
         $visit = $hoppervisit->store($request->all());
-        event(new EventSessionUpdated($request->event_session_id, 'visit_created', 'Created a new Visit: ' . $visit->id));
         
-        $path = $this->hopperfile->copyMasterToWorking($visit->file_entity->filename);
-        //$id, $event, $notes = '', $filename = null, $tasks = [], $user = 'Hopper', $request = null
-        event(new \App\Events\Backend\Hopper\FileEntityUpdated($visit->file_entity->id, 'visit_behavior', 'Moved master file '.$visit->file_entity->filename.' to working', $request->filename, ['update_path' => $path]));
+        event(new EventSessionUpdated($request->event_session_id, 'visit_created', 'Created a new Visit: ' . $visit->id));
+		//Copy the current file in Master to Working
+//		$this->hopperfile->copyMasterToWorking($request->currentfilename);
+        //If it's a blind update
+        if($request->blind_update === "YES"){
+            $path = $this->hopperfile->copyTemporaryNewFileToMaster($request->filename, true);
+//            debugbar()->info($path);            
+			
+			//Update Visitor Info
+            $visit->visitors = "(blind update)";
+            $visit->difficulty = "1";
+            $visit->design_notes = "This was a blind update";
+            $visit->design_username = \Auth::user()->name;
+			//Save
+            $visit->save();
+			
+			\Log::info('Blind Update Occurred: '.$request->filename);
+            
+			//Copy the new master to archive
+            $this->hopperfile->copyMasterToArchive($request->filename);
+			//Move the old master to archive
+            $this->hopperfile->moveMasterToArchive($request->currentfilename);
+			
+			//Find the file entity by reference
+			$fileentity = \App\Models\Hopper\FileEntity::find($request->primary_file_entity_id);
+			//Update File Entity Referenced
+			$updated_fileentity = $this->hopperfileentity->update($request, $fileentity);
+            
+			//$id, $event, $notes = '', $filename = null, $tasks = [], $user = 'Hopper', $request = null
+            event(new \App\Events\Backend\Hopper\FileEntityUpdated($visit->file_entity->id, 'visit_behavior', 'Copied master file '.$visit->file_entity->filename.' to working', $request->filename, ['update_path' => $path]));
+			
+            //We're done here
+            return $visit;
+            
+        }
+        
+//		\Log::info('copyMasterToWorking: '. $request->currentfilename);
+        //Copy the current file in Master to Archive
+//        $this->hopperfile->copyMasterToArchive($request->currentfilename);
+        
+        
+        
+        //If there is no updated file
+        if($request->currentfilename === $request->filename){
+			//Find the file entity by reference
+			
+//			debugbar()->info('Moved to master');
+			$this->hopperfile->copyMasterToWorking($request->currentfilename);
+            //Up the version number and copy that to Working and move to Master
+            $path = $this->hopperfile->copyMasterToWorking($request->currentfilename, $request->next_version);
+            $this->hopperfile->moveMasterToMaster($request->currentfilename, $request->next_version);
+			
+			$fileentity = \App\Models\Hopper\FileEntity::find($request->primary_file_entity_id);
+			$updated_fileentity = $this->hopperfileentity->update($request, $fileentity);
 
+			//Otherwise, if there's a filename and an entity and the currentfilename (old file) does not equal the filename passed in the request
+        }elseif($request->filename && $request->primary_file_entity_id && ($request->currentfilename !== $request->filename)){
+			//Copy the current file in Master to Working
+			$this->hopperfile->copyMasterToWorking($request->currentfilename);
+            //Copy the current file in Temporary to Master
+            $path = $this->hopperfile->copyTemporaryNewFileToMaster($request->filename);
+            //Copy the new file in Master into Archive
+            $this->hopperfile->copyMasterToArchive($request->filename);
+            //Move the old file in Master to Archive
+            $this->hopperfile->moveMasterToArchive($request->currentfilename);
+            //Move the current file in Temporary to Working
+            $this->hopperfile->moveTemporaryNewFileToWorking($request->filename);
+        }
+        //$id, $event, $notes = '', $filename = null, $tasks = [], $user = 'Hopper', $request = null
+        event(new \App\Events\Backend\Hopper\FileEntityUpdated($visit->file_entity->id, 'visit_behavior', 'Copied master file '.$visit->file_entity->filename.' to working', $request->filename, ['update_path' => $path]));
+        
         return $visit;
     }
 
     public function createNewFileEntity(Request $request, EventSession $eventsession) {
-        //Get File Entity Service
-        $hopperfileentity = new \App\Services\Hopper\HopperFileEntity();
+        
         //Add a New File Entity
         $request->merge(['event_session_id' => $eventsession->id]);
-        $fileentity = $hopperfileentity->store($request->all());
+        $fileentity = $this->hopperfileentity->store($request->all());
 
         event(new EventSessionUpdated($request->id, 'file_entity_created', 'Created a new File Entity: ' . $fileentity->id));
 
@@ -166,14 +235,11 @@ class HopperEventSession {
     }
 
     public function updateNewFileEntity(Request $request, EventSession $eventsession) {
-        //Get File Entity Service
-        $hopperfileentity = new \App\Services\Hopper\HopperFileEntity();
         //Find the file entity by reference
-
         $fileentity = \App\Models\Hopper\FileEntity::find($request->primary_file_entity_id);
         //Update File Entity Referenced
-        $updated_fileentity = $hopperfileentity->update($request, $fileentity);
-
+        $updated_fileentity = $this->hopperfileentity->update($request, $fileentity);
+		//$id, $event, $notes = '', $filename = null, $tasks = [], $user = 'Hopper', $request = null
         event(new EventSessionUpdated($request->id, 'file_entity_updated', 'Updated a File Entity: ' . $updated_fileentity->id));
 
         return $updated_fileentity;
@@ -206,23 +272,7 @@ class HopperEventSession {
     }
     
     public function setFromDateTimesString($dateTimeString, $delimiter = ';') {
-        $dates_rooms = [];
-        if (isset($dates_rooms) && is_string($dateTimeString)) {
-            $dateTimeString = rtrim($dateTimeString, $delimiter);
-            $_dates_rooms = explode($delimiter, $dateTimeString);
-            //Assumed string is {date},{room_name},{room_id}
-            foreach ($_dates_rooms as $key => $date_room) {
-                $date_room_obj = new \stdClass;
-                $date_room = explode(',', $date_room);
-                $date_room_obj->date = \Carbon\Carbon::parse($date_room[0])->timezone(config('hopper.event_timezone', 'UTC'))->toIso8601String();
-                $date_room_obj->room_name = trim($date_room[1]);
-                $date_room_obj->room_id = trim($date_room[2]);
-                $dates_rooms[$key] = $date_room_obj;
-            }
-//           
-        }
-        debugbar()->info($dates_rooms);
-        return $dates_rooms;
+        return self::modifyFromDateTimesString($dateTimeString, $delimiter);
     }
 
     public function parseDateTimeforStorage(&$data) {
@@ -253,6 +303,27 @@ class HopperEventSession {
                       
         }
         return $EventSessionArray;            
+    }
+    
+    
+    public static function modifyFromDateTimesString($dateTimeString, $delimiter = ';') {
+        $dates_rooms = [];
+        if (isset($dates_rooms) && is_string($dateTimeString)) {
+            $dateTimeString = rtrim($dateTimeString, $delimiter);
+            $_dates_rooms = explode($delimiter, $dateTimeString);
+            //Assumed string is {date},{room_name},{room_id}
+            foreach ($_dates_rooms as $key => $date_room) {
+                $date_room_obj = new \stdClass;
+                $date_room = explode(',', $date_room);
+                $date_room_obj->date = \Carbon\Carbon::parse($date_room[0])->timezone(config('hopper.event_timezone', 'UTC'))->toIso8601String();
+                $date_room_obj->room_name = trim($date_room[1]);
+                $date_room_obj->room_id = trim($date_room[2]);
+                $dates_rooms[$key] = $date_room_obj;
+            }
+//           
+        }
+//        debugbar()->info($dates_rooms);
+        return $dates_rooms;
     }
 
 }

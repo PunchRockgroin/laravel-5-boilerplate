@@ -80,9 +80,15 @@ class HopperAdminController extends Controller {
                     return redirect()->route('backend.hopper.admin.index')
                                     ->with('flash_info', "There's no file to update from!");
                 }
-                
-                $count = $this->eventsessionimport->importChunked();
-                
+//                
+                try {
+                  $count = count($this->eventsessionimport->get());
+                  $results = $this->eventsessionimport->importChunked();
+                } catch (App\Exceptions\GeneralException $e) {
+                    return redirect()->route('backend.hopper.admin.index')
+                        ->with('flash_warning', $e->getMessage());
+                }
+
                 break;
             case 'file_entities': 
                 

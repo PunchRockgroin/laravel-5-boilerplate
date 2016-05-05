@@ -7,6 +7,8 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Services\Hopper\HopperFile;
 
+use Vinkla\Pusher\Facades\Pusher;
+
 class FileEntityUpdatedHandler implements ShouldQueue {
 
     protected $hopperfile;
@@ -28,21 +30,7 @@ class FileEntityUpdatedHandler implements ShouldQueue {
      * @return void
      */
     public function handle(FileEntityUpdated $event) {
-        //
-//        \Log::info('File Uploaded: '.$event->filename);
-//        if(!empty($event->tasks)){
-//          foreach($event->tasks as $key => $task){
-//            try{
-//              $taskStatus = 'complete';
-//              $event->tasks[$key]['status'] = $taskStatus;
-//            }catch(Exception $e){
-//              \Log::error($e);
-//              $event->tasks[$key]['status'] = $e->getMessage(); 
-//            }
-//          }
-//        }
-                
-
+		
         try {
             $History = [
                 'event' => $event->event,
@@ -58,25 +46,23 @@ class FileEntityUpdatedHandler implements ShouldQueue {
                 $OldHistory = $FileEntity->history;
                 $OldHistory[] = $History;
                 $updateData = ['history' => $OldHistory];
-                
-                if(!empty($event->tasks)){
-                    $this->performTasks($event->tasks, $updateData);
-                }
-                
+				
+				$this->performTasks($event->tasks, $updateData);
                 $FileEntity->update($updateData);
+				
             }
-            
-//            $this->hopperfile->_moveHopperTemporaryToHopperWorking($event->newFileName);
+			Pusher::trigger('hopper-channel', 'file-entity-'.$event->id, ['message' => $event->notes]);
         } catch (Exception $e) {
             \Log::error($e);
 //            \Debugbar::addException($e);
         }
-//        $this->hopperfile->_moveHopperTemporaryToHopperWorking($newFileName);
     }
     
     
     private function performTasks($tasks, &$updateData){
-        
+		if(empty($tasks) && ! is_array($tasks)){
+		   return;
+		}
         foreach($tasks as $task => $taskdata){
             switch ($task) {
                 case 'update_path':

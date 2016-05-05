@@ -118,6 +118,22 @@ class HopperVisit{
         return $visit;
     }
     
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  $data
+     * @param  App\Models\Hopper\Visit  $visit
+     * @return App\Models\Hopper\Visit
+     */
+    public function blind_update($data, Visit $visit)
+    {
+        //
+        $visit->update($data);
+                
+        
+        return $visit;
+    }
+    
     
     
     public function updateLinkedEventSession($data, Visit $visit){
@@ -143,7 +159,7 @@ class HopperVisit{
            
           if(isset($data['behavior']) && isset($data['filename']) && isset($data['newfile']) && $data['behavior'] === 'update_visit'){
                 
-                $path = $this->hopperfile->copyTemporaryNewFileToMaster($data['filename']);
+                $path = $this->hopperfile->copyTemporaryNewFileToMaster($data['filename'], true);
                 //$id, $event, $notes = '', $filename = null, $tasks = [], $user = 'Hopper', $request = null
                 event(new \App\Events\Backend\Hopper\FileEntityUpdated($visit->file_entity->id, 'visit_behavior', 'Moved updated visit file '.$data['filename'].' to master', $data['filename'], ['update_path' => $path]));
                 

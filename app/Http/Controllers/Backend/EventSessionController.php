@@ -153,51 +153,58 @@ class EventSessionController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param \Illuminate\Http\Request  $request
+	 * @param EventSession $eventsession Description
+	 * @param HopperEventSession $hoppereventsession Description
+	 * @param HopperVisit $hoppervisit Description
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, EventSession $eventsession, HopperEventSession $hoppereventsession, HopperVisit $hoppervisit)
     {
         $messagebag = new \Illuminate\Support\MessageBag();
+		
+		//If it's a blind update and things haven't changed, notify
+		if($request->blind_update === "YES" && ($request->currentfilename === $request->filename)){
+			$messagebag->add('file_warning', "<strong class=''>You did not attach a file to update to</strong>");
+			return redirect()->back()->withFlashWarning($messagebag); 
+		}
         
+		//Update checkin status for the event session
         $hoppereventsession->updateCheckInStatus($request, $messagebag, $eventsession->id);
-        
-//        debugbar()->info($request->all());
-        
-        $eventsession = $hoppereventsession->update($request->all(), $eventsession);
+		$eventsession = $hoppereventsession->update($request->all(), $eventsession);
         $request->merge(['event_session_id' => $eventsession->id]);
-        
         $messagebag->add('updated', "Event Session " . $eventsession->session_id . " Updated");
-        //If Has Filename, but no current file entity, create a new file enity
+        
+		//If Has Filename, but no current file entity, create a new file enity
         if($request->filename && empty($request->primary_file_entity_id)){
             //Create New File Entity
             $fileentity = $hoppereventsession->createNewFileEntity($request, $eventsession);
             //Notify
             $messagebag->add('created', "File  " . $fileentity->filename . " Created");
         }elseif($request->filename && $request->primary_file_entity_id && ($request->currentfilename !== $request->filename)){
-            //If Has Filename, and file entity id, and the current file name does not match the new file name (i.e. new upload)
-//           debugbar()->info($eventsession->file_entity);
+            //If Has Filename, and file entity id, and the current file name does not match the new file name (i.e. new upload)   
             //Update File Entity Referenced
             $fileentity = $hoppereventsession->updateNewFileEntity($request, $eventsession);
             //Notify
             $messagebag->add('updated', "File  " . $fileentity->filename . " Updated");
-//            debugbar()->info($updated_fileentity);
+			
         }else{
             //Do nothing
             $request->merge(['file_entity_id' => $request->primary_file_entity_id]);
         }
         
+		//If we are creating a new visit or checking in
         if($request->action === 'create_visit' || $request->action === 'check_in' ){
             
             $request->merge( ['checkin_username'=> \Auth::user()->name ] );
             $visit = $hoppereventsession->createNewVisit($request, $hoppervisit);
-            
-            $messagebag->add('create_visit', "<strong class='lead'>Visit Created</strong>");
-            $messagebag->add('create_visit', "View this visit now: " . route('admin.visit.edit', ['id' => $visit->id] ));
-            
+			//If this is not a blind update, notify of new visit created.
+            if($request->blind_update !== "YES"){
+                $messagebag->add('create_visit', "<strong class='lead'>Visit Created</strong>");
+                $messagebag->add('create_visit', "<a href='".route('admin.visit.edit', ['id' => $visit->id] )."' target='_blank'>View this visit now</a>");
+            }
             return redirect()->route('admin.eventsession.index')->withFlashMessage($messagebag);
-        }else{
+        }else{ //We are just updating the event session
             return redirect()->back()->withFlashMessage($messagebag);   
         }
                 
