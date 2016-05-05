@@ -163,8 +163,8 @@ class HopperVisit{
                 //$id, $event, $notes = '', $filename = null, $tasks = [], $user = 'Hopper', $request = null
                 event(new \App\Events\Backend\Hopper\FileEntityUpdated($visit->file_entity->id, 'visit_behavior', 'Moved updated visit file '.$data['filename'].' to master', $data['filename'], ['update_path' => $path]));
                 
-                $this->hopperfile->moveMasterToArchive($data['filename']);
-                event(new \App\Events\Backend\Hopper\FileEntityUpdated($visit->file_entity->id, 'visit_behavior', 'Moved updated visit file '.$data['filename'].' to archive', $data['filename']));
+				$this->hopperfile->copyMasterToArchive($data['filename']);
+                event(new \App\Events\Backend\Hopper\FileEntityUpdated($visit->file_entity->id, 'visit_behavior', 'Copied updated visit file '.$data['filename'].' to archive', $data['filename']));
                 
           }
         
