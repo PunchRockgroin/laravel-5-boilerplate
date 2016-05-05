@@ -58,6 +58,9 @@ class VisitController extends Controller
         ->addColumn(['data' => 'design_username', 'name' => 'design_username', 'title' => 'Graphic Operator'])
         ->addColumn(['data' => 'created_at', 'name' => 'created_at', 'title' => 'Created At'])
         ->addColumn(['data' => 'updated_at', 'name' => 'updated_at', 'title' => 'Updated At'])
+		->parameters(
+			['order' => [[0, 'desc']]]
+		)
         ->addAction();
         
         $data = [
