@@ -34,11 +34,13 @@ return [
     'different'            => 'El campo :attribute y :other deben ser diferentes.',
     'digits'               => 'El número :attribute debe tener :digits dígitos.',
     'digits_between'       => 'El número :attribute debe tener entre :min y :max dígitos.',
+    'distinct'             => 'The :attribute field has a duplicate value.',
     'email'                => 'El campo :attribute debe contener un e-mail válido.',
     'exists'               => 'El campo :attribute seleccionado es inválido.',
     'filled'               => 'El campo :attribute es obligatorio.',
     'image'                => 'El campo :attribute debe contener una imagen.',
     'in'                   => 'El :attribute seleccionado no es válido.',
+    'in_array'             => 'The :attribute field does not exist in :other.',
     'integer'              => 'El campo :attribute debe ser un número entero.',
     'ip'                   => 'El campo :attribute debe contener una dirección IP válida.',
     'json'                 => 'El campo :attribute debe contener un JSON válido.',
@@ -57,6 +59,7 @@ return [
     ],
     'not_in'               => 'El :attribute seleccionado no es válido.',
     'numeric'              => 'El campo :attribute debe ser un número.',
+    'present'              => 'The :attribute field must be present.',
     'regex'                => 'El formato de :attribute no es válido.',
     'required'             => 'El campo :attribute es obligatorio.',
     'required_if'          => 'El campo :attribute es obligatorio cuando :other tiene valor :value.',
@@ -112,7 +115,7 @@ return [
                 'permissions' => [
                     'associated_roles' => 'Roles asociados',
                     'dependencies' => 'Dependencias',
-                    'display_name' => 'Nombre al mostrar',
+                    'display_name' => 'Nombre a mostrar',
                     'group' => 'Grupo',
                     'group_sort' => 'Orden del Grupo',
 
@@ -121,7 +124,7 @@ return [
                     ],
 
                     'name' => 'Nombre',
-                    'system' => 'System?',
+                    'system' => 'Sistema?',
                 ],
 
                 'roles' => [

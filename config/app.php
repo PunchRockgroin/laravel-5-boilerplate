@@ -48,7 +48,7 @@ return [
     |
     */
 
-    'url' => env('APP_URL'),
+    'url' => env('APP_URL', '127.0.0.1'),
 
     /*
     |--------------------------------------------------------------------------
@@ -183,14 +183,13 @@ return [
          * Third Party Providers
          */
         Arcanedev\LogViewer\LogViewerServiceProvider::class,
-        Barryvdh\Debugbar\ServiceProvider::class,
         Collective\Html\HtmlServiceProvider::class,
         Creativeorange\Gravatar\GravatarServiceProvider::class,
         DaveJamesMiller\Breadcrumbs\ServiceProvider::class,
         Laracasts\Utilities\JavaScript\JavaScriptServiceProvider::class,
         HieuLe\Active\ActiveServiceProvider::class,
         Laravel\Socialite\SocialiteServiceProvider::class,
-        
+        Spatie\Backup\BackupServiceProvider::class,
         Yajra\Datatables\DatatablesServiceProvider::class,
         Maatwebsite\Excel\ExcelServiceProvider::class,
         Vinkla\Pusher\PusherServiceProvider::class,
@@ -273,5 +272,4 @@ return [
         
         'Hopper' => App\Services\Hopper\Facades\Hopper::class,
     ],
-
 ];

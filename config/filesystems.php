@@ -16,17 +16,20 @@ return [
      */
 
     'default' => 'local',
+
     /*
-      |--------------------------------------------------------------------------
-      | Default Cloud Filesystem Disk
-      |--------------------------------------------------------------------------
-      |
-      | Many applications store files both locally and in the cloud. For this
-      | reason, you may specify a default "cloud" driver here. This driver
-      | will be bound as the Cloud disk implementation in the container.
-      |
-     */
+    |--------------------------------------------------------------------------
+    | Default Cloud Filesystem Disk
+    |--------------------------------------------------------------------------
+    |
+    | Many applications store files both locally and in the cloud. For this
+    | reason, you may specify a default "cloud" driver here. This driver
+    | will be bound as the Cloud disk implementation in the container.
+    |
+    */
+
     'cloud' => 's3',
+
     /*
       |--------------------------------------------------------------------------
       | Filesystem Disks
@@ -43,17 +46,11 @@ return [
             'driver' => 'local',
             'root' => storage_path('app'),
         ],
-        'ftp' => [
-            'driver' => 'ftp',
-            'host' => 'ftp.example.com',
-            'username' => 'your-username',
-            'password' => 'your-password',
-        // Optional FTP Settings...
-        // 'port'     => 21,
-        // 'root'     => '',
-        // 'passive'  => true,
-        // 'ssl'      => true,
-        // 'timeout'  => 30,
+
+        'public' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public'),
+            'visibility' => 'public',
         ],
         's3' => [
             'driver' => 's3',
