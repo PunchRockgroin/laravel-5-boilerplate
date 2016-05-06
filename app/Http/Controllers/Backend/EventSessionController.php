@@ -27,7 +27,7 @@ class EventSessionController extends Controller
         //
         
         if ($request->ajax()) {
-            $eventsessions = EventSession::select(['id', 'session_id', 'speakers', 'onsite_phone', 'presentation_owner', 'created_at', 'updated_at']);
+            $eventsessions = EventSession::select(['id', 'session_id', 'checked_in', 'speakers', 'onsite_phone', 'presentation_owner', 'created_at', 'updated_at']);
             return \Datatables::of($eventsessions)
                     ->editColumn('created_at', '{!! $created_at->diffForHumans() !!}')
                     ->editColumn('updated_at', function ($eventsession) {
@@ -38,8 +38,12 @@ class EventSessionController extends Controller
 //                    })  
                     ->editColumn('action', function ($eventsession) {
                         $content = '';
-                        $content .= '<a class="btn btn-primary btn-xs" href="'. route('admin.eventsession.edit', [$eventsession->session_id]).'">Edit</a> ';
-                        $content .= '<a class="btn btn-info btn-xs" href="'. route('admin.eventsession.show', [$eventsession->session_id]).'">Show</a> ';
+						if( ! $eventsession->checkedInBoolean() ):
+                        $content .= '<a class="btn btn-success btn-block btn-xs" href="'. route('admin.eventsession.edit', [$eventsession->session_id]).'">Check-in</a> ';
+						else:
+						$content .= '<a class="btn btn-primary btn-block btn-xs" href="'. route('admin.eventsession.edit', [$eventsession->session_id]).'">Update</a> ';	
+						endif;
+//                        $content .= '<a class="btn btn-info btn-xs" href="'. route('admin.eventsession.show', [$eventsession->session_id]).'">Show</a> ';
                         return $content;
                     })
                     ->make(true);
@@ -52,8 +56,7 @@ class EventSessionController extends Controller
         ->addColumn(['data' => 'session_id', 'name' => 'session_id', 'title' => 'Session ID'])
         ->addColumn(['data' => 'speakers', 'name' => 'speakers', 'title' => 'Speakers'])
         ->addColumn(['data' => 'onsite_phone', 'name' => 'onsite_phone', 'title' => 'On-site Phone'])
-        ->addColumn(['data' => 'presentation_owner', 'name' => 'presentation_owner', 'title' => 'Presenation Owner'])
-                
+        ->addColumn(['data' => 'presentation_owner', 'name' => 'presentation_owner', 'title' => 'Presenation Owner'])                
 //        ->addColumn(['data' => 'created_at', 'name' => 'created_at', 'title' => 'Created At'])
 //        ->addColumn(['data' => 'updated_at', 'name' => 'updated_at', 'title' => 'Updated At'])
               
