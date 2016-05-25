@@ -29,6 +29,20 @@
           </div>
                 
       </div>
+	<div class="box box-success">
+    <div class="box-header with-border">
+			<h3 class="box-title">Checked In</h3>
+			<div class="box-tools pull-right">
+				<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+
+			</div>
+		</div>
+		<div class="box-body">
+			<canvas id="checkedInPieChart" data-legend-target="#checkedInPieChartLegend" data-variable="checkedInData" class='pieChart'></canvas>
+			<div id="checkedInPieChartLegend"></div>
+		</div><!-- /.box-body -->
+	</div>
+	@permission('view-access-management')	
     <div class="box box-success">
         <div class="box-header with-border">
             <h3 class="box-title"></h3>
@@ -40,15 +54,10 @@
              {!! $html->table(['class' => 'table responsive table-bordered table-striped', 'width' => '100%' ]) !!}
         </div><!-- /.box-body -->
     </div><!--box box-success-->
+	@endauth
 @endsection
 
-
-
 @push('after-scripts-end')
-<script>
-    var pusher = new Pusher("{{ env('PUSHER_MAIN_AUTH_KEY',  'your-auth-key') }}", {
-                        encrypted: true
-                      });
-</script>
+	
     {!! $html->scripts() !!}
 @endpush

@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'default' => env('QUEUE_DRIVER', 'async'),
+    'default' => env('QUEUE_DRIVER', 'redis'),
 
     /*
     |--------------------------------------------------------------------------
@@ -61,7 +61,7 @@ return [
             'driver'     => 'redis',
             'connection' => 'default',
             'queue'      => 'default',
-            'expire'     => 60,
+            'expire'     => 300,
         ],
         'async' => array(
             'driver' => 'async',

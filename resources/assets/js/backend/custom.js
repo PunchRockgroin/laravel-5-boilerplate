@@ -10,8 +10,8 @@ var hopperVue = new Vue({
     el: '#Hopper',
     data: {
         message: '',
-        inVisit: '',
-        idleUsers: ''
+        inVisit: {},
+        idleUsers: {}
     },
     filters: {
         moment: function (date) {
@@ -51,8 +51,10 @@ var hopperVue = new Vue({
             // GET request
             this.$http({url: window.hopper.heartbeat_data, method: 'GET'}).then(function (response) {
                 // success callback
+//                console.log(response.data.payload);
                 this.$set('message', response.data.message);
                 this.$set('inVisit', response.data.payload.inVisit);
+//                console.log(response.data.payload);
 //                var arr = Object.keys(response.data.payload.groups).map(function (key) {return response.data.payload.groups[key]});
                 var otherUsers = [];
                 _.forEach(response.data.payload.groups, function (value) {
@@ -65,25 +67,97 @@ var hopperVue = new Vue({
             }, function (response) {
                 // error callback
             });
+        },
+        setBehaviorData: function(members){
+            var elGroups = _.groupBy(members, function (member) { 
+                return member.heartbeat.route;
+            });
+            var inVisit = _.filter(members, function (member) { 
+                return member.heartbeat.route == 'admin.visit.edit';
+            });
+            var idleUsers = _.filter(members, function (member) { 
+                return member.heartbeat.route != 'admin.visit.edit';
+            });
+            
+//            console.log(elGroups);
+//            console.log(otherUsers);
+            this.$set('inVisit', inVisit);
+            this.$set('idleUsers', idleUsers);
+        },
+        getMemberHeartbeat: function(member){
+            this.$http({url: window.hopper.heartbeat_user+'/'+member.id, method: 'GET'}).then(function (response) {
+            // success callback
+            console.log(response.data.payload);
+//                    this.$set('message', response.data.message);
+//                    this.$set('inVisit', response.data.payload.inVisit);
+//    //                console.log(response.data.payload);
+//    //                var arr = Object.keys(response.data.payload.groups).map(function (key) {return response.data.payload.groups[key]});
+//                    var otherUsers = [];
+//                    _.forEach(response.data.payload.groups, function (value) {
+//                        _.forEach(value, function (subvalue) {
+//                            otherUsers.push(subvalue);
+//                        });
+//                    });
+//                    this.$set('idleUsers', otherUsers);
+
+            }, function (response) {
+                // error callback
+                console.log(response);
+            });  
+        },
+//        addMember: function()
+        getPusherPresence: function(event){
+            var PresenceChannel = pusher.subscribe("presence-test_channel");
+            PresenceChannel.bind('pusher:subscription_succeeded', function(members) {
+//                console.log(members);
+//                hopperVue.setBehaviorData(members.members);
+                hopperVue.getDashboardData();
+            });
+
+            PresenceChannel.bind('pusher:member_added', function(member) {
+                // for example:
+//                console.log(member);
+//                console.log(hopperVue.inVisit);
+                
+//                console.log(hopperVue.idleUsers);
+//                _.each(hopperVue.idleUsers, function(user){
+//                    console.log(user.heartbeat.route);
+//                })
+//                hopperVue.setBehaviorData(members.members);
+                  hopperVue.getDashboardData();
+                  hopperVue.getMemberHeartbeat(member);
+            });
+            PresenceChannel.bind('pusher:member_removed', function(member) {
+                // for example:
+//                console.log(member);
+//                console.log(hopperVue.inVisit);
+//                _.each(hopperVue.idleUsers, function(user){
+//                    console.log(user.heartbeat.route);
+//                })
+//                hopperVue.setBehaviorData(members.members);
+                  hopperVue.getDashboardData();
+                  hopperVue.getMemberHeartbeat(member);
+            });
         }
     },
     ready: function () {
         this.getHeartbeat();
-
+        
 
     }
 });
 
+//$.get('/admin/visit/stats').done(function(data){
+//    console.log(data);
+//})
 
-if (typeof window.hopper !== "undefined" && typeof window.hopper.heartbeat_detector_enable !== "undefined" && window.hopper.heartbeat_detector_enable === true) {
-    hopperVue.getDashboardData();
-    setInterval(function () {
+$(function () {
+    if (typeof window.hopper !== "undefined" && typeof window.hopper.heartbeat_detector_enable !== "undefined" && window.hopper.heartbeat_detector_enable === true) {
         hopperVue.getDashboardData();
-    }, 10000);
-}
-
-
-
+        hopperVue.getPusherPresence();
+    }
+    
+});
 
 
 $(function () {
@@ -105,15 +179,10 @@ $(function () {
 });
 
 
+
 $(function () {
 
 var channel;
-
-
-
-
-
-
 //    $('.repeat').each(function() {
 //        var obj = $(this),
 //            objD = obj.data(),
@@ -402,7 +471,7 @@ $(function () {
 
             }
         };
-    }
+    } 
 
     $("input.bootstrap-checkbox-switch").bootstrapSwitch().on('switchChange.bootstrapSwitch', function (event, state) {
         var $el = $(this),
@@ -418,4 +487,100 @@ $(function () {
         }
 
     });
+});
+
+
+$(function () {
+    
+
+//
+//        //-------------
+//        //- LINE CHART -
+//        //--------------
+
+  // Get context with jQuery - using jQuery's .get() method.
+
+//        var lineChartData = {
+//          labels: ["January", "February", "March", "April", "May", "June", "July"],
+//          datasets: [
+//            {
+//              label: "Electronics",
+//              fillColor: "rgb(210, 214, 222)",
+//              strokeColor: "rgb(210, 214, 222)",
+//              pointColor: "rgb(210, 214, 222)",
+//              pointStrokeColor: "#c1c7d1",
+//              pointHighlightFill: "#fff",
+//              pointHighlightStroke: "rgb(220,220,220)",
+//              data: [65, 59, 80, 81, 56, 55, 40]
+//            },
+//            {
+//              label: "Digital Goods",
+//              fillColor: "rgba(60,141,188,0.9)",
+//              strokeColor: "rgba(60,141,188,0.8)",
+//              pointColor: "#3b8bba",
+//              pointStrokeColor: "rgba(60,141,188,1)",
+//              pointHighlightFill: "#fff",
+//              pointHighlightStroke: "rgba(60,141,188,1)",
+//              data: [28, 48, 40, 19, 86, 27, 90]
+//            }
+//          ]
+//        };
+
+        var lineOptions = {
+          //Boolean - If we should show the scale at all
+          showScale: true,
+          //Boolean - Whether grid lines are shown across the chart
+          scaleShowGridLines: false,
+          //String - Colour of the grid lines
+          scaleGridLineColor: "rgba(0,0,0,.05)",
+          //Number - Width of the grid lines
+          scaleGridLineWidth: 1,
+          //Boolean - Whether to show horizontal lines (except X axis)
+          scaleShowHorizontalLines: true,
+          //Boolean - Whether to show vertical lines (except Y axis)
+          scaleShowVerticalLines: true,
+          //Boolean - Whether the line is curved between points
+          bezierCurve: true,
+          //Number - Tension of the bezier curve between points
+          bezierCurveTension: 0.3,
+          //Boolean - Whether to show a dot for each point
+          pointDot: false,
+          //Number - Radius of each point dot in pixels
+          pointDotRadius: 4,
+          //Number - Pixel width of point dot stroke
+          pointDotStrokeWidth: 1,
+          //Number - amount extra to add to the radius to cater for hit detection outside the drawn point
+          pointHitDetectionRadius: 20,
+          //Boolean - Whether to show a stroke for datasets
+          datasetStroke: true,
+          //Number - Pixel width of dataset stroke
+          datasetStrokeWidth: 2,
+          //Boolean - Whether to fill the dataset with a color
+          datasetFill: true,
+          //String - A legend template
+          legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend chart-js-legend list-unstyled \"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].fillColor%>\"></span><%=datasets[i].label%></li><%}%></ul>",
+          //Boolean - whether to maintain the starting aspect ratio or not when responsive, if set to false, will take up entire container
+          maintainAspectRatio: true,
+          //Boolean - whether to make the chart responsive to window resizing
+          responsive: true
+        };
+  
+        $('.lineChart').each(function(index){
+            var $el = $(this),
+                lineChartCanvas = $(this).get(0).getContext("2d"), lineChart,
+                elvariable = $el.data('variable') || false,
+                values = window[elvariable] || false,
+                legend = $el.data('legendTarget'),
+                options = $el.data();
+            var settings = $.extend( {}, lineOptions, options );
+
+            if(values){
+                lineChart = new Chart(lineChartCanvas).Line(values, settings);
+                if($(legend).length){
+                    $(legend).html(lineChart.generateLegend());
+                }
+            }else{
+                $el.replaceWith( '<div class="callout callout-danger"><h4>No Data</h4><p>There is a problem that we need to fix. A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart.</p></div>' );
+            }
+        });
 });

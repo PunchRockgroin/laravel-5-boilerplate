@@ -7,6 +7,10 @@ Route::group(['middleware' => 'web'], function() {
     Route::group(['namespace' => 'Language'], function () {
         require (__DIR__ . '/Routes/Language/Language.php');
     });
+	
+	Route::group(['namespace' => 'Pusher', 'prefix' => 'pusher'], function(){
+			require (__DIR__ . '/Routes/Pusher/Pusher.php');      
+		});
 
     /**
      * Frontend Routes
@@ -15,6 +19,7 @@ Route::group(['middleware' => 'web'], function() {
     Route::group(['namespace' => 'Frontend'], function () {
         require (__DIR__ . '/Routes/Frontend/Frontend.php');
         require (__DIR__ . '/Routes/Frontend/Access.php');
+		require (__DIR__ . '/Routes/Frontend/Visit.php');
     });
 
     /**
@@ -41,6 +46,7 @@ Route::group(['middleware' => 'web'], function() {
                 require (__DIR__ . '/Routes/Backend/Visit.php');
                 require (__DIR__ . '/Routes/Backend/Hopper.php');
             });
+			
         });
         
         /**
@@ -50,8 +56,8 @@ Route::group(['middleware' => 'web'], function() {
             require (__DIR__ . '/Routes/Backend/Heartbeat.php');
             
         });
-    });
-    
-
-    
+		
+    }); 
+	
+	
 });

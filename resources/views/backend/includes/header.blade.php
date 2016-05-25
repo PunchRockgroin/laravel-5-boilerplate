@@ -14,13 +14,13 @@
         <div class="navbar-custom-menu">
             <ul class="nav navbar-nav">
 
-                @if (config('locale.status') && count(config('locale.languages')) > 1)
+                @if (false && config('locale.status') && count(config('locale.languages')) > 1)
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{ trans('menus.language-picker.language') }} <span class="caret"></span></a>
                         @include('includes.partials.lang')
                     </li>
                 @endif
-
+				@if (false)
                 <!-- Messages: style can be found in dropdown.less-->
                 <li class="dropdown messages-menu">
                     <!-- Menu toggle button -->
@@ -112,7 +112,7 @@
                         </li>
                     </ul>
                 </li>
-
+				@endif
                 <!-- User Account Menu -->
                 <li class="dropdown user user-menu">
                     <!-- Menu Toggle Button -->
@@ -127,11 +127,16 @@
                         <!-- The user image in the menu -->
                         <li class="user-header">
                             <img src="{!! access()->user()->picture !!}" class="img-circle" alt="User Image" />
+							
                             <p>
                                 {!! access()->user()->name !!} - {{ trans('roles.web_developer') }}
+								@if(false)
                                 <small>{{ trans('strings.backend.general.member_since') }} XX/XX/XXXX</small>
+								@endif
                             </p>
+							
                         </li>
+						@if(false)
                         <!-- Menu Body -->
                         <li class="user-body">
                             <div class="col-xs-4 text-center">
@@ -144,11 +149,14 @@
                                 <a href="#">Link</a>
                             </div>
                         </li>
+						@endif
                         <!-- Menu Footer-->
                         <li class="user-footer">
+							@if(false)
                             <div class="pull-left">
                                 <a href="#" class="btn btn-default btn-flat">{{ trans('navs.backend.button') }}</a>
                             </div>
+							@endif
                             <div class="pull-right">
                                 <a href="{!! route('auth.logout') !!}" class="btn btn-default btn-flat">{{ trans('navs.general.logout') }}</a>
                             </div>

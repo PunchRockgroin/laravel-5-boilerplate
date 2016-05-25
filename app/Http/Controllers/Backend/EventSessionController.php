@@ -166,7 +166,7 @@ class EventSessionController extends Controller
     {
         $messagebag = new \Illuminate\Support\MessageBag();
 		
-		if(isset($request->temporaryfilename) && isset($request->filename) && ($request->temporaryfilename !== $request->filename)){
+		if(isset($request->temporaryfilename) && !empty($request->temporaryfilename) && isset($request->filename) && ($request->temporaryfilename !== $request->filename)){
 			//Rename temporary file to the new filename before anything else
 			$hopperfile = new \App\Services\Hopper\HopperFile;
 			$hopperfile->updateTemporary($request->temporaryfilename, $request->filename); 

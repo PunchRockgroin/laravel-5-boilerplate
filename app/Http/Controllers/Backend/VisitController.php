@@ -14,14 +14,18 @@ use App\Services\Hopper\HopperVisit;
 
 use App\Services\Hopper\Contracts\HopperContract;
 
+use Vinkla\Pusher\PusherManager;
+
 class VisitController extends Controller
 {
     
     private $messagebag;
+    private $pusher;
     
-    public function __construct(\Illuminate\Support\MessageBag $messagebag)
+    public function __construct(\Illuminate\Support\MessageBag $messagebag, PusherManager $pusher)
     {
         $this->messagebag = $messagebag;        
+		$this->pusher = $pusher;
     }
     
     /**
@@ -31,8 +35,6 @@ class VisitController extends Controller
      */
     public function index(Request $request, Builder $htmlbuilder)
     {
-        
-        
         if ($request->ajax()) {
             $Visits = Visit::select(['id', 'session_id', 'visitors', 'design_username', 'created_at', 'updated_at']);
             return \Datatables::of($Visits)
@@ -111,9 +113,9 @@ class VisitController extends Controller
     public function edit(Visit $visit, HopperVisit $hoppervisit)
     {
         $data = $hoppervisit->edit($visit);       
-        
-        
-        event(new \App\Events\Backend\Hopper\Heartbeat(auth()->user(), request()->route(), \Carbon\Carbon::now()->toIso8601String()));
+		
+        event(new \App\Events\Backend\Hopper\Heartbeat(auth()->user(), request()->route(), \Carbon\Carbon::now()->toIso8601String()));		
+		
         return view('backend.visit.edit', $data);
     }
 
@@ -183,6 +185,15 @@ class VisitController extends Controller
         
         return redirect(route('admin.visit.index'))
                     ->withErrors(['Alert', 'Could not find Visit ID: '. $visit_id]);
-        
     }
+	
+	
+	public function stats(Request $request){
+		$hopperstats = new \App\Services\Hopper\HopperStats;
+		
+		$visit_stats = $hopperstats->visit_stats($request);
+		
+		return response()->json($visit_stats, 200);
+	}
+	
 }

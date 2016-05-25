@@ -13,6 +13,7 @@
                 <a href="{!! route('admin.dashboard') !!}"><span>{{ trans('menus.backend.sidebar.dashboard') }}</span></a>
             </li>
             
+			@permission('view-access-management')
             <li class="{{ Active::pattern('admin/eventsession') }} treeview">
                 <a href="#">
                     <span>{{ trans('eventsession.backend.sidebar.title') }}</span>
@@ -27,7 +28,8 @@
                     </li>
                 </ul>
             </li>
-            
+            @endauth
+			
             <li class="{{ Active::pattern('admin/visit') }} treeview">
                 <a href="#">
                     <span>{{ trans('visit.backend.sidebar.title') }}</span>
@@ -39,7 +41,7 @@
                     </li>
                 </ul>
             </li>
-            
+            @permission('view-access-management')
             <li class="{{ Active::pattern('admin/files') }} treeview">
                 <a href="#">
                     <span>{{ trans('fileentity.backend.sidebar.title') }}</span>
@@ -54,13 +56,15 @@
                     </li>
                 </ul>
             </li>
-
+			@endauth
+			
             @permission('view-access-management')
                 <li class="{{ Active::pattern('admin/access/*') }}">
                     <a href="{!!url('admin/access/users')!!}"><span>{{ trans('menus.backend.access.title') }}</span></a>
                 </li>
             @endauth
 
+			@permission('view-access-management')
             <li class="{{ Active::pattern('admin/log-viewer*') }} treeview">
                 <a href="#">
                     <span>{{ trans('menus.backend.log-viewer.main') }}</span>
@@ -75,7 +79,8 @@
                     </li>
                 </ul>
             </li>
-            
+            @endauth
+			
             @permission('view-access-management')
                 <li class="{{ Active::pattern('admin/hopper/*') }}">
                     <a href="{!!url('admin/hopper')!!}"><span>{{ trans('hopper.backend.sidebar.title') }}</span></a>

@@ -1,5 +1,6 @@
 <?php
 Route::post('visit/find', 'VisitController@find')->name('admin.visit.find');
+Route::get('visit/stats', 'VisitController@stats')->name('admin.visit.stats');
 Route::resource('visit', 'VisitController', [
     'except' => ['create', 'store',],
     'names' => [

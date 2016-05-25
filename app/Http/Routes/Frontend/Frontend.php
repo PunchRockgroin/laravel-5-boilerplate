@@ -16,3 +16,4 @@ Route::group(['middleware' => 'auth'], function () {
         Route::patch('profile/update', 'ProfileController@update')->name('frontend.user.profile.update');
     });
 });
+

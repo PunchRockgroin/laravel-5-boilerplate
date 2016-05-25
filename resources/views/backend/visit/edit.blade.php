@@ -98,11 +98,13 @@
 
 @push('after-scripts-end')
 <div style="" class="dz-overtop">
-    
     <div>
         <i class="fa fa-5x fa-download"></i>
         <div class='h1'>Drop anywhere</div>
     </div>
-    
 </div>
+@include('includes/partials/pusher')
+<script>
+	pusher.subscribe("presence-test_channel");
+</script>
 @endpush

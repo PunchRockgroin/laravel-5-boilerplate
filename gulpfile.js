@@ -1,10 +1,10 @@
 var elixir = require('laravel-elixir');
-//require('./elixir-extensions');
+require('./elixir-extensions');
 
 elixir(function(mix) {
  mix
-     .phpUnit()
-     //.compressHtml()
+//     .phpUnit()
+//     .compressHtml()
 
     /**
      * Copy needed files from /node directories
@@ -87,7 +87,8 @@ elixir(function(mix) {
          'assets/bower_components/bootstrap-daterangepicker/daterangepicker.js',
          'assets/bower_components/AdminLTE/plugins/datatables/jquery.dataTables.min.js',
          'assets/bower_components/AdminLTE/plugins/datatables/dataTables.bootstrap.min.js',
-         'assets/bower_components/AdminLTE/plugins/datatables/extensions/Responsive/js/dataTables.responsive.min.js',         
+         'assets/bower_components/AdminLTE/plugins/datatables/extensions/Responsive/js/dataTables.responsive.min.js',     
+         'assets/bower_components/AdminLTE/plugins/chartjs/Chart.min.js',    
          'assets/bower_components/vue/dist/vue.js',         
          'assets/bower_components/vue-resource/dist/vue-resource.js',         
          'assets/js/plugin/sweetalert/sweetalert.min.js',

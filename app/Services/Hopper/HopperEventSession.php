@@ -149,13 +149,11 @@ class HopperEventSession {
         $request->merge(['file_entity_id' => $request->primary_file_entity_id]);
         $visit = $hoppervisit->store($request->all());
         event(new EventSessionUpdated($request->event_session_id, 'visit_created', 'Created a new Visit: ' . $visit->id));
-		//Copy the current file in Master to Working
-//		$this->hopperfile->copyMasterToWorking($request->currentfilename);
+		
+		
         //If it's a blind update
         if($request->blind_update === "YES"){
-            $path = $this->hopperfile->copyTemporaryNewFileToMaster($request->filename, true);
-//            debugbar()->info($path);            
-			
+            $path = $this->hopperfile->copyTemporaryNewFileToMaster($request->filename, true);     
 			//Update Visitor Info
             $visit->visitors = "(blind update)";
             $visit->difficulty = "1";
@@ -163,19 +161,15 @@ class HopperEventSession {
             $visit->design_username = \Auth::user()->name;
 			//Save
             $visit->save();
-			
 			\Log::info('Blind Update Occurred: '.$request->filename);
-            
 			//Copy the new master to archive
             $this->hopperfile->copyMasterToArchive($request->filename);
 			//Move the old master to archive
             $this->hopperfile->moveMasterToArchive($request->currentfilename);
-			
 			//Find the file entity by reference
 			$fileentity = \App\Models\Hopper\FileEntity::find($request->primary_file_entity_id);
 			//Update File Entity Referenced
 			$updated_fileentity = $this->hopperfileentity->update($request, $fileentity);
-            
 			//$id, $event, $notes = '', $filename = null, $tasks = [], $user = 'Hopper', $request = null
             event(new \App\Events\Backend\Hopper\FileEntityUpdated($visit->file_entity->id, 'visit_behavior', 'Copied master file '.$visit->file_entity->filename.' to working', $request->filename, ['update_path' => $path]));
 			
@@ -183,26 +177,24 @@ class HopperEventSession {
             return $visit;
             
         }
-        
-//		\Log::info('copyMasterToWorking: '. $request->currentfilename);
-        //Copy the current file in Master to Archive
-//        $this->hopperfile->copyMasterToArchive($request->currentfilename);
-        
-        
-        
         //If there is no updated file
         if($request->currentfilename === $request->filename){
-			//Find the file entity by reference
-			
-//			debugbar()->info('Moved to master');
+			//Copy the current file in Master to Archive
+			//$this->hopperfile->copyMasterToArchive($request->currentfilename);
+			//Copy the current file in Master into Working
 			$this->hopperfile->copyMasterToWorking($request->currentfilename);
-            //Up the version number and copy that to Working and move to Master
+			//Up the version number in Master
+            $path = $this->hopperfile->copyMasterToMaster($request->currentfilename, $request->next_version);
+            //Up the version number and copy that to Working
             $path = $this->hopperfile->copyMasterToWorking($request->currentfilename, $request->next_version);
-            $this->hopperfile->moveMasterToMaster($request->currentfilename, $request->next_version);
-			
+			//Copy the new file in Master into Archive
+			$this->hopperfile->copyMasterToArchive($request->currentfilename, $request->next_version);
+			//Move the old file in Master to Archive
+            $this->hopperfile->moveMasterToArchive($request->currentfilename);
+			//Find the fileentity by ID
 			$fileentity = \App\Models\Hopper\FileEntity::find($request->primary_file_entity_id);
+			//Update
 			$updated_fileentity = $this->hopperfileentity->update($request, $fileentity);
-
 			//Otherwise, if there's a filename and an entity and the currentfilename (old file) does not equal the filename passed in the request
         }elseif($request->filename && $request->primary_file_entity_id && ($request->currentfilename !== $request->filename)){
 			//Copy the current file in Master to Working
@@ -215,6 +207,10 @@ class HopperEventSession {
             $this->hopperfile->moveMasterToArchive($request->currentfilename);
             //Move the current file in Temporary to Working
             $this->hopperfile->moveTemporaryNewFileToWorking($request->filename);
+			//Find the fileentity by ID
+			$fileentity = \App\Models\Hopper\FileEntity::find($request->primary_file_entity_id);
+			//Update
+			$updated_fileentity = $this->hopperfileentity->update($request, $fileentity);
         }
         //$id, $event, $notes = '', $filename = null, $tasks = [], $user = 'Hopper', $request = null
         event(new \App\Events\Backend\Hopper\FileEntityUpdated($visit->file_entity->id, 'visit_behavior', 'Copied master file '.$visit->file_entity->filename.' to working', $request->filename, ['update_path' => $path]));

@@ -27,11 +27,9 @@ class HopperServiceProvider extends ServiceProvider
             
             $heartbeat_detector_enable = false;
             $heartbeat_detector_routes = ['admin.dashboard'];
-            
-//            if(in_array(request()->route()->getName(), $heartbeat_detector_routes)){
-//                $heartbeat_detector_enable = true;
-//            }
-            
+			
+			$pusher_presence_routes = ['admin.dashboard', 'admin.visit.edit'];
+                        
             javascript()->put([
                 'hopper' => [
                     'userid' => auth()->user()->id,
@@ -39,7 +37,9 @@ class HopperServiceProvider extends ServiceProvider
                     'email' => auth()->user()->email,
                     'heartbeat_status' => route('backend.heartbeat.status'),
                     'heartbeat_data' => route('admin.dashboard.data'),
+                    'heartbeat_user' => '/admin/dashboard/heartbeat',
                     'heartbeat_detector_enable' => (in_array(request()->route()->getName(), $heartbeat_detector_routes) ? true : false),
+                    'pusher_presence_enable' => (in_array(request()->route()->getName(), $pusher_presence_routes) ? true : false),
                 ],
             ]);
         });

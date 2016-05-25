@@ -4,18 +4,46 @@ namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
 use App\Services\Hopper\Contracts\HopperContract as Hopper;
+
+use Vinkla\Pusher\PusherManager;
+
+use App\Models\Hopper\EventSession;
+
 /**
  * Class DashboardController
  * @package App\Http\Controllers\Backend
  */
 class DashboardController extends Controller
 {
-    /**
+	
+	private $hopperstats;
+	private $pusher;
+
+
+	public function __construct(PusherManager $pusher) {
+		$this->pusher = $pusher;
+		$this->hopperstats = new \App\Services\Hopper\HopperStats();
+		
+	}
+	
+	/**
      * @return \Illuminate\View\View
      */
     public function index(Hopper $hopper)
     {
+		$EventSessions = EventSession::all();
+		$checkinsovertime = $this->hopperstats->check_ins_over_time(\Carbon\Carbon::now()->subWeeks(1), \Carbon\Carbon::now());
+        $visitsovertime = $this->hopperstats->visits_over_time(\Carbon\Carbon::now()->subWeeks(1), \Carbon\Carbon::now());
+		javascript()->put([
+            'checkedInData' => $this->hopperstats->js_get_checked_in($EventSessions),
+            'checkInByDay' => $this->hopperstats->js_visits_and_checkins_over_time($checkinsovertime, $visitsovertime, \Carbon\Carbon::now()->subWeeks(1), \Carbon\Carbon::now()),
+        ]);
+		
         $data = [];
+		
+//		debugbar()->info($this->pusher->get_channel_info('presence-test_channel',array('info' => 'members')));
+		
+//		\Pusher::get_channel_info('presence-test_channel');
 //        $filtered = [];
 //        $grouped = [];
 //               
@@ -119,6 +147,24 @@ class DashboardController extends Controller
         $data['inVisit'] = $filtered;
         
         return response()->json(['message' => 'ok', 'payload' => $data]);
+        
+    }
+	
+	public function userHeartbeat($id){
+        $heartbeat = [];
+        $user = \App\Models\Access\User\User::find($id);
+		$value = \Cache::get('heartbeat-'.md5($user->email));
+		if($value){
+			$heartbeat['statusclass'] = 'yellow';
+			$heartbeat['heartbeat'] = json_decode($value, TRUE);
+		}else{
+			$heartbeat['statusclass'] = 'gray';
+			$heartbeat['heartbeat'] = ['route'=>'offline'];
+		}
+        
+		//debugbar()->info($users);
+                
+        return response()->json(['message' => 'ok', 'payload' => $heartbeat]);
         
     }
 }
