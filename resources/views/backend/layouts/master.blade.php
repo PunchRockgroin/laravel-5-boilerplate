@@ -17,9 +17,9 @@
         @yield('meta')
 
         <!-- Styles -->
-        @yield('before-styles-end')
+        @stack('before-styles-end')
         {!! Html::style(elixir('css/backend.css')) !!}
-        @yield('after-styles-end')
+        @stack('after-styles-end')
         
         <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -58,9 +58,9 @@
     <script>window.jQuery || document.write('<script src="{{asset('js/vendor/jquery/jquery-2.1.4.min.js')}}"><\/script>')</script>
     {!! Html::script('js/vendor/bootstrap/bootstrap.min.js') !!}
 
-    @yield('before-scripts-end')
+    @stack('before-scripts-end')
     {!! HTML::script(elixir('js/backend.js')) !!}
-    @yield('after-scripts-end')
+    @stack('after-scripts-end')
     </body>
 </html>
 @stop
