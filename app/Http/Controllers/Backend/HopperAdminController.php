@@ -43,14 +43,14 @@ class HopperAdminController extends Controller {
             \Illuminate\Support\MessageBag $messagebag,
              HopperEventSession $hoppereventsession,
              HopperVisit $hoppervisit,
-             HopperFileEntity $hopperfileentity,
-             EventSessionImport $eventsessionimport
+             HopperFileEntity $hopperfileentity
+//             EventSessionImport $eventsessionimport
             )
     {
         $this->messagebag = $messagebag;
         $this->hoppereventsession = $hoppereventsession;
         $this->hopperfileentity = $hopperfileentity;
-        $this->eventsessionimport = $eventsessionimport;
+//        $this->eventsessionimport = $eventsessionimport;
     }
     
     
@@ -71,7 +71,7 @@ class HopperAdminController extends Controller {
      * @param  $model 
      * @return \Illuminate\Http\Response
      */
-    public function import(Request $request, $model) {
+    public function import(Request $request, EventSessionImport $eventsessionimport, $model) {
         $count = 0;
         
         switch ($model){
@@ -82,8 +82,8 @@ class HopperAdminController extends Controller {
                 }
 //                
                 try {
-                  $count = count($this->eventsessionimport->get());
-                  $results = $this->eventsessionimport->importChunked();
+                  $count = count($eventsessionimport->get());
+                  $results = $eventsessionimport->importChunked();
                 } catch (App\Exceptions\GeneralException $e) {
                     return redirect()->route('backend.hopper.admin.index')
                         ->with('flash_warning', $e->getMessage());

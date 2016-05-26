@@ -17,13 +17,16 @@ class EventSessionImport extends \Maatwebsite\Excel\Files\ExcelFile {
             \Illuminate\Foundation\Application $app,
             \Maatwebsite\Excel\Excel $excel) {
         parent::__construct($app, $excel);
-
     }
         
 
     public function getFile()
     {
-        return env('HOPPER_STORAGE', storage_path() . '/app') . "/import" . '/import.xlsx';
+		$import_default =  env('HOPPER_STORAGE', storage_path() . '/app') . "/import" . '/import.xlsx';
+		if(  file_exists( $import_default )){
+			return $import_default;
+		}
+		return null;
     }
 
     public function getFilters()
@@ -35,7 +38,6 @@ class EventSessionImport extends \Maatwebsite\Excel\Files\ExcelFile {
     
     
     public function importChunked($chunk = 250){
-
         $this->chunk($chunk, function($results)
             {
                 $results->each(function($row){
