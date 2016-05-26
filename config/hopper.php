@@ -92,11 +92,27 @@ return [
     'checkin_upload_mimes' => env('HOPPER_CHECKIN_UPLOAD_MIMES', 'pdf,ppt,pptx'),
 	/*
       |--------------------------------------------------------------------------
-      | Valid upload Mimes
+      | Use Queue for Filesystem/Etc
       |--------------------------------------------------------------------------
       |
-      | Mime types that can legitimatley use the uploader(s)
+      | Do we use syncronous file system ops or queued ops
       |
      */
     'use_queue' => env('HOPPER_USE_QUEUE', true),
+	
+	/*
+      |--------------------------------------------------------------------------
+      | Appearance Settings
+      |--------------------------------------------------------------------------
+     */
+	
+	/*
+      |--------------------------------------------------------------------------
+      | Use Dates
+      |--------------------------------------------------------------------------
+      |
+      | Do we show and use dates in event sessions (may not be necessary anymore)
+      |
+     */
+    'use_dates' => env('HOPPER_USE_DATES', true),
 ];

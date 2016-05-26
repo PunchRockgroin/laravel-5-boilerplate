@@ -10,9 +10,9 @@
 @endsection
 
 @section('content')
+
 {!! Form::model($visit, ['route' => array('admin.visit.update', $visit->id), 'role' => 'form', 'method' => 'patch']) !!}
 {!! Form::hidden('behavior', 'update_visit') !!} 
-
 
 <div class="row">
     <div class="col-sm-12">
@@ -47,7 +47,7 @@
                 <!-- /.info-box-content -->
             </div>
 
-
+			@if(config('hopper.use_dates', false))
             <div class="info-box">
                 <span class="info-box-icon bg-green"><i class="fa fa-clock-o"></i></span>
 
@@ -64,7 +64,8 @@
                 </div>
                 <!-- /.info-box-content -->
             </div>
-
+			@endif
+			
             <div class="info-box">
                 <span class="info-box-icon bg-{!! ($visit->event_session->approval_brand === 'YES' ? 'green' : 'red') !!}"><i class="fa fa-check-circle"></i></span>
 

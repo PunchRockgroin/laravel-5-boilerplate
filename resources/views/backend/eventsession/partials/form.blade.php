@@ -32,6 +32,8 @@
                 <div class="help-block">{{ trans('eventsession.backend.form.presentation_owner.help_block') }}</div>
             </div>
         </div>
+		
+		@if(config('hopper.use_dates', false))
         <div class="repeater">
             <div data-repeater-list="dates_rooms" class="row">
                 @if(!empty($eventsession) && !empty($eventsession->dates_rooms))
@@ -42,6 +44,8 @@
             </div> 
             <a data-repeater-create class='btn btn-success' >Add</a>
         </div>
+		@endif
+		
         <div class='clearfix'>
             <div class=" pull-right">
                 @include('backend.eventsession.partials.actions')
