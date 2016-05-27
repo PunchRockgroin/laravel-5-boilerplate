@@ -20,5 +20,5 @@ return [
      * yellow
      * yellow-light
      */
-    'theme' => 'black-light',
+    'theme' => 'blue',
 ];
