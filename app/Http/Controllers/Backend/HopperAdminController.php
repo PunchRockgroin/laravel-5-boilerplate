@@ -82,8 +82,25 @@ class HopperAdminController extends Controller {
                 }
 //                
                 try {
-                  $count = count($eventsessionimport->get());
-                  $results = $eventsessionimport->importChunked();
+					\Excel::filter('chunk')->load(env('HOPPER_STORAGE', storage_path() . '/app') . "/import" . '/import.xlsx')->chunk(250, function($results)
+					{
+							foreach($results as $row)
+							{
+								if (!empty($row['id'])) {
+									$row['id'] = (int) $row['id'];
+								}
+								if (!empty($row['dates_rooms'])) {
+									$row['dates_rooms'] = \App\Services\Hopper\HopperEventSession::modifyFromDateTimesString($row['dates_rooms']);
+								}
+
+								$searchParams = [
+									'session_id' => $row['session_id'],
+								];   
+								EventSession::firstOrNew($searchParams)->fill($row->all())->save();
+							}
+					});
+					$entries = $eventsessionimport->get();
+					$count = count($entries);
                 } catch (App\Exceptions\GeneralException $e) {
                     return redirect()->route('backend.hopper.admin.index')
                         ->with('flash_warning', $e->getMessage());
@@ -248,7 +265,9 @@ class HopperAdminController extends Controller {
                                 ->with('flash_danger', "You've reset all the Visits");
                 break;
             case 'reset-sessions':
-                EventSession::truncate();
+				EventSession::where( 'id', 'like', '%%' )->delete();
+				\DB::table( 'event_sessions' )->truncate();
+//                EventSession::truncate();
                 return redirect()->route('backend.hopper.admin.index')
                                 ->with('flash_danger', "You've reset all the Event Sessions");
                 break;
