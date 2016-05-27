@@ -7,7 +7,7 @@
     </h1>
 @endsection
 
-@section('after-styles-end')
+@push('after-styles-end')
     <style>
         /* Log level labels & progress bars */
         .label-env {
@@ -92,7 +92,7 @@
             background-color: {{ log_styler()->color('debug') }};
         }
     </style>
-@endsection
+@endpush
 
 @section('content')
     <div class="box box-success">
@@ -130,7 +130,7 @@
     </div><!--box box-success-->
 @endsection
 
-@section('after-scripts-end')
+@push('after-scripts-end')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
     <script>
         Chart.defaults.global.responsive      = true;
@@ -146,4 +146,4 @@
                 });
         })
     </script>
-@stop
+@endpush

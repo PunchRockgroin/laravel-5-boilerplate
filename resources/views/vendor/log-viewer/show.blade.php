@@ -7,7 +7,7 @@
     </h1>
 @endsection
 
-@section('after-styles-end')
+@push('after-styles-end')
     <style>
         /* Log level labels & progress bars */
         .label-env {
@@ -92,7 +92,7 @@
             background-color: {{ log_styler()->color('debug') }};
         }
     </style>
-@endsection
+@endpush
 
 @section('content')
     <div class="box box-success">
@@ -228,7 +228,7 @@
     </div><!--box box-success-->
 @endsection
 
-@section('after-scripts-end')
+@push('after-scripts-end')
     <script>
         $(function () {
             var deleteLogModal = $('div#delete-log-modal'),
@@ -265,4 +265,4 @@
             });
         });
     </script>
-@stop
+@endpush
