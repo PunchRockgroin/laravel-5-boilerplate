@@ -8,6 +8,7 @@ use App\Services\Hopper\Contracts\HopperContract as Hopper;
 use Vinkla\Pusher\PusherManager;
 
 use App\Models\Hopper\EventSession;
+use App\Models\Hopper\Visit;
 
 /**
  * Class DashboardController
@@ -34,12 +35,20 @@ class DashboardController extends Controller
 		$EventSessions = EventSession::all();
 		$checkinsovertime = $this->hopperstats->check_ins_over_time(\Carbon\Carbon::now()->subWeeks(1), \Carbon\Carbon::now());
         $visitsovertime = $this->hopperstats->visits_over_time(\Carbon\Carbon::now()->subWeeks(1), \Carbon\Carbon::now());
+		
 		javascript()->put([
             'checkedInData' => $this->hopperstats->js_get_checked_in($EventSessions),
             'checkInByDay' => $this->hopperstats->js_visits_and_checkins_over_time($checkinsovertime, $visitsovertime, \Carbon\Carbon::now()->subWeeks(1), \Carbon\Carbon::now()),
         ]);
 		
-        $data = [];
+		$EventSessionCheckin = $this->hopperstats->get_checked_in($EventSessions);
+		
+		$VisitStats = $this->hopperstats->visit_stats();
+		
+        $data = [
+			'VisitStats' => $VisitStats,
+			'EventSessionCheckin' => $EventSessionCheckin
+		];
 		
 //		debugbar()->info($this->pusher->get_channel_info('presence-test_channel',array('info' => 'members')));
 		

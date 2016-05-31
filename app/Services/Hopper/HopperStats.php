@@ -216,13 +216,14 @@ class HopperStats {
 	}
 	
 	
-	public function visit_stats(Request $request){
-		$Visits = Visit::select(['id', 'session_id', 'visitors', 'design_username', 'created_at', 'updated_at'])->get();
+	public function visit_stats(){
+		$Visits = Visit::select(['id', 'session_id', 'visitors', 'design_username', 'difficulty', 'created_at', 'updated_at'])->get();
 
 		return [
 			'totalvisits' => $Visits->count(),
 			'visitsbyuser' => $this->visits_by_user( $Visits ),
 			'visitsovertime' => $this->visits_over_time( \Carbon\Carbon::now()->subWeeks(1), \Carbon\Carbon::now() ),
+			'visit_avg_difficulty' => $Visits->avg('difficulty'),
 		];
 		
 	}
