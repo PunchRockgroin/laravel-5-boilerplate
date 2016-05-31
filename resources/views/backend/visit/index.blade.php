@@ -58,6 +58,5 @@
 @endsection
 
 @push('after-scripts-end')
-	
     {!! $html->scripts() !!}
 @endpush

@@ -8,19 +8,6 @@
 @endsection
 
 @section('content')
-    <div class="box box-success">
-        <div class="box-header with-border">
-            <h3 class="box-title">{{ trans('strings.backend.dashboard.welcome') }} {!! access()->user()->name !!}!</h3>
-            <div class="box-tools pull-right">
-                <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-            </div><!-- /.box tools -->
-        </div><!-- /.box-header -->
-        <div class="box-body">
-			 
-
-            
-        </div><!-- /.box-body -->
-    </div><!--box box-success-->
 	<div class="row">
         <div class="col-md-3 col-sm-6 col-xs-12">
           <div class="info-box">

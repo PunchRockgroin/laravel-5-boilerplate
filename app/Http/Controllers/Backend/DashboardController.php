@@ -34,8 +34,9 @@ class DashboardController extends Controller
     {
 		$EventSessions = EventSession::all();
 		$checkinsovertime = $this->hopperstats->check_ins_over_time(\Carbon\Carbon::now()->subWeeks(1), \Carbon\Carbon::now());
+		debug($checkinsovertime);
         $visitsovertime = $this->hopperstats->visits_over_time(\Carbon\Carbon::now()->subWeeks(1), \Carbon\Carbon::now());
-		
+		debug($visitsovertime);
 		javascript()->put([
             'checkedInData' => $this->hopperstats->js_get_checked_in($EventSessions),
             'checkInByDay' => $this->hopperstats->js_visits_and_checkins_over_time($checkinsovertime, $visitsovertime, \Carbon\Carbon::now()->subWeeks(1), \Carbon\Carbon::now()),

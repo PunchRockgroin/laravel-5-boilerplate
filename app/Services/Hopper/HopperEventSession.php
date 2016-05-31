@@ -120,12 +120,15 @@ class HopperEventSession {
     public function updateCheckInStatus(&$request, &$messagebag, $id = null) {
         switch ($request->action) {
             case 'check_in':
-                $request->merge(['checked_in' => 'YES']);
+                $request->merge([
+					'checked_in' => 'YES',
+					'check_in_datetime' => \Carbon\Carbon::now( config('hopper.event_timezone') ),
+				]);
                 $messagebag->add('checked_in', "<strong class='lead'>Checked In</strong>");
                 event(new EventSessionUpdated($id, 'checked_in', 'Checked in'));
                 break;
             case 'check_out':
-                $request->merge(['checked_in' => 'NO']);
+                $request->merge(['checked_in' => 'NO', 'check_in_datetime' => null]);
                 $messagebag->add('checked_in', "<strong class='lead'>Checked Out</strong>");
                 event(new EventSessionUpdated($id, 'checked_out', 'Checked out'));
                 break;
@@ -238,6 +241,15 @@ class HopperEventSession {
         event(new EventSessionUpdated($request->id, 'file_entity_updated', 'Updated a File Entity: ' . $updated_fileentity->id));
 
         return $updated_fileentity;
+    }
+	
+	public static function modifyCheckinTime($EventSession){
+        if ($EventSession->checked_in === 'YES' && $EventSession->check_in_datetime === NULL) {
+            $EventSession->check_in_datetime = \Carbon\Carbon::now(config('hopper.event_timezone'));
+        } elseif ($EventSession->checked_in !== 'YES' && $EventSession->check_in_datetime !== NULL) {
+            $EventSession->check_in_datetime = NULL;
+        }
+        return $EventSession;
     }
 
     public function parseDateTimeforEdit(&$data) {

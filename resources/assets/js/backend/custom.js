@@ -154,7 +154,7 @@ var hopperVue = new Vue({
 $(function () {
     if (typeof window.hopper !== "undefined" && typeof window.hopper.heartbeat_detector_enable !== "undefined" && window.hopper.heartbeat_detector_enable === true) {
         hopperVue.getDashboardData();
-        hopperVue.getPusherPresence();
+        //hopperVue.getPusherPresence();
     }
     
 });
@@ -573,11 +573,11 @@ $(function () {
                 legend = $el.data('legendTarget'),
                 options = $el.data();
             var settings = $.extend( {}, lineOptions, options );
-
+            console.log(values);
             if(values){
                 lineChart = new Chart(lineChartCanvas).Line(values, settings);
                 if($(legend).length){
-                    $(legend).html(lineChart.generateLegend());
+//                    $(legend).html(lineChart.generateLegend());
                 }
             }else{
                 $el.replaceWith( '<div class="callout callout-danger"><h4>No Data</h4><p>There is a problem that we need to fix. A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart.</p></div>' );
