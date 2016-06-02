@@ -136,8 +136,8 @@ class HopperAdminController extends Controller {
                 try {
                     $EventSessionArray = $this->hoppereventsession->parseForExport(EventSession::all());
 
-                    return redirect()->route('backend.hopper.admin.index')
-                                    ->with('flash_warning', "Something Happened");
+//                    return redirect()->route('backend.hopper.admin.index')
+//                                    ->with('flash_warning', "Something Happened");
                     
                     \Excel::create('event_sessions_' . $now, function($excel) use($EventSessionArray) {
 

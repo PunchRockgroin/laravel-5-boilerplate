@@ -10,6 +10,7 @@
 @endsection
 
 @section('content')
+	
     <div class="box">
           <div class="box-header">
             <h3 class="box-title">Enter Visit ID or Session ID</h3>
@@ -29,19 +30,66 @@
           </div>
                 
       </div>
-	<div class="box box-success">
-    <div class="box-header with-border">
-			<h3 class="box-title">Checked In</h3>
-			<div class="box-tools pull-right">
-				<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+	
+	<div class="row">
+        <div class="col-md-3 col-sm-6 col-xs-12">
+          <div class="info-box">
+            <span class="info-box-icon bg-aqua"><i class="fa fa-check-circle"></i></span>
 
-			</div>
-		</div>
-		<div class="box-body">
-			<canvas id="checkedInPieChart" data-legend-target="#checkedInPieChartLegend" data-variable="checkedInData" class='pieChart'></canvas>
-			<div id="checkedInPieChartLegend"></div>
-		</div><!-- /.box-body -->
-	</div>
+            <div class="info-box-content">
+              <span class="info-box-text">Your Total Visits</span>
+              <span class="info-box-number">{!! $VisitStats['count'] or 'N/A' !!}</span>
+            </div>
+            <!-- /.info-box-content -->
+          </div>
+          <!-- /.info-box -->
+        </div>
+        <!-- /.col -->
+        <div class="col-md-3 col-sm-6 col-xs-12">
+          <div class="info-box">
+            <span class="info-box-icon bg-red"><i class="fa fa-question-circle"></i></span>
+
+            <div class="info-box-content">
+              <span class="info-box-text">Your Average Visit Difficulty</span>
+              <span class="info-box-number">{!! $VisitStats['avg_difficulty'] or 'N/A' !!}</span>
+            </div>
+            <!-- /.info-box-content -->
+          </div>
+          <!-- /.info-box -->
+        </div>
+        <!-- /.col -->
+
+        <!-- fix for small devices only -->
+        <div class="clearfix visible-sm-block"></div>
+
+        <div class="col-md-3 col-sm-6 col-xs-12">
+          <div class="info-box">
+            <span class="info-box-icon bg-green"><i class="fa fa-users"></i></span>
+
+            <div class="info-box-content">
+              <span class="info-box-text">Checked In</span>
+              <span class="info-box-number">{!! $EventSessionCheckin['checked_in'] !!}</span>
+            </div>
+            <!-- /.info-box-content -->
+          </div>
+          <!-- /.info-box -->
+        </div>
+        <!-- /.col -->
+        <div class="col-md-3 col-sm-6 col-xs-12">
+          <div class="info-box">
+            <span class="info-box-icon bg-yellow"><i class="fa fa-users"></i></span>
+
+            <div class="info-box-content">
+              <span class="info-box-text">Left to check in</span>
+              <span class="info-box-number">{!! $EventSessionCheckin['not_checked_in'] !!}</span>
+            </div>
+            <!-- /.info-box-content -->
+          </div>
+          <!-- /.info-box -->
+        </div>
+        <!-- /.col -->
+      </div>
+
 	@permission('view-access-management')	
     <div class="box box-success">
         <div class="box-header with-border">

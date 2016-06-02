@@ -21,6 +21,7 @@ class VisitController extends Controller
     
     private $messagebag;
     private $pusher;
+	
     
     public function __construct(\Illuminate\Support\MessageBag $messagebag, PusherManager $pusher)
     {
@@ -65,10 +66,24 @@ class VisitController extends Controller
 		)
         ->addAction();
         
+		$hopperstats = new \App\Services\Hopper\HopperStats();
+		
+		$EventSessions = \App\Models\Hopper\EventSession::all();
+		
+		$EventSessionCheckin = $hopperstats->get_checked_in($EventSessions);
+		
+		$MyVisitStats = collect($hopperstats->visits_by_self( ));
+				
+		debugbar()->info($MyVisitStats);		
+		
         $data = [
-            'html' => $html
+            'html' => $html,
+			'VisitStats' => $MyVisitStats,
+			'EventSessionCheckin' => $EventSessionCheckin
         ];
-        event(new \App\Events\Backend\Hopper\Heartbeat(auth()->user(), request()->route(), \Carbon\Carbon::now()->toIso8601String()));
+        
+		//event(new \App\Events\Backend\Hopper\Heartbeat(auth()->user(), request()->route(), \Carbon\Carbon::now()->toIso8601String()));
+		
         return view('backend.visit.index', $data);
     }
 

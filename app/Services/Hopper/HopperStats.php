@@ -201,23 +201,48 @@ class HopperStats {
     }
 	
 	public function get_visits(){
-		return Visit::select(['id', 'session_id', 'visitors', 'design_username', 'created_at', 'updated_at']);
+		return Visit::select(['id', 'session_id', 'visitors', 'design_username', 'difficulty', 'created_at', 'updated_at']);
 	}
 	
+	public function get_visits_by_user($design_username){
+		return Visit::select(['id', 'session_id', 'visitors', 'design_username', 'difficulty', 'created_at', 'updated_at'])
+				->where('design_username', '=', $design_username);
+	}
+	
+	public function parse_visit_data($visitdata){
+		$parsed = [];
+		
+		$parsed['count'] = count($visitdata);
+		$parsed['avg_difficulty'] = $visitdata->avg('difficulty');
+		
+		return $parsed;
+	}
+
 	public function visits_by_user($Visits = null){
 		if( empty( $Visits ) && ! $Visits instanceof \Illuminate\Support\Collection ){
 			$Visits = $this->get_visits()->get();
 		}
 		$visitsbyuser = [];
 		foreach($Visits->groupBy('design_username') as $key => $visitbyuser){
-			$visitsbyuser[$key] = count($visitbyuser);
+			$visitsbyuser[$key] = $this->parse_visit_data($visitbyuser);
 		}
 		return $visitsbyuser;
 	}
 	
+	public function visits_by_self($Visits = null){
+		if( empty( $Visits ) && ! $Visits instanceof \Illuminate\Support\Collection ){
+			$MyUsername =  auth()->user()->name;
+			$Visits = $this->get_visits_by_user($MyUsername)->get();
+		}
+		if($Visits->count()){
+			return $this->parse_visit_data($Visits);
+		}
+		return null;
+	}
+	
 	
 	public function visit_stats(){
-		$Visits = Visit::select(['id', 'session_id', 'visitors', 'design_username', 'difficulty', 'created_at', 'updated_at'])->get();
+		$Visits = $this->get_visits()->get();
 
 		return [
 			'totalvisits' => $Visits->count(),
