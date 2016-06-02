@@ -72,10 +72,8 @@ class VisitController extends Controller
 		
 		$EventSessionCheckin = $hopperstats->get_checked_in($EventSessions);
 		
-		$MyVisitStats = collect($hopperstats->visits_by_self( ));
-				
-		debugbar()->info($MyVisitStats);		
-		
+		$MyVisitStats = collect( $hopperstats->visits_by_self() );
+
         $data = [
             'html' => $html,
 			'VisitStats' => $MyVisitStats,
