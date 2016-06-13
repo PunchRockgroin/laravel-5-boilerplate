@@ -203,7 +203,8 @@ class HopperStats {
 	
 	public function get_visits(){
 		return Visit::select(['id', 'session_id', 'visitors', 'design_username', 'difficulty', 'created_at', 'updated_at'])
-				->where('visitors', '!=', '(blind update)');
+				->where('visitors', '!=', '(blind update)')
+				->where('visitors', '!=', 'no one');
 	}
 	
 	public function get_visits_by_user($design_username){
@@ -214,6 +215,7 @@ class HopperStats {
 	public function parse_visit_data($visitdata){
 		$parsed = [];
 		
+//		$parsed['sessions'] = $visitdata->toArray();
 		$parsed['count'] = count($visitdata);
 		$parsed['avg_difficulty'] = $visitdata->avg('difficulty');
 		
@@ -325,12 +327,61 @@ class HopperStats {
         return $data;
     }
     
-	public function checkin_station_visits(){
+	public function sessions_with_multiple_visits($Visits = null, $mincount = 2){
+		if( empty( $Visits ) && ! $Visits instanceof \Illuminate\Support\Collection ){
+			$Visits = $this->get_visits()->get();
+		}
+
+		$visitsbysessionID = [];
+		foreach($Visits->groupBy('session_id') as $key => $visitsbysession){
+			if(!empty($key)){
+				$elData = [
+					'session_id' => $key
+				];		
+				$visitsbysessionID[$key] = array_merge($elData, $this->parse_visit_data($visitsbysession));
+
+			}
+			
+		}
+		$collected = collect($visitsbysessionID);
 		
+		$filtered = $collected->filter(function ($value, $key) use ($mincount) {
+			return $value['count'] >= $mincount;
+		});
 		
-		
-		
+		$sorted = $filtered->sortByDesc('count');
+				
+		return $sorted;
 	}
+	
+	public function sessions_with_visitors($Visits = null, $mincount = 2){
+		if( empty( $Visits ) && ! $Visits instanceof \Illuminate\Support\Collection ){
+			$Visits = Visit::select(['id', 'session_id', 'visitors', 'design_username', 'difficulty', 'created_at', 'updated_at'])
+				->whereNotNull('visitors')
+				->where('visitors', '!=', '(blind update)')
+				->where('visitors', '!=', 'N/A')
+				->where('visitors', '!=', 'no one')
+				->get();
+		}
+
+		$visitsbysessionID = [];
+		//debugbar()->info($Visits);
+		foreach($Visits->groupBy('session_id') as $key => $visitsbysession){
+			if(!empty($key)){
+				$elData = [
+					'session_id' => $key
+				];		
+				$visitsbysessionID[$key] = array_merge($elData, $this->parse_visit_data($visitsbysession));
+
+			}
+			
+		}
+		$collected = collect($visitsbysessionID);		
+//		$sorted = $filtered->sortByDesc('count');
+				
+		return $collected;
+	}
+	
 	
 	
     public function buildDateRangeArray($first, $last)

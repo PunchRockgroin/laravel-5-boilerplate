@@ -13,6 +13,7 @@ use App\Http\Controllers\Controller;
 use App\Services\Hopper\HopperEventSession;
 use App\Services\Hopper\HopperFileEntity;
 use App\Services\Hopper\HopperVisit;
+use App\Services\Hopper\HopperStats;
 
 use App\Models\Hopper\EventSession;
 use App\Models\Hopper\Visit;
@@ -38,6 +39,7 @@ class HopperAdminController extends Controller {
     private $hoppereventsession;
     private $hoppervisit;
     private $hopperfileentity;
+    private $hopperstats;
     
     private $eventsessionimport;
     
@@ -45,7 +47,8 @@ class HopperAdminController extends Controller {
             \Illuminate\Support\MessageBag $messagebag,
              HopperEventSession $hoppereventsession,
              HopperVisit $hoppervisit,
-             HopperFileEntity $hopperfileentity
+             HopperFileEntity $hopperfileentity,
+			 HopperStats $hopperstats
 //             EventSessionImport $eventsessionimport
             )
     {
@@ -53,6 +56,7 @@ class HopperAdminController extends Controller {
         $this->hoppereventsession = $hoppereventsession;
         $this->hoppervisit = $hoppervisit;
         $this->hopperfileentity = $hopperfileentity;
+        $this->hopperstats = $hopperstats;
 //        $this->eventsessionimport = $eventsessionimport;
     }
     
@@ -64,6 +68,12 @@ class HopperAdminController extends Controller {
      */
     public function index() {
         $data = [];    
+		
+		$sessions_with_visitors = $this->hopperstats->sessions_with_visitors();
+		
+//		debugbar()->info($sessions_with_visitors);
+		
+		
         return view('backend.hopper.admin.index', $data);
     }
     
@@ -156,13 +166,18 @@ class HopperAdminController extends Controller {
                 break;
             case 'visits':
                 try {
-                    $Visits = $this->hoppervisit->parseForExport(Visit::all());
-                    
-                    \Excel::create('visits_' . $now, function($excel) use($Visits) {
 
+					$Visits = $this->hoppervisit->parseForExport(Visit::all());
+					
+					$VisitArray = $this->hopperstats->sessions_with_multiple_visits();
+                    
+                    \Excel::create('visits_' . $now, function($excel) use($Visits, $VisitArray) {
                         $excel->sheet('Visits', function($sheet) use($Visits) {
 
                             $sheet->fromModel($Visits);
+                        });
+						$excel->sheet('MultipleVisits', function($sheet) use($VisitArray) {
+							$sheet->fromArray($VisitArray);
                         });
                     })->download('xlsx');
                 } catch (Exception $e) {
