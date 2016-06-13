@@ -168,7 +168,7 @@ class HopperStats {
                 ->whereDate('check_in_datetime', '<=', $last->toDateString())
                 ->get()->groupBy(function($item)
         {
-          return $item->check_in_datetime->format('Y-m-d');
+          return $item->check_in_datetime->timezone('America/Los_Angeles')->format('Y-m-d');
         });
 
           $check_ins_array = $this->arrayFlipAndZero($this->buildDateRangeArray($first, $last));
@@ -186,6 +186,7 @@ class HopperStats {
         $data = Visit::latest()
                 ->whereDate('created_at', '>=', $first->toDateString())
                 ->whereDate('created_at', '<=', $last->toDateString())
+				->where('visitors', '!=', '(blind update)')
                 ->get()->groupBy(function($item)
         {
           return $item->created_at->format('Y-m-d');
@@ -201,7 +202,8 @@ class HopperStats {
     }
 	
 	public function get_visits(){
-		return Visit::select(['id', 'session_id', 'visitors', 'design_username', 'difficulty', 'created_at', 'updated_at']);
+		return Visit::select(['id', 'session_id', 'visitors', 'design_username', 'difficulty', 'created_at', 'updated_at'])
+				->where('visitors', '!=', '(blind update)');
 	}
 	
 	public function get_visits_by_user($design_username){
@@ -224,7 +226,10 @@ class HopperStats {
 		}
 		$visitsbyuser = [];
 		foreach($Visits->groupBy('design_username') as $key => $visitbyuser){
-			$visitsbyuser[$key] = $this->parse_visit_data($visitbyuser);
+			if(!empty($key)){
+				$visitsbyuser[$key] = $this->parse_visit_data($visitbyuser);
+			}
+			
 		}
 		return $visitsbyuser;
 	}
@@ -241,6 +246,37 @@ class HopperStats {
 	}
 	
 	
+	public function top_user_visits($Visits = null, $count = 3){
+		if( empty( $Visits ) && ! $Visits instanceof \Illuminate\Support\Collection ){
+			$Visits = collect($this->visits_by_user());
+		}
+		$sorted = $Visits->sortByDesc('count');
+		return $sorted->take($count);
+	}
+	
+	
+	public function js_chart_user_visits($Visits = null){
+		if( empty( $Visits ) && ! $Visits instanceof \Illuminate\Support\Collection ){
+			$Visits = collect($this->visits_by_user());
+		}
+		$sorted = $Visits->sortByDesc('count');
+		
+		$eldata = [];
+		
+		foreach($sorted as $key => $sorted_data){
+			$eldata[] = [
+				'value' => $sorted_data['count'],
+                'color' => $this->tint("#00B388", ( ( $sorted_data['count'] + rand(1, 10) ) / 100 )),
+                'highlight' => $this->tint("#425563", ( ( $sorted_data['count'] + rand(1, 10) ) / 100 )),
+                'label' => $key 
+			];
+		}
+		
+		return $eldata;
+		
+	}
+	
+	
 	public function visit_stats(){
 		$Visits = $this->get_visits()->get();
 
@@ -249,6 +285,7 @@ class HopperStats {
 			'visitsbyuser' => $this->visits_by_user( $Visits ),
 			'visitsovertime' => $this->visits_over_time( \Carbon\Carbon::now()->subWeeks(1), \Carbon\Carbon::now() ),
 			'visit_avg_difficulty' => $Visits->avg('difficulty'),
+
 		];
 		
 	}
@@ -270,7 +307,7 @@ class HopperStats {
                     'pointStrokeColor' => "rgba(198,201,202,1)",
                     'pointHighlightFill' => "#fff",
                     'pointHighlightStroke' => "#00B388",
-                        'data' => array_values($visitsovertime)
+                    'data' => array_values($visitsovertime)
                 ),
                 array(
                     'label' => "Checked In",
@@ -280,7 +317,7 @@ class HopperStats {
                     'pointStrokeColor' => "#00B388",
                     'pointHighlightFill' => "#fff",
                     'pointHighlightStroke' => "#00B388",
-                        'data' => array_values($checkinsovertime)
+                    'data' => array_values($checkinsovertime)
                 ),
                 
             ],
@@ -288,6 +325,14 @@ class HopperStats {
         return $data;
     }
     
+	public function checkin_station_visits(){
+		
+		
+		
+		
+	}
+	
+	
     public function buildDateRangeArray($first, $last)
     {
         $dates = [];
@@ -321,5 +366,52 @@ class HopperStats {
 
         return $newarray;
     }
+	
+	public function mix($color_1 = array(0, 0, 0), $color_2 = array(0, 0, 0), $weight = 0.5)
+	{
+		$f = function($x) use ($weight) { return $weight * $x; };
+		$g = function($x) use ($weight) { return (1 - $weight) * $x; };
+		$h = function($x, $y) { return round($x + $y); };
+		return array_map($h, array_map($f, $color_1), array_map($g, $color_2));
+	}
+	
+	public function tint($color, $weight = 0.5)
+	{
+		$t = $color;
+		if(is_string($color)) $t = $this->hex2rgb($color);
+		$u = $this->mix($t, array(255, 255, 255), $weight);
+		if(is_string($color)) return $this->rgb2hex($u);
+		return $u;
+	}
+	
+	public function tone($color, $weight = 0.5)
+	{
+		$t = $color;
+		if(is_string($color)) $t = $this->hex2rgb($color);
+		$u = $this->mix($t, array(128, 128, 128), $weight);
+		if(is_string($color)) return $this->rgb2hex($u);
+		return $u;
+	}
+
+	public function shade($color, $weight = 0.5)
+	{
+		$t = $color;
+		if(is_string($color)) $t = $this->hex2rgb($color);
+		$u = $this->mix($t, array(0, 0, 0), $weight);
+		if(is_string($color)) return $this->rgb2hex($u);
+		return $u;
+	}
+	
+	public function hex2rgb($hex = "#000000")
+	{
+		$f = function($x) { return hexdec($x); };
+		return array_map($f, str_split(str_replace("#", "", $hex), 2));
+	}
+	
+	public function rgb2hex($rgb = array(0, 0, 0))
+	{
+		$f = function($x) { return str_pad(dechex($x), 2, "0", STR_PAD_LEFT); };
+		return "#" . implode("", array_map($f, $rgb));
+	}
 	
 }

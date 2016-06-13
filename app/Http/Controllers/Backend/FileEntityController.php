@@ -99,7 +99,7 @@ class FileEntityController extends Controller {
     public function store(Request $request, HopperFileEntity $hopperfileentity) {
         //
         
-        debugbar()->info($request->all());
+        //debugbar()->info($request->all());
         
         $this->validate($request, [
             'newfile' => 'required',
@@ -156,7 +156,7 @@ class FileEntityController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, HopperFile $hopperfile, HopperFileEntity $hopperfileentity, $id) {
-        debugbar()->info($request->all());
+        //debugbar()->info($request->all());
         
         $FileEntity = FileEntity::findOrFail($id);
         $hopperfileentity->update($request, $FileEntity);

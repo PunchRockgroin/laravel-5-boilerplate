@@ -27,6 +27,8 @@ use Carbon\Carbon as Carbon;
 
 use App\Services\Hopper\Excel\EventSessionImport;
 
+use App\Services\Hopper\Contracts\HopperFileContract;
+
 
 class HopperAdminController extends Controller {
 
@@ -49,6 +51,7 @@ class HopperAdminController extends Controller {
     {
         $this->messagebag = $messagebag;
         $this->hoppereventsession = $hoppereventsession;
+        $this->hoppervisit = $hoppervisit;
         $this->hopperfileentity = $hopperfileentity;
 //        $this->eventsessionimport = $eventsessionimport;
     }

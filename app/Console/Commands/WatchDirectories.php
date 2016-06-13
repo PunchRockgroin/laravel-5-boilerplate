@@ -52,7 +52,7 @@ class WatchDirectories extends Command
                     $filename = basename($path);
 //                    \Slack::send($filename.' was added to Done.');
 //                    \Slack::to('@davidalberts')->send($filename.' was added to Done. Are we rich yet?');
-                    \Slack::to(env('WATCHER_DEFAULT_PING',  '@davidalberts'))->attach([
+                    \Slack::to('@kaitlin')->attach([
                         'fallback' => $filename . ' was added to ' . $path,
                         'text' => $filename . ' was added to ' . $path,
                         'color' => 'good',

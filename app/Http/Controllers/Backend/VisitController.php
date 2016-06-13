@@ -73,11 +73,20 @@ class VisitController extends Controller
 		$EventSessionCheckin = $hopperstats->get_checked_in($EventSessions);
 		
 		$MyVisitStats = collect( $hopperstats->visits_by_self() );
+		
+		$TopVisits = collect( $hopperstats->top_user_visits() );
+		
+		// debugbar()->info($hopperstats->js_chart_user_visits());
+		
+		javascript()->put([
+            'graphicOpsPie' => $hopperstats->js_chart_user_visits(),
+        ]);
 
         $data = [
             'html' => $html,
 			'VisitStats' => $MyVisitStats,
-			'EventSessionCheckin' => $EventSessionCheckin
+			'EventSessionCheckin' => $EventSessionCheckin,
+			'TopVisits' => $TopVisits,
         ];
         
 		//event(new \App\Events\Backend\Hopper\Heartbeat(auth()->user(), request()->route(), \Carbon\Carbon::now()->toIso8601String()));
@@ -152,7 +161,7 @@ class VisitController extends Controller
         ]);
         
         
-        debugbar()->info($request->all());
+        //debugbar()->info($request->all());
         
         $hoppervisit->update($request->all(), $visit);
         

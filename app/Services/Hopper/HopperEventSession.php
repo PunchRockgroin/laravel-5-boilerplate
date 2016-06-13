@@ -10,11 +10,19 @@ use App\Services\Hopper\Contracts\HopperContract;
 use App\Services\Hopper\Contracts\HopperFileContract;
 use App\Events\Backend\Hopper\EventSessionUpdated;
 
+use Storage;
+
 class HopperEventSession {
 
     protected $hopper;
     protected $hopperfile;
     protected $hopperfileentity;
+	
+	public $hopper_temporary_name;
+    public $hopper_working_name;
+    public $hopper_master_name;
+    public $hopper_archive_name;
+	
 
     /**
      * @param HopperContract            $hopper
@@ -26,6 +34,11 @@ class HopperEventSession {
         $this->hopper = $hopper;
         $this->hopperfile = $hopperfile;
         $this->hopperfileentity = $hopperfileentity;
+		
+		$this->hopper_temporary_name = env('HOPPER_TEMPORARY_NAME', 'temporary/');
+        $this->hopper_working_name = env('HOPPER_WORKING_NAME', 'working/');
+        $this->hopper_master_name = env('HOPPER_MASTER_NAME', '1_Master/');
+        $this->hopper_archive_name = env('HOPPER_ARCHIVE_NAME', 'ZZ_Archive/');
     }
 
     /**
@@ -156,7 +169,19 @@ class HopperEventSession {
 		
         //If it's a blind update
         if($request->blind_update === "YES"){
-            $path = $this->hopperfile->copyTemporaryNewFileToMaster($request->filename, true);     
+             
+			debugbar()->info($request->currentfilename);
+			debugbar()->info($request->filename);
+			debugbar()->info($request->all());
+			
+			$master_stream = $this->hopperfile->getStream($this->hopper_master_name . $request->currentfilename);
+			$new_file_stream = $this->hopperfile->getStream($this->hopper_temporary_name . $request->filename);
+			
+//			
+//			
+			$path = $this->hopperfile->copyTemporaryNewFileToMaster($request->filename, $master_stream);    
+//			$this->hopperfile->getStream
+			
 			//Update Visitor Info
             $visit->visitors = "(blind update)";
             $visit->difficulty = "1";
@@ -166,9 +191,13 @@ class HopperEventSession {
             $visit->save();
 			\Log::info('Blind Update Occurred: '.$request->filename);
 			//Copy the new master to archive
-            $this->hopperfile->copyMasterToArchive($request->filename);
-			//Move the old master to archive
-            $this->hopperfile->moveMasterToArchive($request->currentfilename);
+            //$this->hopperfile->copyMasterToArchive($request->filename, $master_stream);
+			
+			if($this->hopperfile->copyMasterToArchive($request->filename)){
+				//Move the old master to archive
+				$this->hopperfile->moveMasterToArchive($request->currentfilename);
+			}
+			
 			//Find the file entity by reference
 			$fileentity = \App\Models\Hopper\FileEntity::find($request->primary_file_entity_id);
 			//Update File Entity Referenced
@@ -216,8 +245,11 @@ class HopperEventSession {
 			$updated_fileentity = $this->hopperfileentity->update($request, $fileentity);
         }
         //$id, $event, $notes = '', $filename = null, $tasks = [], $user = 'Hopper', $request = null
-        event(new \App\Events\Backend\Hopper\FileEntityUpdated($visit->file_entity->id, 'visit_behavior', 'Copied master file '.$visit->file_entity->filename.' to working', $request->filename, ['update_path' => $path]));
+		if(!empty($visit->file_entity->id)){
+			 event(new \App\Events\Backend\Hopper\FileEntityUpdated($visit->file_entity->id, 'visit_behavior', 'Copied master file '.$visit->file_entity->filename.' to working', $request->filename, ['update_path' => $path]));
         
+		}
+       
         return $visit;
     }
 

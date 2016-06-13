@@ -97,13 +97,13 @@ class HopperFileEntity extends HopperFile{
         
         if(isset($request->currentfilename) && isset($request->filename) && ($request->currentfilename !== $request->filename) ){
 			if(isset($request->action) && ( $request->action === 'create_visit' || $request->action === 'check_in' ) ){
-//				$this->hopperfile->copyMasterToWorking($request->currentfilename);
-//				event(new \App\Events\Backend\Hopper\FileEntityUpdated($FileEntity->id, 'copy', 'Copied '.$request->currentfilename.' to working', $request->currentfilename));
+				//$this->hopperfile->copyMasterToWorking($request->currentfilename);
+				event(new \App\Events\Backend\Hopper\FileEntityUpdated($FileEntity->id, 'copy', 'Copied '.$request->currentfilename.' to working', $request->currentfilename));
 			}
-//            $path = $this->hopperfile->copyTemporaryNewFileToMaster($request->filename);
-//            event(new \App\Events\Backend\Hopper\FileEntityUpdated($FileEntity->id, 'copy', 'Moved '.$request->filename.' to master', $request->filename, ['update_path' => $path]));
-//            $this->hopperfile->moveMasterToArchive($request->currentfilename);
-//            event(new \App\Events\Backend\Hopper\FileEntityUpdated($FileEntity->id, 'move', 'Moved '.$request->currentfilename.' to archive', $request->currentfilename));
+            //$path = $this->hopperfile->copyTemporaryNewFileToMaster($request->filename);
+            //event(new \App\Events\Backend\Hopper\FileEntityUpdated($FileEntity->id, 'copy', 'Moved '.$request->filename.' to master', $request->filename, ['update_path' => $path]));
+            //$this->hopperfile->moveMasterToArchive($request->currentfilename);
+            //event(new \App\Events\Backend\Hopper\FileEntityUpdated($FileEntity->id, 'move', 'Moved '.$request->currentfilename.' to archive', $request->currentfilename));
         }elseif(isset($request->currentfilename) && isset($request->filename) && ($request->currentfilename === $request->filename) ){
 			if(isset($request->action) && ( $request->action === 'create_visit' || $request->action === 'check_in' ) ){
 //				$this->hopperfile->moveMasterToMaster($request->currentfilename, $request->next_version);

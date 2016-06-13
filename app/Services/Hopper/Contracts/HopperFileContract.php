@@ -32,6 +32,8 @@ Interface HopperFileContract
     public function renameFileVersion($currentFileName, $nextVersion, $currentFileExtension = null);
     
     public function purgeDupesToArchive();
+	
+	public function getAllInMaster();
     
 //    public function parseDateTimeforEdit(&$data);
     

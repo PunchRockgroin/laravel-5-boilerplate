@@ -52,7 +52,7 @@ class EventSessionController extends Controller
         
         
         $html = $htmlbuilder
-//        ->addColumn(['data' => 'id', 'name' => 'id', 'title' => 'ID'])
+        ->addColumn(['data' => 'id', 'name' => 'id', 'title' => 'ID'])
         ->addColumn(['data' => 'session_id', 'name' => 'session_id', 'title' => 'Session ID'])
         ->addColumn(['data' => 'speakers', 'name' => 'speakers', 'title' => 'Speakers'])
         ->addColumn(['data' => 'onsite_phone', 'name' => 'onsite_phone', 'title' => 'On-site Phone'])
@@ -106,7 +106,7 @@ class EventSessionController extends Controller
     public function store(Request $request, HopperEventSession $hoppereventsession)
     {
         //
-         debugbar()->info($request->all());
+         //debugbar()->info($request->all());
          
          $this->validate($request, [
             'session_id' => 'required',
@@ -130,7 +130,7 @@ class EventSessionController extends Controller
     public function show(EventSession $eventsession, HopperEventSession $hoppereventsession)
     {
 //        $eventsession = EventSession::findOrFail($id);
-        debugbar()->info($eventsession);
+        //debugbar()->info($eventsession);
         $data = [
             'EventSession' => $eventsession
         ];
@@ -149,7 +149,7 @@ class EventSessionController extends Controller
 
         $data = $hoppereventsession->edit($eventsession);
 //        debugbar()->info($data);
-        event(new \App\Events\Backend\Hopper\Heartbeat(auth()->user(), request()->route(), \Carbon\Carbon::now()->toIso8601String()));
+        //event(new \App\Events\Backend\Hopper\Heartbeat(auth()->user(), request()->route(), \Carbon\Carbon::now()->toIso8601String()));
         return view('backend.eventsession.edit', $data);
     }
 
