@@ -32,6 +32,13 @@ class DashboardController extends Controller
      */
     public function index(Hopper $hopper)
     {
+		
+		
+		$hopperuser = new \App\Services\Hopper\HopperUser();
+		
+		$hopperuser->users_by_status();
+		
+		
 		$EventSessions = EventSession::all();
 		$checkinsovertime = $this->hopperstats->check_ins_over_time(\Carbon\Carbon::now()->subDays(4), \Carbon\Carbon::now());
 

@@ -35,4 +35,29 @@ class User extends Authenticatable
      * @var array
      */
     protected $dates = ['deleted_at'];
+	
+	
+	protected $casts = [
+        'history' => 'array',
+    ];
+	
+	
+	
+	public function scopeGetGraphicOperatorStatus(){
+		
+		$query = $this->select('users.id', 'users.name', 'users.state')
+                    ->leftJoin('assigned_roles', function($join) {
+                        $join->on('users.id', '=', 'assigned_roles.user_id');
+                    })
+                    ->leftJoin('roles', function ($join) {
+                        $join->on('assigned_roles.role_id', '=', 'roles.id');
+                    })
+                    ->where('roles.name', 'Graphic Operator')
+                    ->get();
+		
+		
+		return $query;
+		
+	}
+	
 }
