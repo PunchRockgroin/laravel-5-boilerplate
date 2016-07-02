@@ -1,6 +1,9 @@
 <?php
 Route::post('visit/find', 'VisitController@find')->name('admin.visit.find');
 Route::get('visit/stats', 'VisitController@stats')->name('admin.visit.stats');
+Route::get('visit/assignments', 'VisitController@assignments')->name('admin.visit.assignments');
+Route::get('visit/unassigned', 'VisitController@unassigned')->name('admin.visit.unassigned');
+Route::post('visit/assign/{id}', 'VisitController@assignUser')->name('admin.visit.assign');
 Route::resource('visit', 'VisitController', [
     'except' => ['create', 'store',],
     'names' => [

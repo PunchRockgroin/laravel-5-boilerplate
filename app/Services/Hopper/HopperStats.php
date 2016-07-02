@@ -168,7 +168,7 @@ class HopperStats {
                 ->whereDate('check_in_datetime', '<=', $last->toDateString())
                 ->get()->groupBy(function($item)
         {
-          return $item->check_in_datetime->timezone('America/Los_Angeles')->format('Y-m-d');
+          return $item->check_in_datetime->timezone(config('hopper.event_timezone', 'UTC'))->format('Y-m-d');
         });
 
           $check_ins_array = $this->arrayFlipAndZero($this->buildDateRangeArray($first, $last));
@@ -183,16 +183,19 @@ class HopperStats {
     
     
     public function visits_over_time($first, $last, $Visit = null){
+		$visits_array = [];
         $data = Visit::latest()
                 ->whereDate('created_at', '>=', $first->toDateString())
                 ->whereDate('created_at', '<=', $last->toDateString())
-				->where('visitors', '!=', '(blind update)')
+				->whereNotNull('visitors')
+				->whereNotNull('design_username')
+				->whereNotIn('visitors', ['(blind update)', 'no one', 'No one', 'Not Here', 'N/A', ''])
                 ->get()->groupBy(function($item)
         {
-          return $item->created_at->format('Y-m-d');
+          return $item->created_at->timezone(config('hopper.event_timezone', 'America/Los_Angeles'))->format('Y-m-d');
         });
 
-          $visits_array = $this->arrayFlipAndZero($this->buildDateRangeArray($first, $last));
+//          $visits_array = $this->arrayFlipAndZero($this->buildDateRangeArray($first, $last));
           
           foreach($data as $key => $entry) {
               $visits_array[$key] = $entry->count();
@@ -203,8 +206,9 @@ class HopperStats {
 	
 	public function get_visits(){
 		return Visit::select(['id', 'session_id', 'visitors', 'design_username', 'difficulty', 'created_at', 'updated_at'])
-				->where('visitors', '!=', '(blind update)')
-				->where('visitors', '!=', 'no one');
+				->whereNotNull('visitors')
+				->whereNotNull('design_username')
+				->whereNotIn('visitors', ['(blind update)', 'no one', 'No one', 'Not Here', 'N/a', '']);
 	}
 	
 	public function get_visits_by_user($design_username){

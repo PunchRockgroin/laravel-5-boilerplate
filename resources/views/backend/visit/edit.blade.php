@@ -36,7 +36,28 @@
 <div class="row">
 
     <div class="col-sm-12 col-md-5 col-md-push-7">
-
+			<div class="box box-primary">
+				<div class="box-header with-border">
+					<h3 class="box-title">Assignment</h3>
+				</div><!-- /.box-header -->
+				<div class="box-body">
+					@if($visit->assignment_user_id === null)
+					<div><strong>Unassigned</strong></div>
+						@if($idleUsers)
+							{{ Form::select('assignment_user_id', $idleUsers, null, ['placeholder' => 'Choose a Graphic Operator']) }}
+						@endif
+					@else
+						@if($assignedUser)
+						<div class="alert alert-info">Assigned to: <strong>{{ $assignedUser['name'] }}</strong></div>
+						@endif
+					@endif
+				</div><!-- /.box-body -->
+				@if($visit->assignment_user_id === null)
+				<div class="box-footer">
+					@include('backend.visit.partials.actions')
+				</div>
+				@endif
+			</div><!-- /.box -->
             <div class="info-box">
                 <span class="info-box-icon bg-green"><i class="fa fa-users"></i></span>
 
@@ -84,7 +105,6 @@
             </div><!-- /.box-header -->
 
             <div class="box-body">
-
                 @include('backend.visit.partials.form')                  
             </div><!-- /.box-body -->
             <div class="box-footer">

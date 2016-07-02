@@ -20,6 +20,7 @@ class Visit extends Model
         'difficulty',
         'design_notes',
         'history',
+		'assignment_user_id',
     );
     
     /**
@@ -30,7 +31,8 @@ class Visit extends Model
     protected $casts = [
         'event_session_id' => 'integer',
         'file_entity_id' => 'integer',
-        'history' => 'array',        
+        'history' => 'array',    
+		'assignment_user_id' => 'integer',
     ];
 
     public function event_session()
@@ -42,4 +44,11 @@ class Visit extends Model
     {
         return $this->hasOne('App\Models\Hopper\FileEntity', 'id', 'file_entity_id');
     }
+	
+	public function user()
+    {
+        return $this->belongsTo('App\Models\Access\User\User', 'assignment_user_id' );
+    }
+	
+	
 }

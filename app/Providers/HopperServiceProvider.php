@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use App\Services\Hopper\Contracts\HopperContract;
+
 use App\Services\Hopper\Hopper;
 use App\Services\Hopper\HopperFile;
+use App\Services\Hopper\HopperUser;
 
 class HopperServiceProvider extends ServiceProvider
 {
@@ -35,6 +37,17 @@ class HopperServiceProvider extends ServiceProvider
                     'userid' => auth()->user()->id,
                     'username' => auth()->user()->name,
                     'email' => auth()->user()->email,
+					'routes' => [
+						'user_status' => route('admin.dashboard.user.status'),
+						'user_update' => route('admin.dashboard.user.update'),
+						'heartbeat_status' => route('backend.heartbeat.status'),
+						'heartbeat_data' => route('admin.dashboard.data'),
+						'heartbeat_user' => '/admin/dashboard/heartbeat',
+						'visit_assignments' => route('admin.visit.assignments'),
+						'visit_unassigned' => route('admin.visit.unassigned'),
+						'visit_assign' => route('admin.visit.assign', ''),
+					],
+					'user_status_uri' => route('admin.dashboard.user.status'),
                     'heartbeat_status' => route('backend.heartbeat.status'),
                     'heartbeat_data' => route('admin.dashboard.data'),
                     'heartbeat_user' => '/admin/dashboard/heartbeat',
@@ -63,10 +76,7 @@ class HopperServiceProvider extends ServiceProvider
         \App\Models\Hopper\EventSession::created(function ($eventsession) {
             event(new \App\Events\Backend\Hopper\EventSessionUpdated($eventsession->id, 'created', 'I was born'));
         });
-        //Announce the creation of a new File Entity
-        \App\Models\Hopper\FileEntity::created(function ($fileentity) {
-            event(new \App\Events\Backend\Hopper\FileEntityUpdated($fileentity->id, 'create', 'Created', 'I was born: ' . $fileentity->filename));
-        });
+        
     }
 
     /**
@@ -93,6 +103,9 @@ class HopperServiceProvider extends ServiceProvider
         });
         $this->app->bind('hopper.file', function ($app) {
             return new HopperFile($app);
+        });
+        $this->app->bind('hopper.user', function ($app) {
+            return new HopperUser($app);
         });
     }
     
@@ -124,6 +137,11 @@ class HopperServiceProvider extends ServiceProvider
             \App\Services\Hopper\Contracts\HopperFileContract::class,
             \App\Services\Hopper\HopperFile::class
         );
+		
+        $this->app->bind(
+            \App\Services\Hopper\Contracts\HopperUserContract::class,
+            \App\Services\Hopper\HopperUser::class
+        );
 
         
     }
@@ -139,6 +157,7 @@ class HopperServiceProvider extends ServiceProvider
         [
             'App\Services\Hopper\Hopper',
             'App\Services\Hopper\HopperFile',
+            'App\Services\Hopper\HopperUser',
         ];
     }
 }

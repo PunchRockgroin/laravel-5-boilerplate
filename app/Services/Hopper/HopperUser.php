@@ -8,9 +8,11 @@ use App\Http\Requests;
 use App\Models\Access\User\User;
 
 use App\Services\Hopper\Contracts\HopperContract;
-use App\Services\Hopper\Contracts\HopperFileContract;
+use App\Services\Hopper\Contracts\HopperUserContract;
 
-class HopperUser{
+use Vinkla\Pusher\Facades\Pusher;
+
+class HopperUser implements HopperUserContract{
     
     
     protected $hopper;
@@ -19,37 +21,96 @@ class HopperUser{
 
     /**
      * @param HopperContract        $hopper
-     * @param HopperFileContract    $hopperfile
      */
-//    public function __construct(
+    public function __construct(
 //        HopperContract $hopper,
 //        HopperFileContract $hopperfile
-//    )
-//    {
+    )
+    {
 //        $this->hopper = $hopper;
 //        $this->hopperfile = $hopperfile;
-//    }
+    }
     
     /**
-     * Update the specified resource in storage.
+     * Get all users by status.
      *
-     * @param  $data
-     * @param  App\Models\Hopper\Visit  $visit
-     * @return App\Models\Hopper\Visit
+     * @return App\Models\Hopper\User
      */
     public function users_by_status()
     {
-        //
 		
-//		$users = User::all();
+		$users = User::with('assignments')
+					->with('visitCount')
+					->with('roles')
+					->whereHas('roles', function ($query) {
+						$query->where('name', '=', 'Graphic Operator');
+					})
+					->get();
 		
 		
-		$users = User::getGraphicOperatorStatus();
+		$users = $users->each(function ($item, $key) {
+			$item = $this->parseUser($item);
+		});
 		
-		debugbar()->info($users);
-		
+		$users->except(['confirmation_code', 'confirmed', 'password', 'remember_token']);
+//		debugbar()->info($users);
 		
         return $users;
     }
+	
+    /**
+     * Toggle the user's state.
+     *
+     * @param  $id
+     * @return App\Models\Hopper\Visit
+     */
+    public function toggle_state($id)
+    {
+		$user = User::find($id);
+		
+		if($user->state === 'active'){
+			$user->state = 'idle';
+		}else{
+			$user->state = 'active';
+		}
+		
+		$user->save();
+		
+		$user = $this->parseUser($user);
+		
+        return $user;
+    }
+	
+	
+	public function get_idle(){
+		$idle_users = User::IdleGraphicOperators();
+		return $idle_users;
+	}
+	
+	/**
+     * Sanitizes User Collection removing unneeded fields
+     *
+     * @param  $userCollection
+     * @return Collection
+     */
+	public function sanitizeUserCollection($userCollection){
+		return $userCollection->except( 'history', 'confirmation_code','status' ,'confirmed');
+	}
+	
+	
+	private function parseUser($user){
+		if($user->state === 'idle'){
+			$user->statusclass = 'green';
+		}else{
+			$user->statusclass = 'yellow';
+		}
+		$user->gravatar = \Gravatar::get($user->email);
+		
+		
+		$user->uid = md5($user->email);
+		
+		return $user;
+	}
+	
 
 }

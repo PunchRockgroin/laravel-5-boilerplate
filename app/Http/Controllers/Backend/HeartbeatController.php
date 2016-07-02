@@ -14,9 +14,6 @@ class HeartbeatController extends Controller
     
     
     public function index(Request $request){
-        
-        
-        
 //        auth()->
         
 //        Cache::forever('user-', 'value');

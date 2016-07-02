@@ -209,6 +209,58 @@ class VisitController extends Controller
                     ->withErrors(['Alert', 'Could not find Visit ID: '. $visit_id]);
     }
 	
+	public function assignments(Request $request){
+		if ($request->ajax()) {
+            $Visits = Visit::select(['id', 'session_id', 'updated_at', 'assignment_user_id'])
+							 ->where('assignment_user_id', '>', 0)
+							 ->orWhereNull('assignment_user_id');
+            return \Datatables::of($Visits)
+//                    ->editColumn('created_at', '{!! $created_at->diffForHumans() !!}')
+                    ->editColumn('updated_at', function ($visit) {
+                        return $visit->updated_at->format('h:m:s');
+                    })
+                    ->editColumn('assignment_user_id', function ($visit) {
+						if($visit->user){
+							return $visit->user->name;
+						}
+						else{
+							return "<div class='label label-warning'>Unassigned</div>";
+						}
+                    })
+                     ->editColumn('action', function ($visit) {
+                        $content = '';
+						if($visit->assignment_user_id){
+							$content .= '<a class="btn btn-info btn-xs" href="'. route('admin.visit.edit', [$visit->id]).'">Update</a> ';
+						}else{
+							$content .= '<a class="btn btn-success btn-xs" href="'. route('admin.visit.edit', [$visit->id]).'">Assign</a> ';
+						}
+//                        $content .= '<a class="btn btn-success btn-xs" href="'. route('admin.visit.edit', [$visit->id]).'">Assign</a> ';
+//                        $content .= '<a class="btn btn-info btn-xs" href="'. route('admin.visit.show', [$visit->id]).'">Show</a> ';
+                        return $content;
+                    })
+                    ->make(true);
+        }
+	}
+	
+	public function unassigned(Request $request){
+		$Visits = Visit::select(['id', 'session_id', 'updated_at', 'assignment_user_id'])
+							 ->whereNull('assignment_user_id')->get();
+		if($Visits->count()){
+			return response()->json(['message' => 'ok', 'payload' => $Visits]);
+		}
+		return response()->json(['message' => 'No Unassigned Visits', 'payload' => $Visits]);
+	}
+	
+	
+	public function assignUser(Request $request, $id, HopperVisit $hoppervisit){
+		
+		$visit = Visit::find($id);
+//		$visit->update(['assignment_user_id' => $request->assignment_user_id]);
+		$visit->assignment_user_id = $request->assignment_user_id;
+		$visit->save();		
+		return response()->json(['message' => 'ok', 'assignment_user_id' => $request->assignment_user_id, 'payload' => $visit]);
+	}
+	
 	
 	public function stats(Request $request){
 		$hopperstats = new \App\Services\Hopper\HopperStats;

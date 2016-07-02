@@ -9,6 +9,7 @@ use App\Models\Hopper\Visit;
 
 use App\Services\Hopper\Contracts\HopperContract;
 use App\Services\Hopper\Contracts\HopperFileContract;
+use App\Services\Hopper\Contracts\HopperUserContract;
 
 use App\Services\Hopper\HopperFileEntity;
 
@@ -18,8 +19,8 @@ class HopperVisit{
     
     
     protected $hopper;
-    
     protected $hopperfile;
+    protected $hopperuser;
 
 
     /**
@@ -28,11 +29,13 @@ class HopperVisit{
      */
     public function __construct(
         HopperContract $hopper,
-        HopperFileContract $hopperfile
+        HopperFileContract $hopperfile,
+		HopperUserContract $hopperuser
     )
     {
         $this->hopper = $hopper;
         $this->hopperfile = $hopperfile;
+		$this->hopperuser = $hopperuser;
     }
 
 
@@ -81,7 +84,9 @@ class HopperVisit{
     {
 
         $data = [
-            'visit' => $visit
+            'visit' => $visit,
+			'idleUsers' => null,
+			'assignedUser' => null,
         ];
         //Is there an file entity attached?
         $file_entity = $visit->file_entity;
@@ -94,8 +99,17 @@ class HopperVisit{
                 'nextVersion' => $nextVersion,
             ]);
         }
+		
+		if($visit->assignment_user_id === null){
+			$idleUsers = \App\Models\Access\User\User::IdleGraphicOperators()->lists('name', 'id');
+			$data['idleUsers'] = $idleUsers;
+		}else{
+			$data['assignedUser'] = $visit->user;
+		}
+		
+		
         event(new EventSessionUpdated($visit->event_session->id, 'visit_behavior', 'Began Visit'));
-//        debugbar()->info($data);
+//        debugbar()->info($data['idleUsers']);
         return $data;
     }
 

@@ -4,11 +4,17 @@ namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
 use App\Services\Hopper\Contracts\HopperContract as Hopper;
+use App\Services\Hopper\Contracts\HopperUserContract;
+
+use App\Services\Hopper\HopperUser;
 
 use Vinkla\Pusher\PusherManager;
+use Vinkla\Pusher\Facades\Pusher;
 
 use App\Models\Hopper\EventSession;
 use App\Models\Hopper\Visit;
+
+use Yajra\Datatables\Html\Builder; // import class on controller
 
 /**
  * Class DashboardController
@@ -18,26 +24,39 @@ class DashboardController extends Controller
 {
 	
 	private $hopperstats;
+	private $hopperuser;
 	private $pusher;
+	
 
 
-	public function __construct(PusherManager $pusher) {
+	public function __construct(PusherManager $pusher, HopperUserContract $hopperuser) {
 		$this->pusher = $pusher;
 		$this->hopperstats = new \App\Services\Hopper\HopperStats();
-		
+		$this->hopperuser = $hopperuser;
 	}
 	
 	/**
      * @return \Illuminate\View\View
      */
-    public function index(Hopper $hopper)
-    {
+    public function index(Hopper $hopper, Builder $htmlbuilder)
+    {		
+		$graphicops = \App\Models\Access\User\User::with('assignments')
+													->with('visitCount')
+													->whereHas('roles', function ($query) {
+														$query->where('name', '=', 'Graphic Operator');
+													})
+													->get();
+		foreach($graphicops as $op){
+			debugbar()->info($op->visitsCount);
+		}
 		
+//		$usersByStatus = $this->hopperuser->users_by_status();
+//		
+//		$usersByStatus = $this->hopperuser->visitsToCount($usersByStatus);
 		
-		$hopperuser = new \App\Services\Hopper\HopperUser();
-		
-		$hopperuser->users_by_status();
-		
+//		foreach($usersByStatus as $op){
+//			debugbar()->info($op->name . ' ' . $op->visits->count());
+//		}	
 		
 		$EventSessions = EventSession::all();
 		$checkinsovertime = $this->hopperstats->check_ins_over_time(\Carbon\Carbon::now()->subDays(4), \Carbon\Carbon::now());
@@ -55,10 +74,24 @@ class DashboardController extends Controller
 		
 		$TopVisits = collect( $this->hopperstats->top_user_visits() );
 		
+		$assignment_html = $htmlbuilder
+		->addColumn(['data' => 'updated_at', 'name' => 'updated_at', 'title' => 'Updated At'])
+        ->addColumn(['data' => 'id', 'name' => 'id', 'title' => 'ID'])
+        ->addColumn(['data' => 'session_id', 'name' => 'session_id', 'title' => 'Session ID'])
+        ->addColumn(['data' => 'assignment_user_id', 'name' => 'assignment_user_id', 'title' => 'Assignment'])
+     
+		->parameters(
+			['order' => [[0, 'asc']]]
+		)
+		->ajax(route('admin.visit.assignments'))
+        ->addAction();
+		
+		
         $data = [
 			'VisitStats' => $VisitStats,
 			'EventSessionCheckin' => $EventSessionCheckin,
 			'TopVisits' => $TopVisits,
+			'AssignmentHTML' => $assignment_html,
 		];
 		
 //		debugbar()->info($this->pusher->get_channel_info('presence-test_channel',array('info' => 'members')));
@@ -187,4 +220,23 @@ class DashboardController extends Controller
         return response()->json(['message' => 'ok', 'payload' => $heartbeat]);
         
     }
+	
+	public function userStatusData(){		
+		$usersByStatus = $this->hopperuser->users_by_status();
+		return response()->json(['message' => 'ok', 'payload' => $usersByStatus]);
+	}
+	
+	public function userStatusUpdate($id){	
+		try {
+			$user = $this->hopperuser->toggle_state($id);
+			
+			$userCollection = $this->hopperuser->sanitizeUserCollection( collect($user) );
+			
+			Pusher::trigger('hopper_channel', 'user_status', ['message' => 'update', 'user'=> $userCollection ]);
+			
+			return response()->json(['message' => 'ok', 'payload' => ['user' => $userCollection]]);
+		} catch ( Exception $ex ) {
+			return response()->json(['message' => 'error', 'payload' => $ex]);
+		}	
+	}
 }

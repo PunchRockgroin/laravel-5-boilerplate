@@ -89,6 +89,7 @@ elixir(function(mix) {
          'assets/bower_components/AdminLTE/plugins/datatables/dataTables.bootstrap.min.js',
          'assets/bower_components/AdminLTE/plugins/datatables/extensions/Responsive/js/dataTables.responsive.min.js',     
          'assets/bower_components/AdminLTE/plugins/chartjs/Chart.min.js',    
+         'assets/bower_components/matchHeight/dist/jquery.matchHeight.js',    
          'assets/bower_components/vue/dist/vue.js',         
          'assets/bower_components/vue-resource/dist/vue-resource.js',         
          'assets/js/plugin/sweetalert/sweetalert.min.js',

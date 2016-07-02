@@ -1,3 +1,21 @@
+$(function () {
+    toastr.options = {
+        "closeButton": true,
+        "debug": false,
+        "progressBar": true,
+        "positionClass": "toast-top-right",
+        "onclick": null,
+        "showDuration": "400",
+        "hideDuration": "1000",
+        "timeOut": "2000",
+        "extendedTimeOut": "1000",
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+    }
+});
+
 Vue.transition('bounce', {
     enterClass: 'bounceInLeft',
     leaveClass: 'bounceOutRight'
@@ -6,10 +24,17 @@ Vue.transition('zoom', {
     enterClass: 'zoomIn',
     leaveClass: 'zoomOut'
 });
+
+Vue.http.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="_token"]').getAttribute('content');
+
 var hopperVue = new Vue({
     el: '#Hopper',
     data: {
         message: '',
+        Users: {},
+        Visits: {},
+        Unassigned: {},
+        currentUser: {},
         inVisit: {},
         idleUsers: {}
     },
@@ -49,7 +74,7 @@ var hopperVue = new Vue({
         },
         getDashboardData: function (event) {
             // GET request
-            this.$http({url: window.hopper.heartbeat_data, method: 'GET'}).then(function (response) {
+            this.$http({url: window.hopper.routes.heartbeat_data, method: 'GET'}).then(function (response) {
                 // success callback
 //                console.log(response.data.payload);
                 this.$set('message', response.data.message);
@@ -68,6 +93,42 @@ var hopperVue = new Vue({
                 // error callback
             });
         },
+        getUserStatusData: function(event){
+            this.$http({url: window.hopper.routes.user_status, method: 'GET'}).then(function (response) {
+                // success callback
+                    
+                  this.Users = response.data.payload;
+//                  console.log(this.Users);
+//                console.log(response.data.payload);
+//                var arr = Object.keys(response.data.payload.groups).map(function (key) {return response.data.payload.groups[key]});
+//                  var active = [];
+//                  var idle = [];
+//                _.forEach(response.data.payload, function (user) {
+//                    if(user.state === 'active'){
+//                        active.push(user);
+//                    }else{
+//                        idle.push(user);
+//                    }
+//                    
+////                    _.forEach(value, function (subvalue) {
+////                        otherUsers.push(subvalue);
+////                    });
+//                });
+//                this.$set('activeUsers', active);
+//                this.$set('idleUsers', idle);
+                 
+                  
+            }, function (response) {
+                // error callback
+            });
+        },
+        updateUserStatus: function(user){
+            console.log(user);
+            console.log(this.Users);
+            var index = _.findIndex(this.Users, { uid: user.uid });
+            this.Users.$set(index, user);
+//            _.extend(_.findWhere(this.Users, { uid: user.uid }), user);
+        },
         setBehaviorData: function(members){
             var elGroups = _.groupBy(members, function (member) { 
                 return member.heartbeat.route;
@@ -78,16 +139,13 @@ var hopperVue = new Vue({
             var idleUsers = _.filter(members, function (member) { 
                 return member.heartbeat.route != 'admin.visit.edit';
             });
-            
-//            console.log(elGroups);
-//            console.log(otherUsers);
             this.$set('inVisit', inVisit);
             this.$set('idleUsers', idleUsers);
         },
         getMemberHeartbeat: function(member){
             this.$http({url: window.hopper.heartbeat_user+'/'+member.id, method: 'GET'}).then(function (response) {
             // success callback
-            console.log(response.data.payload);
+//            console.log(response.data.payload);
 //                    this.$set('message', response.data.message);
 //                    this.$set('inVisit', response.data.payload.inVisit);
 //    //                console.log(response.data.payload);
@@ -138,12 +196,63 @@ var hopperVue = new Vue({
                   hopperVue.getDashboardData();
                   hopperVue.getMemberHeartbeat(member);
             });
+        },
+        toggleUserStatus: function(id, event){
+            this.$http({url: window.hopper.routes.user_update+'/'+id, method: 'POST'}).then(function (response) {
+            // success callback
+              if(response.data.message === 'ok'){
+                  var payload = response.data.payload;
+//                  console.log(payload);
+                  toastr.success(payload.user.name + ' state changed to: <strong>' + payload.user.state + '</strong>', 'Hopper Says');
+              }else{
+                  toastr.error('Something happened', 'Hopper Says');
+                  console.log(response.data);
+              }
+
+            }, function (response) {
+                // error callback
+                console.log(response);
+            });  
+        },
+        getUnassigned: function(event){
+            this.$http({url: window.hopper.routes.visit_unassigned, method: 'GET'}).then(function (response) {
+                this.Unassigned = response.data.payload;
+            });
+        },
+        assignUserToVisitModal: function(user, event){
+            this.$http({url: window.hopper.routes.visit_unassigned, method: 'GET'}).then(function (response) {
+                this.Unassigned = response.data.payload;
+                this.currentUser = user;
+//                $('#UnAssigned').
+                console.log(user.name);
+                console.log(response.data.payload);
+//                this.$set('Unassigned', response.data.payload);
+                $('.user-assignment-modal').modal('show');
+            });
+            
+        },
+        assignUserToVisit: function(user, visit, event){
+            var $el = $(event.target);
+            $el.find('.btn-content').html('<i class="fa fa-spinner fa-spin fa-fw"></i> Assigning').parent().addClass('btn-warning');
+            this.$http.post(window.hopper.routes.visit_assign+'/'+visit.id, {assignment_user_id:user.id}).then(function (response) {
+                $el.find('.btn-content').html('<i class="fa fa-check"></i> Assigned').parent().removeClass('btn-warning').addClass('btn-success');
+            });
+            console.log(visit);
         }
     },
     ready: function () {
-        this.getHeartbeat();
-        
-
+//        this.getHeartbeat();
+          this.getUserStatusData();
+//          this.getUnassigned();
+    },
+    watch: {
+        Users:function(){
+            //code here executes whenever the Users array changes 
+            //and runs AFTER the dom is updated, could use this in
+            //the parent component
+             $('.user-group').matchHeight();
+             
+        }
     }
 });
 
@@ -153,32 +262,29 @@ var hopperVue = new Vue({
 
 $(function () {
     if (typeof window.hopper !== "undefined" && typeof window.hopper.heartbeat_detector_enable !== "undefined" && window.hopper.heartbeat_detector_enable === true) {
-        hopperVue.getDashboardData();
+        //hopperVue.getDashboardData();
         //hopperVue.getPusherPresence();
     }
     
+    $('.user-status-refresh').on('click', function(){
+            hopperVue.getUserStatusData();
+            
+    });
+    
+    var hopperChannel;
+    hopperChannel = pusher.subscribe('hopper_channel');
+    hopperChannel.bind('user_status', function(data) {    
+//        console.log(data.message);
+        if(data.message === 'update'){
+            hopperVue.getUserStatusData();
+            $('#dataTableBuilder').DataTable().ajax.reload();
+//            console.log(data);
+//            hopperVue.updateUserStatus(data.user);
+        }
+    });
+    
+    
 });
-
-
-$(function () {
-    toastr.options = {
-        "closeButton": true,
-        "debug": false,
-        "progressBar": true,
-        "positionClass": "toast-top-right",
-        "onclick": null,
-        "showDuration": "400",
-        "hideDuration": "1000",
-        "timeOut": "2000",
-        "extendedTimeOut": "1000",
-        "showEasing": "swing",
-        "hideEasing": "linear",
-        "showMethod": "fadeIn",
-        "hideMethod": "fadeOut"
-    }
-});
-
-
 
 $(function () {
 
