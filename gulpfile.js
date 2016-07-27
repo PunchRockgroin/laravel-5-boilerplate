@@ -59,6 +59,10 @@ elixir(function(mix) {
          'backend/plugin/toastr/toastr.scss',
          'plugin/sweetalert/sweetalert.scss'
      ], 'resources/assets/css/backend/app.css')
+     
+     .sass([
+         'brand/font_inline.scss'
+     ], 'public/css/backend_print.css')
 
      /**
       * Combine pre-processed backend CSS files
@@ -74,6 +78,7 @@ elixir(function(mix) {
          '../bower_components/animate.css/animate.css',
          'backend/app.css'
      ], 'public/css/backend.css')
+     
 
      /**
       * Combine backend scripts

@@ -14,11 +14,13 @@ return [
     */
 
     'backend' => [
+		'name' => 'Visit',
         'admin' => [
             'title' => 'Visit Management',
             'index' => 'Dashboard',
             'create' => 'Create a new Visit',
             'edit' => 'Edit',
+			'invoice' => 'Invoice',
         ],
         'form' => [
             'filename' => [
@@ -37,5 +39,8 @@ return [
             'index' => 'Dashboard',
             'create' => 'Create Visit',
         ],
+		'dashboard' => [
+			'my_assignments' => 'My Assignments'
+		]
     ],
 ];

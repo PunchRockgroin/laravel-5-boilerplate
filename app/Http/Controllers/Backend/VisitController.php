@@ -124,7 +124,13 @@ class VisitController extends Controller
                     ->editColumn('updated_at', '{!! $updated_at->diffForHumans() !!}')
                      ->editColumn('action', function ($visit) {
                         $content = '';
-                        $content .= '<a class="btn btn-primary btn-block btn-xs" href="'. route('admin.visit.edit', [$visit->id]).'">Edit</a> ';
+						if(config('hopper.print.enable', false)){
+							$content .= '<a class="btn btn-primary btn-xs" href="'. route('admin.visit.edit', [$visit->id]).'">Edit</a> ';
+							$content .= '<a class="btn btn-info btn-xs" href="'. route('admin.visit.invoice', [$visit->id]).'">Invoice</a> ';
+							$content .= '<a target="_blank" class="btn btn-info btn-xs" href="'. route('admin.visit.print', [$visit->id]).'">Print</a> ';
+						}else{
+							$content .= '<a class="btn btn-primary btn-block btn-xs" href="'. route('admin.visit.edit', [$visit->id]).'">Edit</a> ';
+						}
                         return $content;
                     })
                     ->make(true);
@@ -206,6 +212,11 @@ class VisitController extends Controller
         $hoppervisit->update($request->all(), $visit);
         
         $this->messagebag->add('updated', "Visit " . $visit->id . " for ". $visit->session_id ." Updated");
+		
+		if(config('hopper.print.enable', false) && config('hopper.print.timing', false) === 'after_visit'){
+//			return redirect()->route('admin.visit.invoice', $visit->id)->withFlashSuccess($this->messagebag);	
+			return redirect()->route('admin.visit.index')->withFlashSuccess($this->messagebag);
+		}
         
         return redirect()->route('admin.visit.index')->withFlashSuccess($this->messagebag);
 
@@ -329,5 +340,31 @@ class VisitController extends Controller
 		
 		return response()->json($visit_stats, 200);
 	}
+	
+	public function invoice(Request $request, $id) {
+        //\Debugbar::disable();
+		
+		$visit = Visit::findOrFail($id);
+		
+        $data = [
+			'visit' => $visit
+		];
+        $view = view('backend.visit.invoice', $data);
+
+        return $view;
+    }
+	
+	public function sheetprint(Request $request, $id) {
+        \Debugbar::disable();
+		
+		$visit = Visit::findOrFail($id);
+		
+        $data = [
+			'visit' => $visit
+		];
+        $view = view('backend.visit.print', $data);
+
+        return $view;
+    }
 	
 }

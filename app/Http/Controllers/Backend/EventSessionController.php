@@ -211,8 +211,13 @@ class EventSessionController extends Controller
                 $messagebag->add('create_visit', "<strong class='lead'>Visit Created</strong>");
                 $messagebag->add('create_visit', "<a href='".route('admin.visit.edit', ['id' => $visit->id] )."' target='_blank'>View this visit now</a>");
             }
-            return redirect()->route('admin.eventsession.index')->withFlashMessage($messagebag);
-        }else{ //We are just updating the event session
+			
+			if(config('hopper.print.enable', false) && config('hopper.print.timing', false) == 'before_visit'){
+				return redirect()->route('admin.visit.invoice', $visit->id)->withFlashMessage($messagebag);	
+			}
+			return redirect()->route('admin.eventsession.index')->withFlashMessage($messagebag);
+            
+        }else{ //We are just updating the visit
             return redirect()->back()->withFlashMessage($messagebag);   
         }
                 
