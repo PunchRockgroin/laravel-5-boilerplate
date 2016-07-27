@@ -88,6 +88,14 @@ class HopperFile implements HopperFileContract {
     public function renamefile($oldFilePath, $newFilePath, $disk = 'hopper') {
 			Storage::disk($disk)->move($oldFilePath, $newFilePath);
     }
+	
+	
+	public function locate($query) {
+			$filesInMaster = $this->getAllInMaster();
+			$validFiles = $this->filterValidFiles($query, $filesInMaster);
+			$mappedFiles = $this->mapFileMeta($validFiles);
+			return $mappedFiles;
+    }
 
     public function validateFile($request) {
         $rules = array(
@@ -606,8 +614,9 @@ class HopperFile implements HopperFileContract {
      * @return array
      */
     public function getFileParts($currentFileParts){
-        $fileNameArrayParts = ['sessionID', 'speaker', 'roomIDs', 'version', 'shareStatus'];
-        $currentFileNameParts = explode('_', $currentFileParts);
+
+        $fileNameArrayParts = config('hopper.filenameparts');
+        $currentFileNameParts = explode('_', pathinfo($currentFileParts, PATHINFO_FILENAME) );
         $currentFileNameArray = [];
         if(count($currentFileNameParts) < 3){
             //Probably a non-session file
@@ -622,14 +631,6 @@ class HopperFile implements HopperFileContract {
             }
         }
         
-        
-//        $currentFileNameArray = [
-//            'sessionID' =>  (empty($currentFileNameParts[0]) ? null : $currentFileNameParts[0]),
-//            'speaker' => (empty($currentFileNameParts[1]) ? null : $currentFileNameParts[1]),
-//            'roomIDs' => (empty($currentFileNameParts[2]) ? null : $currentFileNameParts[2]),
-//            'version' => (empty($currentFileNameParts[3]) ? null : $currentFileNameParts[3]),
-//            'shareStatus' => (empty($currentFileNameParts[4]) ? null : $currentFileNameParts[4])
-//        ];
         return $currentFileNameArray;
     }
     
@@ -645,25 +646,49 @@ class HopperFile implements HopperFileContract {
     }
     
     /**
+     * Filters valid files.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function filterValidFiles($query, $collection, $disk = 'hopper'){
+
+        $collection = $collection->filter(function ($item) use ($query) {
+				$fileparts = explode('/', $item);
+				
+				if(isset($fileparts[1])
+					&& starts_with( $fileparts[1] , $query )
+					&& ends_with( $fileparts[1], explode(',', config('hopper.checkin_upload_mimes') ) )
+				){
+					return true;				
+				}
+				return false;
+			});
+        
+        
+        return $collection;
+    }
+	
+    /**
      * Maps file collection with file data.
      *
      * @return \Illuminate\Support\Collection
      */
     public function mapFileMeta($collection, $disk = 'hopper'){
-
+		
         $collection = $collection
             ->map(function ($item) use ($disk) {
                 $fileparts = explode('/', $item);
 				$hopperfileparts = $this->getFileParts($fileparts[1]);
+				$currentVersion = \App\Services\Hopper\Facades\Hopper::getCurrentVersion($fileparts[1]);
                 $filemeta = Storage::disk($disk)->getMetaData($item);
                 $filemeta['mime'] = Storage::disk($disk)->mimeType($item);
                 return [
                     'filename' => $fileparts[1],
 					'fileparts' => $hopperfileparts,
+					'currentVersion' => (int) $currentVersion,
+					'nextVersion' => str_pad($currentVersion + 1, 2, '0', STR_PAD_LEFT),
                     'storage_disk' => $disk,
                     'type' => $filemeta['type'],
-                    'path' => $filemeta['path'],
-                    'mime' => $filemeta['mime'],
                     'filemeta' => $filemeta,
                 ];
             });

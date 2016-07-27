@@ -99,7 +99,7 @@ class HopperUser implements HopperUserContract{
 	
 	
 	private function parseUser($user){
-		if($user->state === 'idle'){
+		if( ! $user->idle ){
 			$user->statusclass = 'green';
 		}else{
 			$user->statusclass = 'yellow';

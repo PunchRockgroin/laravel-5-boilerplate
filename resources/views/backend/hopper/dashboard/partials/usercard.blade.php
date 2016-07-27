@@ -11,20 +11,18 @@
 		</div>
 		<div class="box-footer">
 			<div class="padding-left">
-				<button class="btn btn-sm toggle-user-status" v-on:click="toggleUserStatus(user.id)"><i class="fa fa-refresh"></i> Toggle Status</button>
-				<button class="btn btn-sm assign-user-to-visit-modal" v-on:click="assignUserToVisitModal(user)"><i class="fa fa-refresh"></i> Assign Visit(s)</button>
+				<!--<button class="btn btn-sm toggle-user-status" v-on:click="toggleUserStatus(user.id)"><i class="fa fa-refresh"></i> Toggle Status</button>-->
+				<button class="btn btn-block btn-sm assign-user-to-visit-modal" v-on:click="assignUserToVisitModal(user)"><i class="fa fa-check"></i> Assign Visit(s)</button>
 			</div>
 		</div>
-		<div class="box-footer">
+
+		<div v-if="user.assignments.length > 0" class="box-footer">
 			<div class="padding-left">
 				Assignments:
-				<div v-if="user.assignments.length > 0">
-					  <template v-for="assignment in user.assignments">
-						  <span class="label label-info">@{{ assignment.session_id }}</span> 
-					  </template>
-				</div>
-				<div v-else>
-					<span class="label label-default">No Assignments</span>
+				<div>
+					<template v-for="assignment in user.assignments">
+						<span class="label label-info">@{{ assignment.session_id }}</span><span> </span>
+					</template>
 				</div>
 			</div>
 		</div>

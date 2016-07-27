@@ -10,26 +10,7 @@
 @endsection
 
 @section('content')
-	
-    <div class="box">
-          <div class="box-header">
-            <h3 class="box-title">Enter Visit ID or Session ID</h3>
-          </div><!-- /.box-header -->
-          <div class="box-body">
-              {!! Form::open( [ 'route' => 'admin.visit.find' ] ) !!}
-              {!! Form::token() !!}
-              <div class='input-group'>
-                  {!! Form::text('visit_id', null, $attributes = array('class'=>'form-control input-lg', 'placeholder'=>'Enter visit ID or Session ID')) !!}
-                  <span class="input-group-btn">
-                    <button class="btn btn-lg btn-success" type="submit">Go!</button>
-                  </span>
-                  
-              </div>
-              <p class="help-block">You can find the Visit ID in the top right of the check-in sheet. You may also enter a Session ID, which will return the last visit for that Session ID.</p>
-              {!! Form::close() !!}
-          </div>
-                
-      </div>
+
 	<div class="row">
 		<div class="col-md-12 col-sm-12 col-xs-12">
           <div class="info-box">
@@ -44,6 +25,48 @@
         </div>
         <!-- /.col -->
 	</div>
+	<div class="row">
+		<div class="col-sm-12 col-md-6">
+			<div class="box box-success">
+				<div class="box-header with-border">
+					<h3 class="box-title">My Assignments</h3>
+					<div class="box-tools pull-right">
+						<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+					</div><!-- /.box tools -->
+				</div><!-- /.box-header -->
+				<div class="box-body">
+					<table id='assignedVisitsTable' class="table responsive table-bordered table-striped" width='100%'>
+						<thead>
+							<th width='150px'>Updated At</th>
+							<th>Session ID</th>
+							<th width='100px'>Action</th>
+						</thead>
+					</table>
+				</div><!-- /.box-body -->
+			</div><!--box box-success-->
+		</div>
+		<div class="col-sm-12 col-md-6">
+			 <div class="box">
+          <div class="box-header">
+            <h3 class="box-title">Find a Visit ID or Session ID</h3>
+          </div><!-- /.box-header -->
+			<div class="box-body">
+					{!! Form::open( [ 'route' => 'admin.visit.find' ] ) !!}
+					{!! Form::token() !!}
+					<div class='input-group'>
+						{!! Form::text('visit_id', null, $attributes = array('class'=>'form-control input-lg', 'placeholder'=>'Enter visit ID or Session ID')) !!}
+						<span class="input-group-btn">
+						  <button class="btn btn-lg btn-success" type="submit">Go!</button>
+						</span>
+
+					</div>
+					<p class="help-block">You can find the Visit ID in the top right of the check-in sheet. You may also enter a Session ID, which will return the last visit for that Session ID.</p>
+					{!! Form::close() !!}
+				</div>       
+			</div>
+		</div>
+	</div>
+   
 	<div class="row">
 		<div class="col-xs-12 col-sm-6 col-md-6">
 		<div class="info-box">
@@ -144,18 +167,81 @@
 	@permission('view-access-management')	
     <div class="box box-success">
         <div class="box-header with-border">
-            <h3 class="box-title"></h3>
+            <h3 class="box-title">All Visits</h3>
             <div class="box-tools pull-right">
                 <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
             </div><!-- /.box tools -->
         </div><!-- /.box-header -->
         <div class="box-body">
-             {!! $html->table(['class' => 'table responsive table-bordered table-striped', 'width' => '100%' ]) !!}
+			<table id='allVisitsTable' class="table responsive table-bordered table-striped" width='100%'>
+				<thead>
+				<th>ID</th>
+				<th>Session ID</th>
+				<th>Visitors</th>
+				<th>Assignment</th>
+				<th>Graphic Operator</th>
+				<th>Created At</th>
+				<th>Updated At</th>
+				<th>Action</th>
+				</thead>
+			</table>
         </div><!-- /.box-body -->
     </div><!--box box-success-->
 	@endauth
 @endsection
 
 @push('after-scripts-end')
-    {!! $html->scripts() !!}
+@include('includes/partials/pusher')
+<script>
+	$(function () {
+    var hopperChannel;
+	$('#assignedVisitsTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: "{!! route('admin.visit.myassignments') !!}",
+        columns: [
+			{data: 'updated_at', name: 'updated_at'},
+            {data: 'session_id', name: 'session_id'},
+			{data: 'action', name: 'action', orderable: false, searchable: false}
+        ]
+    });
+	@permission('view-access-management')	
+	$('#allVisitsTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: "{!! route('admin.visit.datatable') !!}",
+        columns: [
+            {data: 'id', name: 'id'},
+            {data: 'session_id', name: 'session_id'},
+            {data: 'visitors', name: 'visitors'},
+			{data: 'assignment_user_id', name: 'assignment_user_id'},
+            {data: 'design_username', name: 'design_username'},
+            {data: 'created_at', name: 'created_at'},
+            {data: 'updated_at', name: 'updated_at'},
+			{data: 'action', name: 'action', orderable: false, searchable: false}
+        ]
+    });
+	@endauth
+	var updateTables = function(){
+		$('#assignedVisitsTable').DataTable().ajax.reload();
+		@permission('view-access-management')	
+			$('#allVisitsTable').DataTable().ajax.reload();
+		@endauth
+		console.log('updated');
+	};
+    if ('undefined' !== typeof pusher) {
+        hopperChannel = pusher.subscribe('hopper_channel');
+        hopperChannel.bind('user_status', function(data) {    
+            if(data.message === 'update'){
+               updateTables();
+            }
+        });
+        hopperChannel.bind('visit_status', function(data) {    
+            if(data.message === 'update'){
+                updateTables();
+            }
+        });
+    }
+});
+</script>
 @endpush

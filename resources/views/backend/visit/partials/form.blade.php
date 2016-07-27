@@ -6,7 +6,23 @@
 
 <div class="form-group @if ($errors->has('visitors')) has-error @endif">
     {!! Form::label('visitors', 'Name of Visitor(s)') !!}
-    {!! Form::text('visitors', null, $attributes = array('class'=>'form-control', 'placeholder'=>'Enter visitor name(s)')) !!}
+	<p class="help-block">If empty, please get the name of the visitors during this session.</p>
+	<div class="form-group">
+		<div class="radio">
+		<label class="control-label ">{!! Form::radio('visitor_type', 'none', null, ['id'=> 'visitorsNone']) !!}No one was present</label>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="radio">
+		<label class="control-label ">{!! Form::radio('visitor_type', 'idk', null, ['id'=> 'visitorsIdk']) !!}I Do Not Know/Could Not Get Visitor Names</label>
+		</div>
+	</div>
+	<div class="input-group">
+      <span class="input-group-addon">
+        {!! Form::radio('visitor_type', 'normal', null, ['id'=> 'visitorsNames']) !!}
+      </span>
+      {!! Form::text('visitors', null, $attributes = array('id'=>'visitorNamesEntry', 'class'=>'form-control', 'placeholder'=>'Enter visitor name(s)')) !!}
+    </div><!-- /input-group -->
     <p class="help-block">If empty, please get the name of the visitors during this session.</p>
 </div>
 <div class="form-group @if ($errors->has('difficulty')) has-error @endif">

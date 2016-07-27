@@ -49,20 +49,20 @@ class EventSessionUpdatedHandler
 //        }
 
         try {
-            $History = [
-                'event' => $event->event,
-                'user' => $event->user,
-                'notes' => $event->notes,
-                'tasks' => $event->tasks,
-                'timestamp' => \Carbon\Carbon::now(),
-            ];
-
-            $EventSession = \App\Models\Hopper\EventSession::find($event->id);
-            if(count($EventSession)){
-                $OldHistory = $EventSession->history;
-                $OldHistory[] = $History;
-                $EventSession->update(['history' => $OldHistory]);
-            }                
+//            $History = [
+//                'event' => $event->event,
+//                'user' => $event->user,
+//                'notes' => $event->notes,
+//                'tasks' => $event->tasks,
+//                'timestamp' => \Carbon\Carbon::now(),
+//            ];
+//
+//            $EventSession = \App\Models\Hopper\EventSession::find($event->id);
+//            if(count($EventSession)){
+//                $OldHistory = $EventSession->history;
+//                $OldHistory[] = $History;
+//                $EventSession->update(['history' => $OldHistory]);
+//            }                
             
 
         } catch (Exception $e) {

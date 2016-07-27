@@ -196,7 +196,7 @@ return [
         JasonLewis\ResourceWatcher\Integration\LaravelServiceProvider::class,
         Maknz\Slack\SlackServiceProvider::class,
         Yajra\Datatables\DatatablesServiceProvider::class,
-
+		Cornford\Bootstrapper\BootstrapServiceProvider::class,
         /*
          * Has to override the Collective\Html\HtmlServiceProvider form singleton
          */
@@ -269,7 +269,7 @@ return [
         'LaravelPusher' => Vinkla\Pusher\Facades\Pusher::class,
         'Slack' => Maknz\Slack\Facades\Slack::class,
         'Datatables' => Yajra\Datatables\Datatables::class,
-        
+        'Bootstrap'  => Cornford\Bootstrapper\Facades\Bootstrap::class,
         'Hopper' => App\Services\Hopper\Facades\Hopper::class,
     ],
 ];

@@ -40,15 +40,16 @@ class DashboardController extends Controller
      */
     public function index(Hopper $hopper, Builder $htmlbuilder)
     {		
-		$graphicops = \App\Models\Access\User\User::with('assignments')
-													->with('visitCount')
-													->whereHas('roles', function ($query) {
-														$query->where('name', '=', 'Graphic Operator');
-													})
-													->get();
-		foreach($graphicops as $op){
-			debugbar()->info($op->visitsCount);
-		}
+//		$graphicops = \App\Models\Access\User\User::with('assignments')
+//													->with('visitCount')
+//													->whereHas('roles', function ($query) {
+//														$query->where('name', '=', 'Graphic Operator');
+//													})
+//													->get();
+////		debugbar()->info($graphicops);												
+//		foreach($graphicops as $op){
+//			debugbar()->info($op->toArray());
+//		}
 		
 //		$usersByStatus = $this->hopperuser->users_by_status();
 //		

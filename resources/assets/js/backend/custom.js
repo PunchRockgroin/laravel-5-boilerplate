@@ -35,6 +35,7 @@ var hopperVue = new Vue({
         Visits: {},
         Unassigned: {},
         currentUser: {},
+        currentVisit: {},
         inVisit: {},
         idleUsers: {}
     },
@@ -123,11 +124,8 @@ var hopperVue = new Vue({
             });
         },
         updateUserStatus: function(user){
-            console.log(user);
-            console.log(this.Users);
             var index = _.findIndex(this.Users, { uid: user.uid });
             this.Users.$set(index, user);
-//            _.extend(_.findWhere(this.Users, { uid: user.uid }), user);
         },
         setBehaviorData: function(members){
             var elGroups = _.groupBy(members, function (member) { 
@@ -214,6 +212,10 @@ var hopperVue = new Vue({
                 console.log(response);
             });  
         },
+        triggerRefresh: function(){
+            this.getUserStatusData();
+            $('#dataTableBuilder').DataTable().ajax.reload();
+        },
         getUnassigned: function(event){
             this.$http({url: window.hopper.routes.visit_unassigned, method: 'GET'}).then(function (response) {
                 this.Unassigned = response.data.payload;
@@ -228,16 +230,19 @@ var hopperVue = new Vue({
                 console.log(response.data.payload);
 //                this.$set('Unassigned', response.data.payload);
                 $('.user-assignment-modal').modal('show');
-            });
-            
+            });   
+        },
+        assignVisitToUserModal: function(visit){ 
+            this.currentVisit = visit;
+            $('.visit-assignment-modal').modal('show');
         },
         assignUserToVisit: function(user, visit, event){
             var $el = $(event.target);
             $el.find('.btn-content').html('<i class="fa fa-spinner fa-spin fa-fw"></i> Assigning').parent().addClass('btn-warning');
             this.$http.post(window.hopper.routes.visit_assign+'/'+visit.id, {assignment_user_id:user.id}).then(function (response) {
                 $el.find('.btn-content').html('<i class="fa fa-check"></i> Assigned').parent().removeClass('btn-warning').addClass('btn-success');
+                this.triggerRefresh();
             });
-            console.log(visit);
         }
     },
     ready: function () {
@@ -268,55 +273,32 @@ $(function () {
     
     $('.user-status-refresh').on('click', function(){
             hopperVue.getUserStatusData();
-            
     });
     
     var hopperChannel;
-    hopperChannel = pusher.subscribe('hopper_channel');
-    hopperChannel.bind('user_status', function(data) {    
-//        console.log(data.message);
-        if(data.message === 'update'){
-            hopperVue.getUserStatusData();
-            $('#dataTableBuilder').DataTable().ajax.reload();
-//            console.log(data);
-//            hopperVue.updateUserStatus(data.user);
-        }
-    });
     
-    
+    if ('undefined' !== typeof pusher) {
+        hopperChannel = pusher.subscribe('hopper_channel');
+        hopperChannel.bind('user_status', function(data) {    
+            if(data.message === 'update'){
+                hopperVue.triggerRefresh();
+            }
+        });
+        hopperChannel.bind('visit_status', function(data) {    
+            if(data.message === 'update'){
+                hopperVue.triggerRefresh();
+            }
+        });
+        $( document ).on( "click", ".assign-visit-to-user", function() {
+             var $el = $(this);
+             hopperVue.assignVisitToUserModal($el.data());
+        });
+    }
 });
 
 $(function () {
 
 var channel;
-//    $('.repeat').each(function() {
-//        var obj = $(this),
-//            objD = obj.data(),
-//            options = {
-//                wrapper : '.repeater-wrapper',
-//                container : '.repeater-container',
-//                row_count_placeholder : '__row-count-placeholder__',
-//                after_add : function(container, new_row, default_after_add) {
-//                $(new_row).find('.date-range-picker').daterangepicker({
-//                        "singleDatePicker": true,
-//                        "showWeekNumbers": false,
-//                        "timePicker": true,
-//                        "timePickerIncrement": 1,
-//                        "opens": "center",
-//                        "drops": "up",
-//                        "locale": {
-//                            format: 'MM/DD/YYYY h:mm A'
-//                        }
-//                    });
-//                default_after_add(container, new_row);
-//                }
-//            },
-//            o = $.extend(true, {}, options, objD );
-//        $(this).repeatable_fields(o);
-//    });
-
-
-
     $('.repeater').repeater({
         defaultValues: {
         },
@@ -369,6 +351,15 @@ var getNextVersion = function(postdata, $target){
     });
 };
 
+var setCurrentFile = function(session_file_option, $target){
+    if (session_file_option.val()) {
+        $('input[name="currentfilename"]').val(session_file_option.val());
+        $('input[name="filename"]').val(session_file_option.val());
+        $('.file-update-section, .current-file-section').removeClass('hidden');
+        $('select[name="next_version"]').val(session_file_option.data('nextversion')).trigger('change');
+    }
+};
+
 $(function () {
     if ($('div#file-upload').length) {
         var baseUrl = "",
@@ -392,6 +383,13 @@ $(function () {
             }, $fileNameInput);
         });
         
+        
+        if($('input.session_file_option').length){
+            setCurrentFile($("input.session_file_option:checked"), $currentFileNameInput);
+            $( ".multiple-file-section" ).on( "click", "input.session_file_option", function() {
+                setCurrentFile($(this), $currentFileNameInput);
+            });
+        };
 
         Dropzone.autoDiscover = false;
         var fileEntityUploadDz = new Dropzone("div#file-upload", {
@@ -404,6 +402,7 @@ $(function () {
 //                addRemoveLinks: true, 
             init: function () {
                 this.on("addedfile", function (file) {
+                    $('input[name="filename_uploaded"]').val(file.name); 
 //                    channel = pusher.subscribe('hopper_channel');
                     fileName = $fileNameInput.val();
                     next_version = $nextVersionInput.val() || false;
@@ -474,6 +473,10 @@ $(function () {
             }
         };
     }
+    
+    $('input#visitorsNames').click(function() {
+        $("#visitorNamesEntry").focus();
+    });
 
 
     if ($('div#visit-upload').length) {
@@ -496,6 +499,18 @@ $(function () {
             maxFiles: 1,
             clickable: false,
             acceptedFiles: '.ppt,.pptx,.pdf,.pptm',
+            accept: function(file, done) {
+                var validname = $('input[name="filename"]').val();
+                if (validname === file.name) {
+                    done();
+                    return;
+                }else{
+                    swal("Oops...", "The filename must match to ensure you are using the right file for this visit.", "error");
+                    visitDropzone.removeAllFiles();
+                }
+//                file.acceptDimensions = done;
+                
+        },
 //                addRemoveLinks: true, 
             init: function () {
                 this.on("dragleave", function (event) {

@@ -32,25 +32,25 @@ class FileEntityUpdatedHandler implements ShouldQueue {
     public function handle(FileEntityUpdated $event) {
 		
         try {
-            $History = [
-                'event' => $event->event,
-                'notes' => $event->notes,
-                'filename' => $event->filename,
-                'tasks' => $event->tasks,
-                'user' => $event->user,
-                'timestamp' => \Carbon\Carbon::now(),
-            ];
-
-            $FileEntity = \App\Models\Hopper\FileEntity::find($event->id);
-            if(count($FileEntity)){
-                $OldHistory = $FileEntity->history;
-                $OldHistory[] = $History;
-                $updateData = ['history' => $OldHistory];
-				
-				$this->performTasks($event->tasks, $updateData);
-                $FileEntity->update($updateData);
-				
-            }
+//            $History = [
+//                'event' => $event->event,
+//                'notes' => $event->notes,
+//                'filename' => $event->filename,
+//                'tasks' => $event->tasks,
+//                'user' => $event->user,
+//                'timestamp' => \Carbon\Carbon::now(),
+//            ];
+//
+//            $FileEntity = \App\Models\Hopper\FileEntity::find($event->id);
+//            if(count($FileEntity)){
+//                $OldHistory = $FileEntity->history;
+//                $OldHistory[] = $History;
+//                $updateData = ['history' => $OldHistory];
+//				
+//				$this->performTasks($event->tasks, $updateData);
+//                $FileEntity->update($updateData);
+//				
+//            }
 			Pusher::trigger('hopper-channel', 'file-entity-'.$event->id, ['message' => $event->notes]);
         } catch (Exception $e) {
             \Log::error($e);

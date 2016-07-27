@@ -41,6 +41,8 @@ class User extends Authenticatable
         'history' => 'array',
     ];
 	
+	protected $appends = ['idle'];
+	
 	public function visits() {
         return $this->hasMany('App\Models\Hopper\Visit', 'design_username', 'name');
     }
@@ -65,7 +67,17 @@ class User extends Authenticatable
 	public function assignments() {
         return $this->hasMany('App\Models\Hopper\Visit', 'assignment_user_id', 'id');
     }
-		
+	
+	public function hasAssignments(){
+		return $this->assignments()->exists();
+	}
+	
+	
+	public function getIdleAttribute()
+	{
+		return $this->assignments()->exists();
+	}
+
 	public function scopeGraphicOperatorStatus(){	
 		
 		$query = $this->selectRaw('users.id, users.name, users.email, users.state, roles.name as role, (select count(*) from visits where visits.design_username = users.name) as visits')
@@ -106,6 +118,19 @@ class User extends Authenticatable
 	}
 	
 	public function scopeIdleOperators($query){	
+		
+		return $query
+					->leftJoin('assigned_roles', function($join) {
+                        $join->on('users.id', '=', 'assigned_roles.user_id');
+                    })
+                    ->leftJoin('roles', function ($join) {
+                        $join->on('assigned_roles.role_id', '=', 'roles.id');
+                    })
+                    ->where('roles.name', 'Graphic Operator')
+					->where('users.state', 'idle');
+	}
+	
+	public function scopeUnassignedOperators($query){	
 		
 		return $query
 					->leftJoin('assigned_roles', function($join) {

@@ -87,19 +87,7 @@ class HopperVisit{
             'visit' => $visit,
 			'idleUsers' => null,
 			'assignedUser' => null,
-        ];
-        //Is there an file entity attached?
-        $file_entity = $visit->file_entity;
-        if(count($file_entity)){
-            $currentVersion = $this->hopper->getCurrentVersion($file_entity->filename);
-            $nextVersion = $currentVersion + 1;
-            $data = array_merge($data, [
-                'FileEntity' => $file_entity,
-                'currentVersion' => $currentVersion,
-                'nextVersion' => $nextVersion,
-            ]);
-        }
-		
+        ];	
 		if($visit->assignment_user_id === null){
 			$idleUsers = \App\Models\Access\User\User::IdleGraphicOperators()->lists('name', 'id');
 			$data['idleUsers'] = $idleUsers;
@@ -108,7 +96,7 @@ class HopperVisit{
 		}
 		
 		
-        event(new EventSessionUpdated($visit->event_session->id, 'visit_behavior', 'Began Visit'));
+        //event(new EventSessionUpdated($visit->event_session->id, 'visit_behavior', 'Began Visit'));
 //        debugbar()->info($data['idleUsers']);
         return $data;
     }
@@ -127,13 +115,15 @@ class HopperVisit{
         
         $this->updateLinkedEventSession($data, $visit);
         $this->updateLinkedFileEntity($data, $visit);
+        $this->updateLinkedUser($data, $visit);
         
-        
+		event(new \App\Events\Backend\Hopper\VisitUpdated($visit->id, 'visit_updated', 'Rejected branding'));
+		
         return $visit;
     }
     
     /**
-     * Update the specified resource in storage.
+     * Update the specified resource in storage blindly.
      *
      * @param  $data
      * @param  App\Models\Hopper\Visit  $visit
@@ -152,21 +142,24 @@ class HopperVisit{
     
     public function updateLinkedEventSession($data, Visit $visit){
         if(!isset($data['action'])){ return; }
-        
+        $updates = [];
         switch($data['action']){
             case 'approve_brand':
-                $visit->event_session->update(['approval_brand' => 'YES']);
-                event(new EventSessionUpdated($visit->event_session->id, 'visit_behavior', 'Approved branding'));
+				$updates['approval_brand'] = "YES";
+//                $visit->event_session->update(['approval_brand' => 'YES']);
+                //event(new EventSessionUpdated($visit->event_session->id, 'visit_behavior', 'Approved branding'));
                 break;
             case 'disapprove_brand':
-                $visit->event_session->update(['approval_brand' => 'NO']);
-                event(new EventSessionUpdated($visit->event_session->id, 'visit_behavior', 'Rejected branding'));
+				$updates['approval_brand'] = "NO";
+//                $visit->event_session->update(['approval_brand' => 'NO']);
+                //event(new EventSessionUpdated($visit->event_session->id, 'visit_behavior', 'Rejected branding'));
                 break;
             default:
                 //event(new EventSessionUpdated($visit->event_session->id, 'visit_behavior', 'Visit Updated'));
                 break;
         }
-        
+		
+        $visit->event_session->update($updates);
     }
             
     public function updateLinkedFileEntity($data, Visit $visit){
@@ -175,29 +168,22 @@ class HopperVisit{
                 
                 $path = $this->hopperfile->copyTemporaryNewFileToMaster($data['filename'], true);
                 //$id, $event, $notes = '', $filename = null, $tasks = [], $user = 'Hopper', $request = null
-                event(new \App\Events\Backend\Hopper\FileEntityUpdated($visit->file_entity->id, 'visit_behavior', 'Moved updated visit file '.$data['filename'].' to master', $data['filename'], ['update_path' => $path]));
+                //event(new \App\Events\Backend\Hopper\FileEntityUpdated($visit->file_entity->id, 'visit_behavior', 'Moved updated visit file '.$data['filename'].' to master', $data['filename'], ['update_path' => $path]));
                 
 				$this->hopperfile->copyMasterToArchive($data['filename']);
-                event(new \App\Events\Backend\Hopper\FileEntityUpdated($visit->file_entity->id, 'visit_behavior', 'Copied updated visit file '.$data['filename'].' to archive', $data['filename']));
+                //event(new \App\Events\Backend\Hopper\FileEntityUpdated($visit->file_entity->id, 'visit_behavior', 'Copied updated visit file '.$data['filename'].' to archive', $data['filename']));
                 
-          }
-        
-//        if(!isset($data['action'])){ return; }
-        
-//        switch($data['action']){
-//            case 'approve_brand':
-//                $visit->event_session->update(['approval_brand' => 'YES']);
-//                event(new EventSessionUpdated($visit->event_session->id, 'visit_behavior', 'Approved branding'));
-//                break;
-//            case 'disapprove_brand':
-//                $visit->event_session->update(['approval_brand' => 'NO']);
-//                event(new EventSessionUpdated($visit->event_session->id, 'visit_behavior', 'Rejected branding'));
-//                break;
-//            default:
-//                event(new EventSessionUpdated($visit->event_session->id, 'visit_behavior', 'Visit Updated'));
-//                break;
-//        }
-        
+          }        
+    }
+	
+	public function updateLinkedUser($data, Visit $visit){
+		$updates = [];
+		if($data['remain_assigned'] !== 'YES'){
+			$updates['assignment_user_id'] = 0;	
+		}
+		
+		$visit->update($updates);
+		
     }
     
     public function parseForExport($Visits){
@@ -207,7 +193,7 @@ class HopperVisit{
          
         foreach($Visits as $key => $Visit){
             unset($Visits[$key]->id);
-            unset($Visits[$key]->history);       
+//            unset($Visits[$key]->history);       
         }
         return $Visits;            
     }

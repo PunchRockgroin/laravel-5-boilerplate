@@ -87,29 +87,12 @@ class HopperEventSession {
 
         $this->parseDateTimeforEdit($eventsession);
         
-        $this->hopperfile->purgeDupesToArchive();
+        //$this->hopperfile->purgeDupesToArchive();
 
         $data = [
             'eventsession' => $eventsession,
-            'History' => $this->hopper->groupedHistory($eventsession->history),
+           // 'History' => $this->hopper->groupedHistory($eventsession->history),
         ];
-//        debugbar()->info($data);
-
-        //Is there an file entity attached?
-        $file_entity = $eventsession->file_entity;
-        if (count($file_entity)) {
-
-            $currentVersion = $this->hopper->getCurrentVersion($file_entity->filename);
-            $nextVersion = $currentVersion + 1;
-            $data = array_merge($data, [
-                'FileEntity' => $file_entity,
-                'currentVersion' => $currentVersion,
-                'nextVersion' => $nextVersion,
-            ]);
-        }
-
-
-//        debugbar()->info($eventsession->history);
 
         return $data;
     }
@@ -138,12 +121,12 @@ class HopperEventSession {
 					'check_in_datetime' => \Carbon\Carbon::now( config('hopper.event_timezone') ),
 				]);
                 $messagebag->add('checked_in', "<strong class='lead'>Checked In</strong>");
-                event(new EventSessionUpdated($id, 'checked_in', 'Checked in'));
+//                event(new EventSessionUpdated($id, 'checked_in', 'Checked in'));
                 break;
             case 'check_out':
                 $request->merge(['checked_in' => 'NO', 'check_in_datetime' => null]);
                 $messagebag->add('checked_in', "<strong class='lead'>Checked Out</strong>");
-                event(new EventSessionUpdated($id, 'checked_out', 'Checked out'));
+//                event(new EventSessionUpdated($id, 'checked_out', 'Checked out'));
                 break;
             case 'create_visit':
 //                $messagebag->add('create_visit', "<strong class='lead'>Visit Created</strong>");
@@ -152,7 +135,7 @@ class HopperEventSession {
 
                 break;
             default:
-                event(new EventSessionUpdated($id, 'update', ''));
+//                event(new EventSessionUpdated($id, 'update', ''));
                 break;
         }
     }
@@ -162,9 +145,9 @@ class HopperEventSession {
         if (!$request->has('checkin_username')) {
             $request->merge(['checkin_username' => \Auth::user()->name]);
         }		
-        $request->merge(['file_entity_id' => $request->primary_file_entity_id]);
-        $visit = $hoppervisit->store($request->all());
-        event(new EventSessionUpdated($request->event_session_id, 'visit_created', 'Created a new Visit: ' . $visit->id));
+//        $request->merge(['file_entity_id' => $request->primary_file_entity_id]);
+        //$visit = $hoppervisit->store($request->all());
+//        event(new EventSessionUpdated($request->event_session_id, 'visit_created', 'Created a new Visit: ' . $visit->id));
 		
 		
         //If it's a blind update
@@ -172,7 +155,6 @@ class HopperEventSession {
              
 			debugbar()->info($request->currentfilename);
 			debugbar()->info($request->filename);
-			debugbar()->info($request->all());
 			
 			$master_stream = $this->hopperfile->getStream($this->hopper_master_name . $request->currentfilename);
 			$new_file_stream = $this->hopperfile->getStream($this->hopper_temporary_name . $request->filename);
@@ -183,13 +165,13 @@ class HopperEventSession {
 //			$this->hopperfile->getStream
 			
 			//Update Visitor Info
-            $visit->visitors = "(blind update)";
-            $visit->difficulty = "1";
-            $visit->design_notes = "This was a blind update";
-            $visit->design_username = \Auth::user()->name;
+//            $visit->visitors = "(blind update)";
+//            $visit->difficulty = "1";
+//            $visit->design_notes = "This was a blind update";
+//            $visit->design_username = \Auth::user()->name;
 			//Save
-            $visit->save();
-			\Log::info('Blind Update Occurred: '.$request->filename);
+//            $visit->save();
+//			\Log::info('Blind Update Occurred: '.$request->filename);
 			//Copy the new master to archive
             //$this->hopperfile->copyMasterToArchive($request->filename, $master_stream);
 			
@@ -199,16 +181,19 @@ class HopperEventSession {
 			}
 			
 			//Find the file entity by reference
-			$fileentity = \App\Models\Hopper\FileEntity::find($request->primary_file_entity_id);
+			//$fileentity = \App\Models\Hopper\FileEntity::find($request->primary_file_entity_id);
 			//Update File Entity Referenced
-			$updated_fileentity = $this->hopperfileentity->update($request, $fileentity);
+			//$updated_fileentity = $this->hopperfileentity->update($request, $fileentity);
 			//$id, $event, $notes = '', $filename = null, $tasks = [], $user = 'Hopper', $request = null
-            event(new \App\Events\Backend\Hopper\FileEntityUpdated($visit->file_entity->id, 'visit_behavior', 'Copied master file '.$visit->file_entity->filename.' to working', $request->filename, ['update_path' => $path]));
+            //event(new \App\Events\Backend\Hopper\FileEntityUpdated($visit->file_entity->id, 'visit_behavior', 'Copied master file '.$visit->file_entity->filename.' to working', $request->filename, ['update_path' => $path]));
 			
             //We're done here
-            return $visit;
+            return true;
             
         }
+		//If it's not a blind update
+		//Create a visit
+		$visit = $hoppervisit->store($request->all());
         //If there is no updated file
         if($request->currentfilename === $request->filename){
 			//Copy the current file in Master to Archive
@@ -224,11 +209,11 @@ class HopperEventSession {
 			//Move the old file in Master to Archive
             $this->hopperfile->moveMasterToArchive($request->currentfilename);
 			//Find the fileentity by ID
-			$fileentity = \App\Models\Hopper\FileEntity::find($request->primary_file_entity_id);
+			//$fileentity = \App\Models\Hopper\FileEntity::find($request->primary_file_entity_id);
 			//Update
-			$updated_fileentity = $this->hopperfileentity->update($request, $fileentity);
+			//$updated_fileentity = $this->hopperfileentity->update($request, $fileentity);
 			//Otherwise, if there's a filename and an entity and the currentfilename (old file) does not equal the filename passed in the request
-        }elseif($request->filename && $request->primary_file_entity_id && ($request->currentfilename !== $request->filename)){
+        }elseif($request->filename && $request->currentfilename && ($request->currentfilename !== $request->filename)){
 			//Copy the current file in Master to Working
 			$this->hopperfile->copyMasterToWorking($request->currentfilename);
             //Copy the current file in Temporary to Master
@@ -240,15 +225,15 @@ class HopperEventSession {
             //Move the current file in Temporary to Working
             $this->hopperfile->moveTemporaryNewFileToWorking($request->filename);
 			//Find the fileentity by ID
-			$fileentity = \App\Models\Hopper\FileEntity::find($request->primary_file_entity_id);
+			//$fileentity = \App\Models\Hopper\FileEntity::find($request->primary_file_entity_id);
 			//Update
-			$updated_fileentity = $this->hopperfileentity->update($request, $fileentity);
+			//$updated_fileentity = $this->hopperfileentity->update($request, $fileentity);
         }
         //$id, $event, $notes = '', $filename = null, $tasks = [], $user = 'Hopper', $request = null
-		if(!empty($visit->file_entity->id)){
-			 event(new \App\Events\Backend\Hopper\FileEntityUpdated($visit->file_entity->id, 'visit_behavior', 'Copied master file '.$visit->file_entity->filename.' to working', $request->filename, ['update_path' => $path]));
-        
-		}
+//		if(!empty($visit->file_entity->id)){
+//			 event(new \App\Events\Backend\Hopper\FileEntityUpdated($visit->file_entity->id, 'visit_behavior', 'Copied master file '.$visit->file_entity->filename.' to working', $request->filename, ['update_path' => $path]));
+//        
+//		}
        
         return $visit;
     }
@@ -336,7 +321,7 @@ class HopperEventSession {
            
             $EventSessionArray[$key]['checked_in'] = (!empty($EventSession['checked_in']) ? "YES" : "NO");
             //Unset History
-            unset($EventSessionArray[$key]['history']);
+//            unset($EventSessionArray[$key]['history']);
             //Unset ID
             unset($EventSessionArray[$key]['id']);
                       

@@ -21,7 +21,7 @@
 
             <div class="info-box-content">
                 <span class="info-box-text">Filename</span>
-                <span class="info-box-number">{!! $visit->file_entity->filename !!}</span>
+                <span class="info-box-number">{!! $visit->working_filename !!}</span>
             </div>
             <!-- /.info-box-content -->
         </div>
@@ -51,6 +51,13 @@
 						<div class="alert alert-info">Assigned to: <strong>{{ $assignedUser['name'] }}</strong></div>
 						@endif
 					@endif
+					{!! Html::checkboxswitch(
+						'remain_assigned',
+						'Keep Assignment on update',
+						'NO',
+						[ 'data-on-color'=>'warning', 'data-off-color'=>'default',]
+						)
+					!!}
 				</div><!-- /.box-body -->
 				@if($visit->assignment_user_id === null)
 				<div class="box-footer">
@@ -80,7 +87,6 @@
                                 {!! $date_room->room_name !!}  <span class="small">({!! $date_room->room_id !!})</span>
                                 {!! $Hopper->parseDateTimeForDisplay($date_room->date) !!} 
                                 </span></span></div>
-                        
                     @endforeach
                 </div>
                 <!-- /.info-box-content -->
@@ -124,8 +130,8 @@
         <div class='h1'>Drop anywhere</div>
     </div>
 </div>
-@include('includes/partials/pusher')
+
 <script>
-	pusher.subscribe("presence-test_channel");
+	//pusher.subscribe("presence-test_channel");
 </script>
 @endpush

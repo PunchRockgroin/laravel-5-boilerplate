@@ -21,6 +21,7 @@ class Visit extends Model
         'design_notes',
         'history',
 		'assignment_user_id',
+		'visitor_type',
     );
     
     /**

@@ -387,6 +387,31 @@ class HopperStats {
 	}
 	
 	
+	public function sessions_with_visitors_over_time($first, $last){
+		$visits_array = [];
+        $data = Visit::latest()
+                ->whereDate('created_at', '>=', $first->toDateString())
+                ->whereDate('created_at', '<=', $last->toDateString())
+				->whereNotNull('visitors')
+				->whereNotNull('design_username')
+				->whereNotIn('visitors', ['(blind update)', 'no one', 'N/A'])
+                ->get()->groupBy(function($item)
+        {
+          return $item->created_at->timezone(config('hopper.event_timezone', 'America/Los_Angeles'))->format('Y-m-d');
+        });
+		
+		$reversed = $data->reverse();
+
+//          $visits_array = $this->arrayFlipAndZero($this->buildDateRangeArray($first, $last));
+          
+//          foreach($data as $key => $entry) {
+//              $visits_array[$key] = $entry->count();
+//          }
+          
+        return $reversed;
+    }
+	
+	
 	
     public function buildDateRangeArray($first, $last)
     {

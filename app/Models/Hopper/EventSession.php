@@ -33,6 +33,8 @@ class EventSession extends Model
         'dates_rooms' => 'object',   
         'history' => 'array',
     ];
+	
+//	protected $appends = ['session_files'];
     
     /**
     * Get the route key for the model.
@@ -49,10 +51,28 @@ class EventSession extends Model
         return $this->hasMany('App\Models\Hopper\Visit');
     }
     
-    public function file_entity() {
-        return $this->hasOne('App\Models\Hopper\FileEntity');
+//    public function file_entity() {
+//        return $this->hasOne('App\Models\Hopper\FileEntity');
+//    }
+	
+	/**
+     * Get the checked in attribute
+     *
+     * @param  string  $value
+     * @return string
+     */
+    public function getSessionFilesAttribute($value)
+    {
+		$hopperfile = new \App\Services\Hopper\HopperFile;
+		
+		$sessionFiles = $hopperfile->locate($this->attributes['session_id']);
+		
+		if(empty($sessionFiles)){
+			return false;
+		}
+        
+		return $sessionFiles;
     }
-
     
     /**
      * Get the checked in attribute

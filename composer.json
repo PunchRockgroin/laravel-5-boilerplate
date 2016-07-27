@@ -24,7 +24,8 @@
         "maknz/slack": "^1.7",
         "laravelcollective/bus": "5.2.*",
         "barryvdh/laravel-async-queue": "~0.4@dev",
-        "yajra/laravel-datatables-oracle": "~6.0"
+        "yajra/laravel-datatables-oracle": "~6.0",
+        "cornford/bootstrapper": "^2.2"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

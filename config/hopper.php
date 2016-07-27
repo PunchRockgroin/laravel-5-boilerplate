@@ -90,6 +90,15 @@ return [
       |
      */
     'checkin_upload_mimes' => env('HOPPER_CHECKIN_UPLOAD_MIMES', 'pdf,ppt,pptx'),
+    /*
+      |--------------------------------------------------------------------------
+      | Valid upload Mimes
+      |--------------------------------------------------------------------------
+      |
+      | Mime types that can legitimatley use the uploader(s)
+      |
+     */
+    'filenameparts' => ['sessionID', 'speaker', 'roomIDs', 'version', 'shareStatus'],
 	/*
       |--------------------------------------------------------------------------
       | Use Queue for Filesystem/Etc

@@ -69,9 +69,9 @@ class HopperAdminController extends Controller {
     public function index() {
         $data = [];    
 		
-		$sessions_with_visitors = $this->hopperstats->sessions_with_visitors();
+		$eldata = $this->hopperstats->sessions_with_visitors_over_time(  \Carbon\Carbon::createFromDate(2016, 6, 6), \Carbon\Carbon::createFromDate(2016, 6, 9));
 		
-//		debugbar()->info($sessions_with_visitors);
+		debugbar()->info($eldata);
 		
 		
         return view('backend.hopper.admin.index', $data);
@@ -170,8 +170,10 @@ class HopperAdminController extends Controller {
 					$Visits = $this->hoppervisit->parseForExport(Visit::all());
 					
 					$VisitArray = $this->hopperstats->sessions_with_multiple_visits();
+					
+					$VisitArrayOverTime = $this->hopperstats->sessions_with_visitors_over_time(  \Carbon\Carbon::createFromDate(2016, 6, 6), \Carbon\Carbon::createFromDate(2016, 6, 9));
                     
-                    \Excel::create('visits_' . $now, function($excel) use($Visits, $VisitArray) {
+                    \Excel::create('visits_' . $now, function($excel) use($Visits, $VisitArray, $VisitArrayOverTime) {
                         $excel->sheet('Visits', function($sheet) use($Visits) {
 
                             $sheet->fromModel($Visits);
@@ -179,6 +181,13 @@ class HopperAdminController extends Controller {
 						$excel->sheet('MultipleVisits', function($sheet) use($VisitArray) {
 							$sheet->fromArray($VisitArray);
                         });
+						
+						foreach($VisitArrayOverTime as $key => $VisitDayOverTime){
+							$excel->sheet($key, function($sheet) use($VisitDayOverTime) {
+								$sheet->fromArray($VisitDayOverTime);
+							});
+						}
+						
                     })->download('xlsx');
                 } catch (Exception $e) {
                     return redirect()->route('backend.hopper.admin.index')

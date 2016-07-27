@@ -1,6 +1,6 @@
 <div class="">
     {!! Form::hidden('user_name', auth()->user()->name ) !!}
-    {!! Form::hidden('filename', $visit->file_entity->filename ) !!}
+    {!! Form::hidden('filename', $visit->working_filename ) !!}
     <div class="dropzone dz-clickable dz-default" id="visit-upload">
         <div class="fallback hidden">
             <input name="file" type="file" multiple />

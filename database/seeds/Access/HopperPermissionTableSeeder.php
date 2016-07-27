@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 /**
  * Class PermissionTableSeeder
  */
-class PermissionTableSeeder extends Seeder
+class HopperPermissionTableSeeder extends Seeder
 {
     public function run()
     {
