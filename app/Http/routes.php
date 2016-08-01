@@ -8,6 +8,10 @@ Route::group(['middleware' => 'web'], function() {
         require (__DIR__ . '/Routes/Language/Language.php');
     });
 
+    Route::group(['namespace' => 'Pusher', 'prefix' => 'pusher'], function(){
+			require (__DIR__ . '/Routes/Pusher/Pusher.php');
+		});
+
     /**
      * Frontend Routes
      * Namespaces indicate folder structure
@@ -34,4 +38,16 @@ Route::group(['namespace' => 'Backend', 'prefix' => 'admin', 'middleware' => 'ad
     require (__DIR__ . '/Routes/Backend/Dashboard.php');
     require (__DIR__ . '/Routes/Backend/Access.php');
     require (__DIR__ . '/Routes/Backend/LogViewer.php');
+
+    require (__DIR__ . '/Routes/Backend/FileEntity.php');
+    require (__DIR__ . '/Routes/Backend/EventSession.php');
+    require (__DIR__ . '/Routes/Backend/Visit.php');
+    require (__DIR__ . '/Routes/Backend/Hopper.php');
+});
+
+/**
+* Unauthenticated Broadcasting
+*/
+Route::group(['namespace' => 'Backend', 'prefix' => 'heartbeat'], function(){
+    require (__DIR__ . '/Routes/Backend/Heartbeat.php');
 });

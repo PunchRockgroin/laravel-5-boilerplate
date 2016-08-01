@@ -16,7 +16,16 @@
         "arcanedev/log-viewer": "~3.0",
         "arcanedev/no-captcha": "~3.0",
         "spatie/laravel-backup": "^3.0",
-        "yajra/laravel-datatables-oracle": "~6.0"
+        "yajra/laravel-datatables-oracle": "~6.0",
+        "maatwebsite/excel": "^2.1",
+        "guzzlehttp/guzzle": "^6.1",
+        "predis/predis": "^1.0",
+        "graham-campbell/dropbox": "^3.2",
+        "vinkla/pusher": "^2.2",
+        "jasonlewis/resource-watcher": "^1.2",
+        "maknz/slack": "^1.7",
+        "laravelcollective/bus": "5.2.*",
+        "cornford/bootstrapper": "^2.2"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

@@ -18,7 +18,7 @@ class MacroServiceProvider extends HtmlServiceProvider
      */
     public function boot()
     {
-        //
+        foreach(glob(base_path('resources/macros/*.macro.php')) as $filename){ require_once($filename); }
     }
 
     /**

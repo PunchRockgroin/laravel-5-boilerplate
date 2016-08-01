@@ -61,6 +61,10 @@ return [
             'region' => 'your-region',
             'bucket' => 'your-bucket',
         ],
+        'hopper' => [
+            'driver' => 'local',
+            'root' => env('HOPPER_STORAGE', storage_path() . '/app'),
+        ],
 
     ],
 
