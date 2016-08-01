@@ -16,6 +16,12 @@
         <div class="col-xs-12 col-sm-8">
             <h4><strong>Speaker check-in form</strong></h4>
             <div class="">Session ID: <strong>{!! $visit->event_session->session_id !!}</strong></div>
+			@if($visit->working_filename)
+            <div class="">Visit filename: <strong>{!! $visit->working_filename !!}</strong></div>
+			@endif
+			@if($visit->filename_uploaded)
+            <div class="">Name of file brought in: <strong>{!! $visit->filename_uploaded !!}</strong></div>
+			@endif
         </div>
         <div class="col-xs-12 col-sm-4">
            

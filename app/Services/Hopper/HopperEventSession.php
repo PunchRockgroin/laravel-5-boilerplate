@@ -153,14 +153,12 @@ class HopperEventSession {
         //If it's a blind update
         if($request->blind_update === "YES"){
              
-			debugbar()->info($request->currentfilename);
-			debugbar()->info($request->filename);
+//			debugbar()->info($request->currentfilename);
+//			debugbar()->info($request->filename);
 			
 			$master_stream = $this->hopperfile->getStream($this->hopper_master_name . $request->currentfilename);
 			$new_file_stream = $this->hopperfile->getStream($this->hopper_temporary_name . $request->filename);
-			
-//			
-//			
+
 			$path = $this->hopperfile->copyTemporaryNewFileToMaster($request->filename, $master_stream);    
 //			$this->hopperfile->getStream
 			
@@ -192,8 +190,7 @@ class HopperEventSession {
             
         }
 		//If it's not a blind update
-		//Create a visit
-		$visit = $hoppervisit->store($request->all());
+		//
         //If there is no updated file
         if($request->currentfilename === $request->filename){
 			//Copy the current file in Master to Archive
@@ -204,6 +201,8 @@ class HopperEventSession {
             $path = $this->hopperfile->copyMasterToMaster($request->currentfilename, $request->next_version);
             //Up the version number and copy that to Working
             $path = $this->hopperfile->copyMasterToWorking($request->currentfilename, $request->next_version);
+			//Use that as working_filename
+			$request->merge(['working_filename' => basename($path)]);
 			//Copy the new file in Master into Archive
 			$this->hopperfile->copyMasterToArchive($request->currentfilename, $request->next_version);
 			//Move the old file in Master to Archive
@@ -218,6 +217,8 @@ class HopperEventSession {
 			$this->hopperfile->copyMasterToWorking($request->currentfilename);
             //Copy the current file in Temporary to Master
             $path = $this->hopperfile->copyTemporaryNewFileToMaster($request->filename);
+			//Use that as working_filename
+			$request->merge(['working_filename' => $request->filename]);
             //Copy the new file in Master into Archive
             $this->hopperfile->copyMasterToArchive($request->filename);
             //Move the old file in Master to Archive
@@ -234,7 +235,10 @@ class HopperEventSession {
 //			 event(new \App\Events\Backend\Hopper\FileEntityUpdated($visit->file_entity->id, 'visit_behavior', 'Copied master file '.$visit->file_entity->filename.' to working', $request->filename, ['update_path' => $path]));
 //        
 //		}
-       
+//		
+        //Create a visit		
+		$visit = $hoppervisit->store($request->all());
+		
         return $visit;
     }
 

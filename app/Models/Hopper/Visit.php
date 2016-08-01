@@ -22,6 +22,7 @@ class Visit extends Model
         'history',
 		'assignment_user_id',
 		'visitor_type',
+		'working_filename',
     );
     
     /**

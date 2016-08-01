@@ -117,7 +117,7 @@ class HopperVisit{
         $this->updateLinkedFileEntity($data, $visit);
         $this->updateLinkedUser($data, $visit);
         
-		event(new \App\Events\Backend\Hopper\VisitUpdated($visit->id, 'visit_updated', 'Rejected branding'));
+		//event(new \App\Events\Backend\Hopper\VisitUpdated($visit->id, 'visit_updated', 'Rejected branding'));
 		
         return $visit;
     }

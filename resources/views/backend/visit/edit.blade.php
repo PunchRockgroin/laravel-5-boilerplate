@@ -22,6 +22,7 @@
             <div class="info-box-content">
                 <span class="info-box-text">Filename</span>
                 <span class="info-box-number">{!! $visit->working_filename !!}</span>
+				<span class="info-box-header small">File uploaded: {!! $visit->filename_uploaded !!}</span>
             </div>
             <!-- /.info-box-content -->
         </div>
