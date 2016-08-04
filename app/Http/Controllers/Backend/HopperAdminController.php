@@ -129,6 +129,7 @@ class HopperAdminController extends Controller {
 					} );
 					$entries = $eventsessionimport->get();
 					$count	 = count( $entries );
+					Storage::disk('hopper')->delete($request->filename);
 					return redirect()->route( 'admin.eventsession.index' )
 						->with( 'flash_success',  "There were " . $count . " " . $request->model . " that were updated." );
 				} catch ( App\Exceptions\GeneralException $e ) {
