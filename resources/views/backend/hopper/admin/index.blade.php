@@ -37,10 +37,7 @@
           <h3 class="box-title">Constructive</h3>
         </div><!-- /.box-header -->
         <div class="box-body">
-
-                <a href="{!! route('backend.hopper.admin.import', ['model'=> 'event_sessions']) !!}" class="btn btn-default"><i class="fa fa-file-excel-o"></i> <span class="hidden-xs  hidden-sm">Import </span>Event Sessions From File</a>
-                <a href="{!! route('backend.hopper.admin.import', ['model'=> 'file_entities']) !!}" class="btn btn-default"><i class="fa fa-file-excel-o"></i> <span class="hidden-xs  hidden-sm">Import </span>File Entities from Master</a>
-
+            <a href="{!! route('backend.hopper.admin.import.eventsessions') !!}" class="btn btn-default"><i class="fa fa-file-excel-o"></i> <span class="hidden-xs  hidden-sm">Import </span>Event Sessions From File</a>
         </div><!-- /.box-body -->
       </div><!-- /.box -->
       <div class="box">
@@ -48,13 +45,9 @@
           <h3 class="box-title">Destructive</h3>
         </div><!-- /.box-header -->
         <div class="box-body">
-            {!! Form::open(array('route' => 'backend.hopper.admin.update', 'role'=>'form', 'id'=>'hopperAdminForm')) !!}
-            <a href="{!! route('backend.hopper.admin.update', ['action'=> 'reset-checkin']) !!}" class="btn btn-default"><i class="fa fa-table"></i> Reset Check-ins</a>
-             <a href="{!! route('backend.hopper.admin.update', ['action'=> 'reset-sessions']) !!}" class="btn btn-default"><i class="fa fa-table"></i> Reset Sessions</a>
-            <a href="{!! route('backend.hopper.admin.update', ['action'=> 'reset-visits']) !!}" class="btn btn-default"><i class="fa fa-table"></i> Reset Visits</a>
-           
-            <a href="{!! route('backend.hopper.admin.update', ['action'=> 'reset-files']) !!}" class="btn btn-default"><i class="fa fa-table"></i> Reset Files</a>
-            {!! Form::close() !!}
+            <a href="{!! route('backend.hopper.admin.update', ['action'=> 'reset-checkin']) !!}" class="btn btn-default destructive-btn"><i class="fa fa-table"></i> Reset Check-ins</a>
+            <a href="{!! route('backend.hopper.admin.update', ['action'=> 'reset-sessions']) !!}" class="btn btn-default destructive-btn"><i class="fa fa-table"></i> Reset Sessions</a>
+            <a href="{!! route('backend.hopper.admin.update', ['action'=> 'reset-visits']) !!}" class="btn btn-default destructive-btn"><i class="fa fa-table"></i> Reset Visits</a>
         </div><!-- /.box-body -->
       </div><!-- /.box -->
 @endsection
