@@ -11,13 +11,13 @@ class UserTableSeeder extends Seeder
 {
     public function run()
     {
-        if (env('DB_CONNECTION') == 'mysql') {
+        if (DB::connection()->getDriverName() == 'mysql') {
             DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         }
 
-        if (env('DB_CONNECTION') == 'mysql') {
+        if (DB::connection()->getDriverName() == 'mysql') {
             DB::table(config('access.users_table'))->truncate();
-        } elseif (env('DB_CONNECTION') == 'sqlite') {
+        } elseif (DB::connection()->getDriverName() == 'sqlite') {
             DB::statement('DELETE FROM ' . config('access.users_table'));
         } else {
             //For PostgreSQL or anything else
@@ -36,6 +36,15 @@ class UserTableSeeder extends Seeder
                 'updated_at'        => Carbon::now(),
             ],
             [
+                'name'              => 'Backend User',
+                'email'             => 'executive@executive.com',
+                'password'          => bcrypt('1234'),
+                'confirmation_code' => md5(uniqid(mt_rand(), true)),
+                'confirmed'         => true,
+                'created_at'        => Carbon::now(),
+                'updated_at'        => Carbon::now(),
+            ],
+            [
                 'name'              => 'Default User',
                 'email'             => 'user@user.com',
                 'password'          => bcrypt('1234'),
@@ -48,7 +57,7 @@ class UserTableSeeder extends Seeder
 
         DB::table(config('access.users_table'))->insert($users);
 
-        if (env('DB_CONNECTION') == 'mysql') {
+        if (DB::connection()->getDriverName() == 'mysql') {
             DB::statement('SET FOREIGN_KEY_CHECKS=1;');
         }
     }

@@ -27,6 +27,10 @@ Vue.transition('zoom', {
 
 Vue.http.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="_token"]').getAttribute('content');
 
+if($('#Hopper').length){
+
+
+
 var hopperVue = new Vue({
     el: '#Hopper',
     data: {
@@ -97,7 +101,7 @@ var hopperVue = new Vue({
         getUserStatusData: function(event){
             this.$http({url: window.hopper.routes.user_status, method: 'GET'}).then(function (response) {
                 // success callback
-                    
+
                   this.Users = response.data.payload;
 //                  console.log(this.Users);
 //                console.log(response.data.payload);
@@ -110,15 +114,15 @@ var hopperVue = new Vue({
 //                    }else{
 //                        idle.push(user);
 //                    }
-//                    
+//
 ////                    _.forEach(value, function (subvalue) {
 ////                        otherUsers.push(subvalue);
 ////                    });
 //                });
 //                this.$set('activeUsers', active);
 //                this.$set('idleUsers', idle);
-                 
-                  
+
+
             }, function (response) {
                 // error callback
             });
@@ -128,13 +132,13 @@ var hopperVue = new Vue({
             this.Users.$set(index, user);
         },
         setBehaviorData: function(members){
-            var elGroups = _.groupBy(members, function (member) { 
+            var elGroups = _.groupBy(members, function (member) {
                 return member.heartbeat.route;
             });
-            var inVisit = _.filter(members, function (member) { 
+            var inVisit = _.filter(members, function (member) {
                 return member.heartbeat.route == 'admin.visit.edit';
             });
-            var idleUsers = _.filter(members, function (member) { 
+            var idleUsers = _.filter(members, function (member) {
                 return member.heartbeat.route != 'admin.visit.edit';
             });
             this.$set('inVisit', inVisit);
@@ -159,7 +163,7 @@ var hopperVue = new Vue({
             }, function (response) {
                 // error callback
                 console.log(response);
-            });  
+            });
         },
 //        addMember: function()
         getPusherPresence: function(event){
@@ -174,7 +178,7 @@ var hopperVue = new Vue({
                 // for example:
 //                console.log(member);
 //                console.log(hopperVue.inVisit);
-                
+
 //                console.log(hopperVue.idleUsers);
 //                _.each(hopperVue.idleUsers, function(user){
 //                    console.log(user.heartbeat.route);
@@ -210,7 +214,7 @@ var hopperVue = new Vue({
             }, function (response) {
                 // error callback
                 console.log(response);
-            });  
+            });
         },
         triggerRefresh: function(){
             this.getUserStatusData();
@@ -230,9 +234,9 @@ var hopperVue = new Vue({
                 console.log(response.data.payload);
 //                this.$set('Unassigned', response.data.payload);
                 $('.user-assignment-modal').modal('show');
-            });   
+            });
         },
-        assignVisitToUserModal: function(visit){ 
+        assignVisitToUserModal: function(visit){
             this.currentVisit = visit;
             $('.visit-assignment-modal').modal('show');
         },
@@ -252,14 +256,16 @@ var hopperVue = new Vue({
     },
     watch: {
         Users:function(){
-            //code here executes whenever the Users array changes 
+            //code here executes whenever the Users array changes
             //and runs AFTER the dom is updated, could use this in
             //the parent component
              $('.user-group').matchHeight();
-             
+
         }
     }
 });
+
+}
 
 //$.get('/admin/visit/stats').done(function(data){
 //    console.log(data);
@@ -270,21 +276,21 @@ $(function () {
         //hopperVue.getDashboardData();
         //hopperVue.getPusherPresence();
     }
-    
+
     $('.user-status-refresh').on('click', function(){
             hopperVue.getUserStatusData();
     });
-    
+
     var hopperChannel;
-    
+
     if ('undefined' !== typeof pusher) {
         hopperChannel = pusher.subscribe('hopper_channel');
-        hopperChannel.bind('user_status', function(data) {    
+        hopperChannel.bind('user_status', function(data) {
             if(data.message === 'update'){
                 hopperVue.triggerRefresh();
             }
         });
-        hopperChannel.bind('visit_status', function(data) {    
+        hopperChannel.bind('visit_status', function(data) {
             if(data.message === 'update'){
                 hopperVue.triggerRefresh();
             }
@@ -343,7 +349,7 @@ var getNextVersion = function(postdata, $target){
     $.post(baseUrl + "/admin/files/nextversion", postdata).done( function(resp){
         if(resp.message === 'ok'){
             $target.val(resp.payload.newfilename);
-            
+
         }else{
             console.log(resp.payload.message);
         }
@@ -372,7 +378,7 @@ $(function () {
         behavior = $behavior.val() || false;
         currentFileName = $currentFileNameInput.val() || false;
         next_version = $nextVersionInput.val() || false;
-            
+
         $nextVersionInput.on('change', function(){
 //         next_version = $nextVersionInput.val() || false;
             getNextVersion({
@@ -382,8 +388,8 @@ $(function () {
                 next_version: $nextVersionInput.val() || false
             }, $fileNameInput);
         });
-        
-        
+
+
         if($('input.session_file_option').length){
             setCurrentFile($("input.session_file_option:checked"), $currentFileNameInput);
             $( ".multiple-file-section" ).on( "click", "input.session_file_option", function() {
@@ -391,18 +397,19 @@ $(function () {
             });
         };
 
-        Dropzone.autoDiscover = false;
+        Dropzone.autoDiscover = true;
         var fileEntityUploadDz = new Dropzone("div#file-upload", {
             url: baseUrl + "/admin/files/upload",
             previewTemplate: document.querySelector('#preview-template').innerHTML,
             paramName: "file", // The name that will be used to transfer the file
             maxFilesize: 500, // MB
             maxFiles: 1,
+            autoDiscover: false,
             acceptedFiles: '.ppt,.pptx,.pdf,.pptm',
-//                addRemoveLinks: true, 
+//                addRemoveLinks: true,
             init: function () {
                 this.on("addedfile", function (file) {
-                    $('input[name="filename_uploaded"]').val(file.name); 
+                    $('input[name="filename_uploaded"]').val(file.name);
 //                    channel = pusher.subscribe('hopper_channel');
                     fileName = $fileNameInput.val();
                     next_version = $nextVersionInput.val() || false;
@@ -438,11 +445,11 @@ $(function () {
                     //$('#movemastertoworking-pseudo').bootstrapSwitch('state', true);
                     //$('.checkin-button').prop('disabled', false);
 //                    channel.bind('dropbox_action', function(data) {
-//                             
+//
 //                            if(data.filename === response.newFileName){
 //                                $el.find('.dz-wait').html('<div class="alert alert-success"><i class="fa fa-check">'+data.message+'</div>');
 //                            }
-////                            
+////
 //
 //                    });
 //                        console.log($el);
@@ -473,7 +480,7 @@ $(function () {
             }
         };
     }
-    
+
     $('input#visitorsNames').click(function() {
         $("#visitorNamesEntry").focus();
     });
@@ -489,7 +496,7 @@ $(function () {
                 ;
 
 
-        Dropzone.autoDiscover = false;
+        Dropzone.autoDiscover = true;
         var visitDropzone = new Dropzone(document.body, {
             url: baseUrl + "/admin/files/upload",
             previewsContainer: "div#visit-upload",
@@ -509,16 +516,16 @@ $(function () {
                     visitDropzone.removeAllFiles();
                 }
 //                file.acceptDimensions = done;
-                
+
         },
-//                addRemoveLinks: true, 
+//                addRemoveLinks: true,
             init: function () {
                 this.on("dragleave", function (event) {
                     if (lastenter === event.target) {
 //                        console.log('dragleave');
                         $('.dz-overtop').removeClass('dragging');
                     }
-//                    
+//
                 });
                 this.on("dragenter", function (event) {
                     lastenter = event.target;
@@ -555,11 +562,11 @@ $(function () {
 
 
 //                    channel.bind('dropbox_action', function(data) {
-//                             
+//
 //                            if(data.filename === response.newFileName){
 //                                $el.find('.dz-wait').html('<div class="alert alert-success"><i class="fa fa-check">'+data.message+'</div>');
 //                            }
-////                            
+////
 //
 //                    });
 //                        console.log($el);
@@ -592,7 +599,7 @@ $(function () {
 
             }
         };
-    } 
+    }
 
     $("input.bootstrap-checkbox-switch").bootstrapSwitch().on('switchChange.bootstrapSwitch', function (event, state) {
         var $el = $(this),
@@ -612,7 +619,7 @@ $(function () {
 
 
 $(function () {
-    
+
 
 //
 //        //-------------
@@ -685,7 +692,11 @@ $(function () {
           //Boolean - whether to make the chart responsive to window resizing
           responsive: true
         };
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> hopper3
         $('.lineChart').each(function(index){
             var $el = $(this),
                 lineChartCanvas = $(this).get(0).getContext("2d"), lineChart,
@@ -704,7 +715,11 @@ $(function () {
                 $el.replaceWith( '<div class="callout callout-danger"><h4>No Data</h4><p>There is a problem that we need to fix. A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart.</p></div>' );
             }
         });
+<<<<<<< HEAD
 		
+=======
+
+>>>>>>> hopper3
 		//-------------
         //- PIE CHART -
         //-------------
@@ -732,7 +747,7 @@ $(function () {
             maintainAspectRatio: true,
             //String - A legend template
             legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend chart-js-legend list-unstyled\"><% for (var i=0; i<segments.length; i++){%><li><span style=\"background-color:<%=segments[i].fillColor%>\"></span><%if(segments[i].label){%><%=segments[i].label%> (<%=segments[i].value%>)<%}%></li><%}%></ul>"
-          }; 
+          };
 
         $('.pieChart').each(function(index){
             var $el = $(this),
@@ -750,6 +765,6 @@ $(function () {
                 }
             }else{
                 $el.replaceWith( '<div class="callout callout-danger"><h4>No Data</h4><p>There is a problem that we need to fix. A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart.</p></div>' );
-            }  
-        }); 
+            }
+        });
 });

@@ -14,19 +14,6 @@ return [
     */
 
     'backend' => [
-        'permissions' => [
-            'created' => 'Permiso creado satisfactoriamente.',
-            'deleted' => 'Permiso eliminado satisfactoriamente.',
-
-            'groups'  => [
-                'created' => 'Grupo de permisos creado satisfactoriamente.',
-                'deleted' => 'Grupo de permisos eliminado satisfactoriamente.',
-                'updated' => 'Grupo de permisos actualizado satisfactoriamente.',
-            ],
-
-            'updated' => 'Permiso actualizado satisfactoriamente.',
-        ],
-
         'roles' => [
             'created' => 'Rol creado satisfactoriamente.',
             'deleted' => 'Rol eliminado satisfactoriamente.',
@@ -34,7 +21,7 @@ return [
         ],
 
         'users' => [
-            'confirmation_email' => 'Un nuevo mensaje de confirmacion ha sido enviado a tu correo.',
+            'confirmation_email' => 'Un nuevo mensaje de confirmación ha sido enviado a tu correo.',
             'created' => 'Usuario creado satisfactoriamente.',
             'deleted' => 'Usuario eliminado satisfactoriamente.',
             'deleted_permanently' => 'Usuario eliminado de forma permanente.',

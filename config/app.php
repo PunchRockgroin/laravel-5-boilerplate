@@ -16,12 +16,14 @@ return [
     'env' => env('APP_ENV', 'production'),
 
     /*
-	|--------------------------------------------------------------------------
-	| Application Name
-	|--------------------------------------------------------------------------
-	|
-	| The application name for use within the UI of the application
-	*/
+    |--------------------------------------------------------------------------
+    | Application Name
+    |--------------------------------------------------------------------------
+    |
+    | The application name for use within the UI of the application
+    |
+    */
+
     'name' => 'Hopper',
 
     /*
@@ -130,6 +132,8 @@ return [
 
     'log' => env('APP_LOG', 'daily'),
 
+    'log_level' => env('APP_LOG_LEVEL', 'debug'),
+
     /*
     |--------------------------------------------------------------------------
     | Autoloaded Service Providers
@@ -176,32 +180,37 @@ return [
         App\Providers\AccessServiceProvider::class,
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
+		    App\Providers\BladeServiceProvider::class,
         App\Providers\EventServiceProvider::class,
+        App\Providers\HistoryServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
         /*
          * Third Party Providers
          */
         Arcanedev\LogViewer\LogViewerServiceProvider::class,
+        Arcanedev\NoCaptcha\NoCaptchaServiceProvider::class,
         Collective\Html\HtmlServiceProvider::class,
         Creativeorange\Gravatar\GravatarServiceProvider::class,
         DaveJamesMiller\Breadcrumbs\ServiceProvider::class,
+		    HieuLe\Active\ActiveServiceProvider::class,
         Laracasts\Utilities\JavaScript\JavaScriptServiceProvider::class,
-        HieuLe\Active\ActiveServiceProvider::class,
         Laravel\Socialite\SocialiteServiceProvider::class,
         Spatie\Backup\BackupServiceProvider::class,
         Yajra\Datatables\DatatablesServiceProvider::class,
+
         Maatwebsite\Excel\ExcelServiceProvider::class,
         Vinkla\Pusher\PusherServiceProvider::class,
         JasonLewis\ResourceWatcher\Integration\LaravelServiceProvider::class,
         Maknz\Slack\SlackServiceProvider::class,
         Yajra\Datatables\DatatablesServiceProvider::class,
-		Cornford\Bootstrapper\BootstrapServiceProvider::class,
+	Cornford\Bootstrapper\BootstrapServiceProvider::class,
+
         /*
          * Has to override the Collective\Html\HtmlServiceProvider form singleton
          */
         App\Providers\MacroServiceProvider::class,
-        
+
         /*
          * Hopper and Related Services
          */
@@ -257,13 +266,12 @@ return [
          */
         'Active'      => HieuLe\Active\Facades\Active::class,
         'Breadcrumbs' => DaveJamesMiller\Breadcrumbs\Facade::class,
-        'Debugbar'    => Barryvdh\Debugbar\Facade::class,
+        'Captcha'     => Arcanedev\NoCaptcha\Facades\NoCaptcha::class,
         'Form'        => Collective\Html\FormFacade::class,
         'Gravatar'    => Creativeorange\Gravatar\Facades\Gravatar::class,
         'Html'        => Collective\Html\HtmlFacade::class,
         'Socialite'   => Laravel\Socialite\Facades\Socialite::class,
-        
-        
+
         'Dropbox' =>  GrahamCampbell\Dropbox\Facades\Dropbox::class,
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
         'LaravelPusher' => Vinkla\Pusher\Facades\Pusher::class,

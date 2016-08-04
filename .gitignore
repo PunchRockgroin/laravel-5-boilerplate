@@ -25,5 +25,6 @@ composer.phar
 error.log
 Todo.rtf
 .vagrant
-deployment-config.json
-*.orig
+
+/resources/bower_components/*
+resources/assets/bower_components/

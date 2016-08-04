@@ -25,6 +25,6 @@
 
 
 
-@push('after-scripts-end')
+@section('after-scripts-end')
     {!! $html->scripts() !!}
-@endpush
+@endsection

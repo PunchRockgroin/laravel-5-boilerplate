@@ -95,9 +95,22 @@
 	<!-- /.col -->
 </div>
 <div class='row'>
-	<div class="col-sm-12">
+	<div class="col-sm-9">
 		@include('backend.includes.partials.checkinlinechart')
 	</div>
+  <div class="col-sm-3">
+    <div class="box box-info">
+        <div class="box-header with-border">
+            <h3 class="box-title">{{ trans('history.backend.recent_history') }}</h3>
+            <div class="box-tools pull-right">
+                <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+            </div><!-- /.box tools -->
+        </div><!-- /.box-header -->
+        <div class="box-body">
+            {!! history()->render() !!}
+        </div><!-- /.box-body -->
+    </div><!--box box-success-->
+  </div>
 </div>
 
 <div class='row'>
@@ -113,7 +126,7 @@
 				 {!! $AssignmentHTML->table(['class' => 'table responsive table-bordered table-striped', 'width' => '100%' ]) !!}
 			</div><!-- /.box-body -->
 		</div><!--box box-success-->
-		
+
 	</div>
 	<div class="col-sm-4">
 		<div class="box box-success">
@@ -133,11 +146,11 @@
 @include('backend.hopper.dashboard.partials.userbehavior')
 
 @endsection
-@push('before-scripts-end')
+@section('before-scripts-end')
 @include('backend.hopper.dashboard.partials.userassignmentmodal')
 @include('backend.hopper.dashboard.partials.visitassignmentmodal')
-@endpush
-@push('after-scripts-end')
+@endsection
+@section('after-scripts-end')
 @include('includes/partials/pusher')
  {!! $AssignmentHTML->scripts() !!}
-@endpush
+@endsection

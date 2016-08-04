@@ -26,6 +26,10 @@
     "vue-resource": "~0.7.0",
     "animate.css": "~3.5.1",
     "lodash": "~4.5.1",
-    "matchHeight": "^0.7.0"
+    "matchHeight": "^0.7.0",
+    "datatables.net": "^1.10.12",
+    "datatables.net-bs": "^1.10.12",
+    "datatables.net-responsive": "^2.1.0",
+    "datatables.net-responsive-bs": "^2.1.0"
   }
 }

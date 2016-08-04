@@ -15,21 +15,6 @@ return [
 
     'backend' => [
         'access' => [
-            'permissions' => [
-                'create_error' => 'Hubo un problema al crear el Permiso. Intentelo de nuevo.',
-                'delete_error' => 'Hubo un problema al eliminar el Permiso. Intentelo de nuevo.',
-
-                'groups' => [
-                    'associated_permissions' => 'No puede eliminar un Grupo que tenga Permisos asociados.',
-                    'has_children' => 'No puede eliminar el Grupo que tenga otros Grupos asociados.',
-                    'name_taken' => 'Ya existe un Grupo con el nombre especificado.',
-                ],
-
-                'not_found' => 'El permiso requerido no existe.',
-                'system_delete_error' => 'No se pueden eliminar Permisos que afectan al sistema.',
-                'update_error' => 'Hubo un problema al modificar el Permiso. Intentelo de nuevo.',
-            ],
-
             'roles' => [
                 'already_exists' => 'Este Rol ya existe. Por favor, especifique un nombre de Rol diferente.',
                 'cant_delete_admin' => 'No puede eliminar el Rol de Administrador.',
@@ -46,7 +31,7 @@ return [
                 'cant_delete_self' => 'No puede eliminarse usted mismo.',
                 'create_error' => 'Hubo un problema al crear el Usuario. Intentelo de nuevo.',
                 'delete_error' => 'Hubo un problema al eliminar el Usuario. Intentelo de nuevo.',
-                'email_error' => 'Ya hay un Usuario con la direccion de E-Mail especificada.',
+                'email_error' => 'Ya hay un Usuario con la dirección de E-Mail especificada.',
                 'mark_error' => 'Hubo un problema al modificar el Usuario. Intentelo de nuevo.',
                 'not_found' => 'El Usuario requerido no existe.',
                 'restore_error' => 'Hubo un problema al restaurar el Usuario. Intentelo de nuevo.',
@@ -72,7 +57,7 @@ return [
             ],
 
             'deactivated' => 'Su cuenta ha sido desactivada.',
-            'email_taken' => 'El e-mail especificado ya está registrado.',
+            'email_taken' => 'El correo especificado ya está registrado.',
 
             'password' => [
                 'change_mismatch' => 'La contraseña antigua no coincide.',

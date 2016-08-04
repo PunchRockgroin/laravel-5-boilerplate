@@ -2,26 +2,24 @@
 
 namespace App\Repositories\Backend\Access\Role;
 
+use App\Models\Access\Role\Role;
+
 /**
  * Interface RoleRepositoryContract
- * @package App\Repositories\Role
+ * @package app\Repositories\Role
  */
 interface RoleRepositoryContract
 {
-    /**
-     * @param  $id
-     * @param  bool    $withPermissions
-     * @return mixed
-     */
-    public function findOrThrowException($id, $withPermissions = false);
 
-    /**
-     * @param  $per_page
-     * @param  string      $order_by
-     * @param  string      $sort
+	/**
      * @return mixed
      */
-    public function getRolesPaginated($per_page, $order_by = 'id', $sort = 'asc');
+    public function getCount();
+
+	/**
+     * @return mixed
+     */
+    public function getForDataTable();
 
     /**
      * @param  string  $order_by
@@ -38,19 +36,19 @@ interface RoleRepositoryContract
     public function create($input);
 
     /**
-     * @param  $id
+     * @param  Role $role
      * @param  $input
      * @return mixed
      */
-    public function update($id, $input);
+    public function update(Role $role, $input);
 
     /**
-     * @param  $id
+     * @param  Role $role
      * @return mixed
      */
-    public function destroy($id);
+    public function destroy(Role $role);
 
-    /**
+	/**
      * @return mixed
      */
     public function getDefaultUserRole();

@@ -16,11 +16,12 @@ return [
     'backend' => [
         'access' => [
             'users' => [
-                'activate' => 'Aktiver',
-                'change_password' => 'Ændre kodeord',
+                'activate' => 'Aktivér',
+                'change_password' => 'Skift adgangskode',
                 'deactivate' => 'Deaktiver',
                 'delete_permanently' => 'Slet permanent',
-                'resend_email' => 'Gensend bekræftelse E-mail',
+                'login_as' => 'Log ind som :user',
+                'resend_email' => 'Gensend bekræftelsesmail',
                 'restore_user' => 'Genskab bruger',
             ],
         ],

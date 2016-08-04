@@ -17,20 +17,6 @@ return [
         'access' => [
             'title' => 'Administración de acceso',
 
-            'permissions' => [
-                'all' => 'Todos los Permisos',
-                'create' => 'Nuevo Permiso',
-                'edit' => 'Modificar Permiso',
-                'groups' => [
-                    'all' => 'Todos los Grupos',
-                    'create' => 'Nuevo Grupo',
-                    'edit' => 'Modificar Grupo',
-                    'main' => 'Grupos',
-                ],
-                'main' => 'Permisos',
-                'management' => 'Administración de Permisos',
-            ],
-
             'roles' => [
                 'all' => 'Todos los Roles',
                 'create' => 'Nuevo Rol',
@@ -71,14 +57,16 @@ return [
          * Be sure to add the new language in alphabetical order.
          */
         'langs' => [
+            'ar' => 'العربية (Arabic)',
             'da' => 'Danés (Danish)',
             'de' => 'Alemán (German)',
             'en' => 'Inglés (English)',
             'es' => 'Español (Spanish)',
             'fr' => 'Francés (French)',
             'it' => 'Italiano (Italian)',
-            'pt-BR' => 'Brazilian Portuguese', //TODO: translate
+            'pt-BR' => 'Portugués Brasileño',
             'sv' => 'Sueco (Swedish)',
+            'th' => 'Thai',
         ],
     ],
 ];

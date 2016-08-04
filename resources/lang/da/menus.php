@@ -15,49 +15,35 @@ return [
 
     'backend' => [
         'access' => [
-            'title' => 'Vedligehold adgangsrettigheder',
-
-            'permissions' => [
-                'all' => 'Alle rettigheder',
-                'create' => 'Opret rettogheder',
-                'edit' => 'rediger rettigheder',
-                'groups' => [
-                    'all' => 'Alle grupper',
-                    'create' => 'Opret gruppe',
-                    'edit' => 'Rediger gruppe',
-                    'main' => 'Groupper',
-                ],
-                'main' => 'Rettigheder',
-                'management' => 'Vedligehold rettigheder',
-            ],
+            'title' => 'Adgangsadministration',
 
             'roles' => [
-                'all' => 'Alle roller',
-                'create' => 'Opret rolle',
-                'edit' => 'rediger rolle',
-                'management' => 'Vedligehold roller',
+                'all' => 'Alle Roller',
+                'create' => 'Opret Rolle',
+                'edit' => 'Rediger Rolle',
+                'management' => 'Rolleadministration',
                 'main' => 'Roller',
             ],
 
             'users' => [
-                'all' => 'Alle brugere',
-                'change-password' => 'Ændre kodeord',
-                'create' => 'opret bruger',
-                'deactivated' => 'Deaktiver bruger',
-                'deleted' => 'Slet bruger',
-                'edit' => 'Rediger bruger',
+                'all' => 'Alle Brugere',
+                'change-password' => 'Skift Adgangskode',
+                'create' => 'Opret Bruger',
+                'deactivated' => 'Deaktiverede Brugere',
+                'deleted' => 'Slet Bruger',
+                'edit' => 'Rediger Bruger',
                 'main' => 'Brugere',
             ],
         ],
 
         'log-viewer' => [
-            'main' => 'Log viser',
+            'main' => 'Logbog',
             'dashboard' => 'Dashboard',
-            'logs' => 'Logs',
+            'logs' => 'Logbog',
         ],
 
         'sidebar' => [
-            'dashboard' => 'Dashboard',
+            'dashboard' => 'Betjeningspanel',
             'general' => 'Generelt',
         ],
     ],
@@ -71,6 +57,7 @@ return [
          * Be sure to add the new language in alphabetical order.
          */
         'langs' => [
+            'ar' => 'Arabisk',
             'da' => 'Dansk',
             'de' => 'Tysk',
             'en' => 'Engelsk',
@@ -79,6 +66,7 @@ return [
             'it' => 'Italiensk',
             'pt-BR' => 'Brasiliansk portugisisk',
             'sv' => 'Svensk',
+            'th' => 'Thai',
         ],
     ],
 ];

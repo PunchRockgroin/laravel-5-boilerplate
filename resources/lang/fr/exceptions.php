@@ -15,21 +15,6 @@ return [
 
     'backend' => [
         'access' => [
-            'permissions' => [
-                'create_error' => 'Un problème est survenu lors de la création de la permission. Veuillez réessayer.',
-                'delete_error' => 'Un problème est survenu lors de la suppression de la permission. Veuillez réessayer.',
-
-                'groups' => [
-                    'associated_permissions' => 'Vous ne pouvez pas supprimer ce groupe parce que des permissions lui sont associées.',
-                    'has_children' => 'Vous ne pouvez pas supprimer ce groupe parce qu\il a des groupes enfants.',
-                    'name_taken' => 'Un groupe porte déjà ce nom',
-                ],
-
-                'not_found' => "Cette permission n'existe pas.",
-                'system_delete_error' => 'Vous ne pouvez pas supprimer une permission administrateur.',
-                'update_error' => 'Un problème est survenu lors de la mise à jour de la permission. Veuillez réessayer.',
-            ],
-
             'roles' => [
                 'already_exists' => 'Un rôle portant ce nom existe déjà.',
                 'cant_delete_admin' => 'Le rôle Administrator ne peut être supprimé.',
@@ -42,8 +27,8 @@ return [
             ],
 
             'users' => [
-                'cant_deactivate_self' => 'Vous ne pouvez pas vous désactiver vous même.',
-                'cant_delete_self' => 'Vous ne pouvez pas vous supprimer vous même.',
+                'cant_deactivate_self' => 'Vous ne pouvez pas vous désactiver vous-même.',
+                'cant_delete_self' => 'Vous ne pouvez pas vous supprimer vous-même.',
                 'create_error' => "Un problème est survenu lors de la création de l'utilisateur. Veuillez réessayer.",
                 'delete_error' => "Un problème est survenu lors de la suppression de l'utilisateur. Veuillez réessayer.",
                 'email_error' => 'Cette adresse email appartient à un autre utilisateur.',
@@ -75,7 +60,7 @@ return [
             'email_taken' => 'Cet email est déjà utilisé.',
 
             'password' => [
-                'change_mismatch' => "L'ancien mot de passe dst invalide.",
+                'change_mismatch' => "L'ancien mot de passe est invalide.",
             ],
 
 

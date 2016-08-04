@@ -62,11 +62,11 @@
 					</div>
 					<p class="help-block">You can find the Visit ID in the top right of the check-in sheet. You may also enter a Session ID, which will return the last visit for that Session ID.</p>
 					{!! Form::close() !!}
-				</div>       
+				</div>
 			</div>
 		</div>
 	</div>
-   
+
 	<div class="row">
 		<div class="col-xs-12 col-sm-6 col-md-6">
 		<div class="info-box">
@@ -153,7 +153,7 @@
 					<div class="box-tools pull-right">
 						<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
 					</div>
-					
+
 				</div>
 				<div class="box-body">
 					<canvas id="graphicOpsPieChart" data-legend-target="#graphicOpsPieChartLegend" data-variable="graphicOpsPie" class="pieChart"></canvas>
@@ -164,7 +164,7 @@
         <!-- /.col -->
       </div>
 
-	@permission('view-access-management')	
+	@permission('view-access-management')
     <div class="box box-success">
         <div class="box-header with-border">
             <h3 class="box-title">All Visits</h3>
@@ -190,7 +190,7 @@
 	@endauth
 @endsection
 
-@push('after-scripts-end')
+@section('after-scripts-end')
 @include('includes/partials/pusher')
 <script>
 	$(function () {
@@ -205,7 +205,7 @@
 			{data: 'action', name: 'action', orderable: false, searchable: false}
         ]
     });
-	@permission('view-access-management')	
+	@permission('view-access-management')
 	$('#allVisitsTable').DataTable({
         processing: true,
         serverSide: true,
@@ -214,7 +214,7 @@
             {data: 'id', name: 'id'},
             {data: 'session_id', name: 'session_id'},
             {data: 'visitors', name: 'visitors'},
-			{data: 'assignment_user_id', name: 'assignment_user_id'},
+			      {data: 'assignment_user_id', name: 'assignment_user_id'},
             {data: 'design_username', name: 'design_username'},
             {data: 'created_at', name: 'created_at'},
             {data: 'updated_at', name: 'updated_at'},
@@ -224,19 +224,19 @@
 	@endauth
 	var updateTables = function(){
 		$('#assignedVisitsTable').DataTable().ajax.reload();
-		@permission('view-access-management')	
+		@permission('view-access-management')
 			$('#allVisitsTable').DataTable().ajax.reload();
 		@endauth
 		console.log('updated');
 	};
     if ('undefined' !== typeof pusher) {
         hopperChannel = pusher.subscribe('hopper_channel');
-        hopperChannel.bind('user_status', function(data) {    
+        hopperChannel.bind('user_status', function(data) {
             if(data.message === 'update'){
                updateTables();
             }
         });
-        hopperChannel.bind('visit_status', function(data) {    
+        hopperChannel.bind('visit_status', function(data) {
             if(data.message === 'update'){
                 updateTables();
             }
@@ -244,4 +244,4 @@
     }
 });
 </script>
-@endpush
+@endsection

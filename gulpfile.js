@@ -3,8 +3,8 @@ require('./elixir-extensions');
 
 elixir(function(mix) {
  mix
-//     .phpUnit()
-//     .compressHtml()
+     //.phpUnit()
+     //.compressHtml()
 
     /**
      * Copy needed files from /node directories
@@ -22,7 +22,29 @@ elixir(function(mix) {
        'node_modules/bootstrap-sass/assets/javascripts/bootstrap.min.js',
        'public/js/vendor/bootstrap'
      )
+ 
+     /**
+     * Copy needed files from Datatables Bower directories
+     * to /public directory.
+     */
+     .copy(
+        [
+            'resources/assets/bower_components/datatables.net-responsive/js/dataTables.responsive.min.js',
+            'resources/assets/bower_components/datatables.net-responsive-bs/js/responsive.bootstrap.js'
+        ],
+       'public/js/backend/plugin/datatables'
+     )
      
+     .copy(
+        [
+            'resources/assets/bower_components/datatables.net-responsive-bs/css/responsive.bootstrap.min.css',
+        ],
+       'public/css/backend/plugin/datatables'
+     )
+     /**
+     * Copy needed files from Branding
+     * to /public directory.
+     */
      .copy('resources/assets/brand/hpe/font', 'public/build/fonts/hpe')
 
      /**
@@ -37,6 +59,14 @@ elixir(function(mix) {
       * Combine pre-processed frontend CSS files
       */
      .styles([
+       '../bower_components/bootstrap-daterangepicker/daterangepicker.css',
+       '../bower_components/AdminLTE/plugins/datatables/extensions/Responsive/css/dataTables.responsive.css',
+       '../bower_components/AdminLTE/plugins/datatables/dataTables.bootstrap.css',
+       '../bower_components/dropzone/dist/min/dropzone.min.css',
+       '../bower_components/dropzone/dist/min/dropzone.min.css',
+       '../bower_components/dropzone/dist/min/basic.min.css',
+       '../bower_components/bootstrap-switch/dist/css/bootstrap3/bootstrap-switch.min.css',
+       '../bower_components/animate.css/animate.css',
         'frontend/app.css'
      ], 'public/css/frontend.css')
 
@@ -64,14 +94,17 @@ elixir(function(mix) {
          'brand/font_inline.scss'
      ], 'public/css/backend_print.css')
 
+     .sass([
+         'brand/font_inline.scss'
+     ], 'public/css/backend_print.css')
+
      /**
       * Combine pre-processed backend CSS files
       */
      .styles([
          '../bower_components/bootstrap-daterangepicker/daterangepicker.css',
-         '../bower_components/AdminLTE/plugins/datatables/extensions/Responsive/css/dataTables.responsive.css',
-         '../bower_components/AdminLTE/plugins/datatables/dataTables.bootstrap.css',         
-         '../bower_components/dropzone/dist/min/dropzone.min.css',
+         '../bower_components/datatables.net-bs/css/dataTables.bootstrap.css',
+         '../bower_components/datatables.net-responsive-bs/css/responsive.bootstrap.css',
          '../bower_components/dropzone/dist/min/dropzone.min.css',
          '../bower_components/dropzone/dist/min/basic.min.css',
          '../bower_components/bootstrap-switch/dist/css/bootstrap3/bootstrap-switch.min.css',
@@ -81,35 +114,55 @@ elixir(function(mix) {
      
 
      /**
+      * Make RTL (Right To Left) CSS stylesheet for the backend
+      */
+     .rtlCss()
+
+     /**
       * Combine backend scripts
       */
-     
-
      .scripts([
-         
-         'assets/bower_components/lodash/lodash.js',
-         'assets/bower_components/moment/moment.js',
-         'assets/bower_components/bootstrap-daterangepicker/daterangepicker.js',
-         'assets/bower_components/AdminLTE/plugins/datatables/jquery.dataTables.min.js',
-         'assets/bower_components/AdminLTE/plugins/datatables/dataTables.bootstrap.min.js',
-         'assets/bower_components/AdminLTE/plugins/datatables/extensions/Responsive/js/dataTables.responsive.min.js',     
-         'assets/bower_components/AdminLTE/plugins/chartjs/Chart.min.js',    
-         'assets/bower_components/matchHeight/dist/jquery.matchHeight.js',    
-         'assets/bower_components/vue/dist/vue.js',         
-         'assets/bower_components/vue-resource/dist/vue-resource.js',         
-         'assets/js/plugin/sweetalert/sweetalert.min.js',
-         'assets/js/plugins.js',         
-         'assets/bower_components/bootstrap-switch/dist/js/bootstrap-switch.min.js',
-         'assets/bower_components/dropzone/dist/min/dropzone.min.js',
-         'assets/bower_components/jquery.repeater/jquery.repeater.js',
-         'assets/bower_components/pusher/dist/pusher.js',
-         'assets/js/backend/app.js',
-         'assets/js/backend/plugin/toastr/toastr.min.js',
-         'assets/js/backend/custom.js'
-     ], 'public/js/backend.js', 'resources')
+       '../bower_components/lodash/lodash.js',
+       '../bower_components/moment/moment.js',
+       '../bower_components/bootstrap-daterangepicker/daterangepicker.js',
+//       '../bower_components/AdminLTE/plugins/datatables/jquery.dataTables.min.js',
+       '../bower_components/datatables.net/js/jquery.dataTables.min.js',
+//       '../bower_components/AdminLTE/plugins/datatables/dataTables.bootstrap.min.js',
+       '../bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js',
+//       '../bower_components/AdminLTE/plugins/datatables/extensions/Responsive/js/dataTables.responsive.min.js',
+       '../bower_components/datatables.net-responsive/js/dataTables.responsive.min.js',
+       '../bower_components/datatables.net-responsive-bs/js/responsive.bootstrap.js',
+       '../bower_components/AdminLTE/plugins/chartjs/Chart.min.js',
+       '../bower_components/matchHeight/dist/jquery.matchHeight.js',
+       '../bower_components/vue/dist/vue.js',
+       '../bower_components/vue-resource/dist/vue-resource.js',
+       'plugin/sweetalert/sweetalert.min.js',
+       'plugins.js',
+       '../bower_components/bootstrap-switch/dist/js/bootstrap-switch.min.js',
+       '../bower_components/dropzone/dist/min/dropzone.min.js',
+       '../bower_components/jquery.repeater/jquery.repeater.js',
+       '../bower_components/pusher/dist/pusher.js',
+       'backend/app.js',
+       'backend/plugin/toastr/toastr.min.js',
+       'backend/custom.js'
+     ], 'public/js/backend.js')
+
+     /**
+      * Combine pre-processed rtl CSS files
+      */
+     .styles([
+         'rtl/bootstrap-rtl.css'
+     ], 'public/css/rtl.css')
 
     /**
       * Apply version control
       */
-     .version(["public/css/frontend.css", "public/js/frontend.js", "public/css/backend.css", "public/js/backend.js"]);
+     .version([
+         "public/css/frontend.css",
+         "public/js/frontend.js",
+         "public/css/backend.css",
+         "public/css/backend-rtl.css",
+         "public/js/backend.js",
+         "public/css/rtl.css"
+     ]);
 });

@@ -3,7 +3,16 @@
 namespace App\Repositories\Backend\Access\User;
 
 use App\Models\Access\User\User;
+use Illuminate\Support\Facades\DB;
 use App\Exceptions\GeneralException;
+use App\Events\Backend\Access\User\UserCreated;
+use App\Events\Backend\Access\User\UserUpdated;
+use App\Events\Backend\Access\User\UserDeleted;
+use App\Events\Backend\Access\User\UserRestored;
+use App\Events\Backend\Access\User\UserDeactivated;
+use App\Events\Backend\Access\User\UserReactivated;
+use App\Events\Backend\Access\User\UserPasswordChanged;
+use App\Events\Backend\Access\User\UserPermanentlyDeleted;
 use App\Exceptions\Backend\Access\User\UserNeedsRolesException;
 use App\Repositories\Backend\Access\Role\RoleRepositoryContract;
 use App\Repositories\Frontend\Access\User\UserRepositoryContract as FrontendUserRepositoryContract;
@@ -28,163 +37,126 @@ class EloquentUserRepository implements UserRepositoryContract
      * @param RoleRepositoryContract $role
      * @param FrontendUserRepositoryContract $user
      */
-    public function __construct(
-        RoleRepositoryContract $role,
-        FrontendUserRepositoryContract $user
-    )
+    public function __construct(RoleRepositoryContract $role, FrontendUserRepositoryContract $user)
     {
         $this->role = $role;
         $this->user = $user;
     }
 
     /**
-     * @param  $id
-     * @param  bool               $withRoles
-     * @throws GeneralException
+     * @param int $status
+     * @param bool $trashed
      * @return mixed
      */
-    public function findOrThrowException($id, $withRoles = false)
+    public function getForDataTable($status = 1, $trashed = false)
     {
-        if ($withRoles) {
-            $user = User::with('roles')->withTrashed()->find($id);
-        } else {
-            $user = User::withTrashed()->find($id);
+        /**
+         * Note: You must return deleted_at or the User getActionButtonsAttribute won't
+         * be able to differentiate what buttons to show for each row.
+         */
+        if ($trashed == "true") {
+            return User::onlyTrashed()
+                ->select(['id', 'name', 'email', 'status', 'confirmed', 'created_at', 'updated_at', 'deleted_at'])
+                ->get();
         }
 
-        if (!is_null($user)) {
-            return $user;
-        }
-
-        throw new GeneralException(trans('exceptions.backend.access.users.not_found'));
-    }
-
-    /**
-     * @param  $per_page
-     * @param  string      $order_by
-     * @param  string      $sort
-     * @param  int         $status
-     * @return mixed
-     */
-    public function getUsersPaginated($per_page, $status = 1, $order_by = 'id', $sort = 'asc')
-    {
-        return User::where('status', $status)
-            ->orderBy($order_by, $sort)
-            ->paginate($per_page);
-    }
-
-    /**
-     * @param  $per_page
-     * @return \Illuminate\Pagination\Paginator
-     */
-    public function getDeletedUsersPaginated($per_page)
-    {
-        return User::onlyTrashed()
-            ->paginate($per_page);
-    }
-
-    /**
-     * @param  string  $order_by
-     * @param  string  $sort
-     * @return mixed
-     */
-    public function getAllUsers($order_by = 'id', $sort = 'asc')
-    {
-        return User::orderBy($order_by, $sort)
+        return User::select(['id', 'name', 'email', 'status', 'confirmed', 'created_at', 'updated_at', 'deleted_at'])
+            ->where('status', $status)
             ->get();
     }
 
     /**
      * @param  $input
      * @param  $roles
-     * @param  $permissions
      * @throws GeneralException
      * @throws UserNeedsRolesException
      * @return bool
      */
-    public function create($input, $roles, $permissions)
+    public function create($input, $roles)
     {
         $user = $this->createUserStub($input);
 
-        if ($user->save()) {
-            //User Created, Validate Roles
-            $this->validateRoleAmount($user, $roles['assignees_roles']);
+		DB::transaction(function() use ($user, $roles) {
+			if ($user->save()) {
+				//User Created, Validate Roles
+				$this->validateRoleAmount($user, $roles['assignees_roles']);
 
-            //Attach new roles
-            $user->attachRoles($roles['assignees_roles']);
+				//Attach new roles
+				$user->attachRoles($roles['assignees_roles']);
 
-            //Attach other permissions
-            $user->attachPermissions($permissions['permission_user']);
+				//Send confirmation email if requested
+				if (isset($input['confirmation_email']) && $user->confirmed == 0) {
+					$this->user->sendConfirmationEmail($user->id);
+				}
 
-            //Send confirmation email if requested
-            if (isset($input['confirmation_email']) && $user->confirmed == 0) {
-                $this->user->sendConfirmationEmail($user->id);
-            }
+				event(new UserCreated($user));
+				return true;
+			}
 
-            return true;
-        }
-
-        throw new GeneralException(trans('exceptions.backend.access.users.create_error'));
+        	throw new GeneralException(trans('exceptions.backend.access.users.create_error'));
+		});
     }
 
     /**
-     * @param $id
+     * @param User $user
      * @param $input
      * @param $roles
-     * @param $permissions
      * @return bool
      * @throws GeneralException
      */
-    public function update($id, $input, $roles, $permissions)
+    public function update(User $user, $input, $roles)
     {
-        $user = $this->findOrThrowException($id);
         $this->checkUserByEmail($input, $user);
 
-        if ($user->update($input)) {
-            //For whatever reason this just wont work in the above call, so a second is needed for now
-            $user->status    = isset($input['status']) ? 1 : 0;
-            $user->confirmed = isset($input['confirmed']) ? 1 : 0;
-            $user->save();
+		DB::transaction(function() use ($user, $input, $roles) {
+			if ($user->update($input)) {
+				//For whatever reason this just wont work in the above call, so a second is needed for now
+				$user->status = isset($input['status']) ? 1 : 0;
+				$user->confirmed = isset($input['confirmed']) ? 1 : 0;
+				$user->save();
 
-            $this->checkUserRolesCount($roles);
-            $this->flushRoles($roles, $user);
-            $this->flushPermissions($permissions, $user);
+				$this->checkUserRolesCount($roles);
+				$this->flushRoles($roles, $user);
 
-            return true;
-        }
+				event(new UserUpdated($user));
+				return true;
+			}
 
-        throw new GeneralException(trans('exceptions.backend.access.users.update_error'));
+        	throw new GeneralException(trans('exceptions.backend.access.users.update_error'));
+		});
     }
 
     /**
-     * @param  $id
+     * @param  User $user
      * @param  $input
      * @throws GeneralException
      * @return bool
      */
-    public function updatePassword($id, $input)
+    public function updatePassword(User $user, $input)
     {
-        $user = $this->findOrThrowException($id);
         $user->password = bcrypt($input['password']);
-        
-        if ($user->save())
+
+        if ($user->save()) {
+            event(new UserPasswordChanged($user));
             return true;
+        }
 
         throw new GeneralException(trans('exceptions.backend.access.users.update_password_error'));
     }
 
     /**
-     * @param  $id
+     * @param  User $user
      * @throws GeneralException
      * @return bool
      */
-    public function destroy($id)
+    public function destroy(User $user)
     {
-        if (auth()->id() == $id) {
+        if (access()->id() == $user->id) {
             throw new GeneralException(trans('exceptions.backend.access.users.cant_delete_self'));
         }
 
-        $user = $this->findOrThrowException($id);
         if ($user->delete()) {
+            event(new UserDeleted($user));
             return true;
         }
 
@@ -192,35 +164,44 @@ class EloquentUserRepository implements UserRepositoryContract
     }
 
     /**
-     * @param  $id
+     * @param  User $user
      * @throws GeneralException
      * @return boolean|null
      */
-    public function delete($id)
+    public function delete(User $user)
     {
-        $user = $this->findOrThrowException($id, true);
-
-        //Detach all roles & permissions
-        $user->detachRoles($user->roles);
-        $user->detachPermissions($user->permissions);
-
-        try {
-            $user->forceDelete();
-        } catch (\Exception $e) {
-            throw new GeneralException($e->getMessage());
+        //Failsafe
+        if (is_null($user->deleted_at)) {
+            throw new GeneralException("This user must be deleted first before it can be destroyed permanently.");
         }
+
+		DB::transaction(function() use ($user) {
+			//Detach all roles & permissions
+			$user->detachRoles($user->roles);
+
+			if ($user->forceDelete()) {
+				event(new UserPermanentlyDeleted($user));
+				return true;
+			}
+
+			throw new GeneralException(trans('exceptions.backend.access.users.delete_error'));
+		});
     }
 
     /**
-     * @param  $id
+     * @param  User $user
      * @throws GeneralException
      * @return bool
      */
-    public function restore($id)
+    public function restore(User $user)
     {
-        $user = $this->findOrThrowException($id);
+        //Failsafe
+        if (is_null($user->deleted_at)) {
+            throw new GeneralException("This user is not deleted so it can not be restored.");
+        }
 
         if ($user->restore()) {
+            event(new UserRestored($user));
             return true;
         }
 
@@ -228,19 +209,29 @@ class EloquentUserRepository implements UserRepositoryContract
     }
 
     /**
-     * @param  $id
+     * @param  User $user
      * @param  $status
      * @throws GeneralException
      * @return bool
      */
-    public function mark($id, $status)
+    public function mark(User $user, $status)
     {
-        if (access()->id() == $id && $status == 0) {
+        if (access()->id() == $user->id && $status == 0) {
             throw new GeneralException(trans('exceptions.backend.access.users.cant_deactivate_self'));
         }
 
-        $user         = $this->findOrThrowException($id);
         $user->status = $status;
+
+        //Log history dependent on status
+        switch ($status) {
+            case 0:
+                event(new UserDeactivated($user));
+            break;
+
+            case 1:
+                event(new UserReactivated($user));
+            break;
+        }
 
         if ($user->save()) {
             return true;
@@ -248,6 +239,92 @@ class EloquentUserRepository implements UserRepositoryContract
 
         throw new GeneralException(trans('exceptions.backend.access.users.mark_error'));
     }
+
+    /**
+     * @param User $user
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws GeneralException
+     */
+    public function loginAs(User $user)
+    {
+        // Overwrite who we're logging in as, if we're already logged in as someone else.
+        if (session()->has('admin_user_id') && session()->has('temp_user_id')) {
+            // Let's not try to login as ourselves.
+            if (auth()->id() == $user->id || session()->get('admin_user_id') == $user->id) {
+                throw new GeneralException('Do not try to login as yourself.');
+            }
+
+            // Overwrite temp user ID.
+            session(['temp_user_id' => $user->id]);
+
+            // Login.
+            access()->loginUsingId($user->id);
+
+            // Redirect.
+            return redirect()->route("frontend.index");
+        }
+
+        $this->flushTempSession();
+
+        //Won't break, but don't let them "Login As" themselves
+        if (access()->id() == $user->id) {
+            throw new GeneralException("Do not try to login as yourself.");
+        }
+
+        //Add new session variables
+        session(["admin_user_id" => access()->id()]);
+        session(["admin_user_name" => access()->user()->name]);
+        session(["temp_user_id" => $user->id]);
+
+        //Login user
+        access()->loginUsingId($user->id);
+
+        //Redirect to frontend
+        return redirect()->route("frontend.index");
+    }
+
+    /**
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function logoutAs()
+    {
+
+        //If for some reason route is getting hit without someone already logged in
+        if (! access()->user()) {
+            return redirect()->route("auth.login");
+        }
+
+        //If admin id is set, relogin
+        if (session()->has("admin_user_id") && session()->has("temp_user_id")) {
+            //Save admin id
+            $admin_id = session()->get("admin_user_id");
+
+            $this->flushTempSession();
+
+            //Relogin admin
+            access()->loginUsingId((int)$admin_id);
+
+            //Redirect to backend user page
+            return redirect()->route("admin.access.user.index");
+        } else {
+            $this->flushTempSession();
+
+            //Otherwise logout and redirect to login
+            access()->logout();
+            return redirect()->route("auth.login");
+        }
+    }
+
+	/**
+	 * Remove old session variables from admin logging in as user
+	 */
+	public function flushTempSession()
+	{
+		//Remove any old session variables
+		session()->forget("admin_user_id");
+		session()->forget("admin_user_name");
+		session()->forget("temp_user_id");
+	}
 
     /**
      * Check to make sure at lease one role is being applied or deactivate user
@@ -288,7 +365,6 @@ class EloquentUserRepository implements UserRepositoryContract
             if (User::where('email', '=', $input['email'])->first()) {
                 throw new GeneralException(trans('exceptions.backend.access.users.email_error'));
             }
-
         }
     }
 
@@ -304,20 +380,6 @@ class EloquentUserRepository implements UserRepositoryContract
     }
 
     /**
-     * @param $permissions
-     * @param $user
-     */
-    private function flushPermissions($permissions, $user)
-    {
-        //Flush permissions out, then add array of new ones if any
-        $user->detachPermissions($user->permissions);
-        if (count($permissions['permission_user']) > 0) {
-            $user->attachPermissions($permissions['permission_user']);
-        }
-
-    }
-
-    /**
      * @param  $roles
      * @throws GeneralException
      */
@@ -328,7 +390,6 @@ class EloquentUserRepository implements UserRepositoryContract
         if (count($roles['assignees_roles']) == 0) {
             throw new GeneralException(trans('exceptions.backend.access.users.role_needed'));
         }
-
     }
 
     /**

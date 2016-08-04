@@ -1,6 +1,6 @@
 @extends('backend.layouts.master')
 
-@section('title', app_name() .' | '. trans('visit.backend.admin.title') .' | '. trans('visit.backend.admin.edit')) 
+@section('title', app_name() .' | '. trans('visit.backend.admin.title') .' | '. trans('visit.backend.admin.edit'))
 
 @section('page-header')
 <h1>
@@ -12,7 +12,7 @@
 @section('content')
 
 {!! Form::model($visit, ['route' => array('admin.visit.update', $visit->id), 'role' => 'form', 'method' => 'patch']) !!}
-{!! Form::hidden('behavior', 'update_visit') !!} 
+{!! Form::hidden('behavior', 'update_visit') !!}
 
 <div class="row">
     <div class="col-sm-12">
@@ -30,9 +30,11 @@
 
 </div>
 <div class="row">
-
+<div class="col-sm-12">
+  @include('backend.visit.partials.file_upload')
 </div>
-@include('backend.visit.partials.file_upload')
+</div>
+
 
 <div class="row">
 
@@ -86,14 +88,14 @@
                     @foreach($visit->event_session->dates_rooms as $date_room)
                     <div><span class="info-box-number"><span class="small">
                                 {!! $date_room->room_name !!}  <span class="small">({!! $date_room->room_id !!})</span>
-                                {!! $Hopper->parseDateTimeForDisplay($date_room->date) !!} 
+                                {!! $Hopper->parseDateTimeForDisplay($date_room->date) !!}
                                 </span></span></div>
                     @endforeach
                 </div>
                 <!-- /.info-box-content -->
             </div>
 			@endif
-			
+
             <div class="info-box">
                 <span class="info-box-icon bg-{!! ($visit->event_session->approval_brand === 'YES' ? 'green' : 'red') !!}"><i class="fa fa-check-circle"></i></span>
 
@@ -112,7 +114,7 @@
             </div><!-- /.box-header -->
 
             <div class="box-body">
-                @include('backend.visit.partials.form')                  
+                @include('backend.visit.partials.form')
             </div><!-- /.box-body -->
             <div class="box-footer">
                 @include('backend.visit.partials.actions')
@@ -124,7 +126,7 @@
 {!! Form::close() !!}
 @endsection
 
-@push('after-scripts-end')
+@section('after-scripts-end')
 <div style="" class="dz-overtop">
     <div>
         <i class="fa fa-5x fa-download"></i>
@@ -135,4 +137,4 @@
 <script>
 	//pusher.subscribe("presence-test_channel");
 </script>
-@endpush
+@endsection

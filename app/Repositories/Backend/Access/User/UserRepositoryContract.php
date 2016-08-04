@@ -2,87 +2,82 @@
 
 namespace App\Repositories\Backend\Access\User;
 
+use App\Models\Access\User\User;
+
 /**
  * Interface UserRepositoryContract
  * @package App\Repositories\User
  */
 interface UserRepositoryContract
 {
-    /**
-     * @param  $id
-     * @param  bool    $withRoles
+
+	/**
+     * @param int $status
+     * @param bool $trashed
      * @return mixed
      */
-    public function findOrThrowException($id, $withRoles = false);
-
-    /**
-     * @param  $per_page
-     * @param  string      $order_by
-     * @param  string      $sort
-     * @param  $status
-     * @return mixed
-     */
-    public function getUsersPaginated($per_page, $status = 1, $order_by = 'id', $sort = 'asc');
-
-    /**
-     * @param  $per_page
-     * @return \Illuminate\Pagination\Paginator
-     */
-    public function getDeletedUsersPaginated($per_page);
-
-    /**
-     * @param  string  $order_by
-     * @param  string  $sort
-     * @return mixed
-     */
-    public function getAllUsers($order_by = 'id', $sort = 'asc');
+    public function getForDataTable($status = 1, $trashed = false);
 
     /**
      * @param $input
      * @param $roles
-     * @param $permissions
      * @return mixed
      */
-    public function create($input, $roles, $permissions);
+    public function create($input, $roles);
 
     /**
-     * @param $id
+     * @param User $user
      * @param $input
      * @param $roles
-     * @param $permissions
      * @return mixed
      */
-    public function update($id, $input, $roles, $permissions);
+    public function update(User $user, $input, $roles);
 
     /**
-     * @param  $id
+     * @param  User $user
      * @return mixed
      */
-    public function destroy($id);
+    public function destroy(User $user);
 
     /**
-     * @param  $id
+     * @param  User $user
      * @return mixed
      */
-    public function delete($id);
+    public function delete(User $user);
 
     /**
-     * @param  $id
+     * @param  User $user
      * @return mixed
      */
-    public function restore($id);
+    public function restore(User $user);
 
     /**
-     * @param  $id
+     * @param  User $user
      * @param  $status
      * @return mixed
      */
-    public function mark($id, $status);
+    public function mark(User $user, $status);
 
     /**
-     * @param  $id
+     * @param  User $user
      * @param  $input
      * @return mixed
      */
-    public function updatePassword($id, $input);
+    public function updatePassword(User $user, $input);
+
+	/**
+     * @param User $user
+     * @return mixed
+     */
+    public function loginAs(User $user);
+
+	/**
+     * @return mixed
+     */
+    public function logoutAs();
+
+	/**
+	 * @return mixed
+	 */
+	public function flushTempSession();
 }

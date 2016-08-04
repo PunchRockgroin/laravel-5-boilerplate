@@ -13,47 +13,55 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
-        /**
-         * Frontend Events
-         */
+      /**
+      * Backend Events
+      */
+     \App\Events\Backend\Hopper\EventSessionUpdated::class => [
+          \App\Listeners\Backend\Hopper\EventSessionUpdatedHandler::class,
+     ],
+     \App\Events\Backend\Hopper\FileEntityUpdated::class => [
+          \App\Listeners\Backend\Hopper\FileEntityUpdatedHandler::class,
+     ],
+     \App\Events\Backend\Hopper\VisitUpdated::class => [
+          \App\Listeners\Backend\Hopper\VisitUpdatedHandler::class,
+     ],
+     \App\Events\Backend\Hopper\FileUploaded::class => [
+          \App\Listeners\Backend\Hopper\FileUploadedHandler::class,
+     ],
+     \App\Events\Backend\Hopper\MasterUpdated::class => [
+          \App\Listeners\Backend\Hopper\MasterUpdatedHandler::class,
+     ],
+     \App\Events\Backend\Hopper\WorkingUpdated::class => [
+             \App\Listeners\Backend\Hopper\WorkingUpdatedHandler::class,
+     ],
+     \App\Events\Backend\Hopper\Heartbeat::class => [
+             \App\Listeners\Backend\Hopper\HeartbeatHandler::class,
+     ],
+    ];
 
-        /**
-         * Authentication Events
-         */
-        \App\Events\Frontend\Auth\UserLoggedIn::class  => [
-            \App\Listeners\Frontend\Auth\UserLoggedInListener::class,
-        ],
-        \App\Events\Frontend\Auth\UserLoggedOut::class => [
-            \App\Listeners\Frontend\Auth\UserLoggedOutListener::class,
-        ],
-        \App\Events\Frontend\Auth\UserRegistered::class => [
-            \App\Listeners\Frontend\Auth\UserRegisteredListener::class,
-        ],
-        
-        /**
-        * Backend Events
-        */
-       \App\Events\Backend\Hopper\EventSessionUpdated::class => [
-            \App\Listeners\Backend\Hopper\EventSessionUpdatedHandler::class,
-       ],
-       \App\Events\Backend\Hopper\FileEntityUpdated::class => [
-            \App\Listeners\Backend\Hopper\FileEntityUpdatedHandler::class,
-       ],
-       \App\Events\Backend\Hopper\VisitUpdated::class => [
-            \App\Listeners\Backend\Hopper\VisitUpdatedHandler::class,
-       ],
-       \App\Events\Backend\Hopper\FileUploaded::class => [
-            \App\Listeners\Backend\Hopper\FileUploadedHandler::class,
-       ],
-       \App\Events\Backend\Hopper\MasterUpdated::class => [
-            \App\Listeners\Backend\Hopper\MasterUpdatedHandler::class,
-       ],
-       \App\Events\Backend\Hopper\WorkingUpdated::class => [
-               \App\Listeners\Backend\Hopper\WorkingUpdatedHandler::class,
-       ],
-       \App\Events\Backend\Hopper\Heartbeat::class => [
-               \App\Listeners\Backend\Hopper\HeartbeatHandler::class,
-       ],
+	/**
+     * Class event subscribers
+     * @var array
+     */
+    protected $subscribe = [
+		/**
+		 * Frontend Subscribers
+		 */
+
+		/**
+		 * Auth Subscribers
+		 */
+		\App\Listeners\Frontend\Auth\UserEventListener::class,
+
+		/**
+		 * Backend Subscribers
+		 */
+
+		/**
+		 * Access Subscribers
+		 */
+        \App\Listeners\Backend\Access\User\UserEventListener::class,
+		\App\Listeners\Backend\Access\Role\RoleEventListener::class,
     ];
 
     /**
