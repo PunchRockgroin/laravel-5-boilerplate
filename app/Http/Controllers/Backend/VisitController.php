@@ -120,8 +120,8 @@ class VisitController extends Controller
 							return "<div class='label label-warning'>Unassigned</div>";
 						}
                     })
-                    ->editColumn('created_at', '{!! \Carbon\Carbon::parse($created_at)->diffForHumans() !!}')
-                    ->editColumn('updated_at', '{!! \Carbon\Carbon::parse($updated_at)->diffForHumans() !!}')
+                    ->editColumn('created_at', '{!! $created_at->diffForHumans() !!}')
+                    ->editColumn('updated_at', '{!! $updated_at->diffForHumans() !!}')
                      ->editColumn('action', function ($visit) {
                         $content = '';
 						if(config('hopper.print.enable', false)){
