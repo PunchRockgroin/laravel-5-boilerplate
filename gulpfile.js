@@ -22,7 +22,29 @@ elixir(function(mix) {
        'node_modules/bootstrap-sass/assets/javascripts/bootstrap.min.js',
        'public/js/vendor/bootstrap'
      )
-
+ 
+     /**
+     * Copy needed files from Datatables Bower directories
+     * to /public directory.
+     */
+     .copy(
+        [
+            'resources/assets/bower_components/datatables.net-responsive/js/dataTables.responsive.min.js',
+            'resources/assets/bower_components/datatables.net-responsive-bs/js/responsive.bootstrap.js'
+        ],
+       'public/js/backend/plugin/datatables'
+     )
+     
+     .copy(
+        [
+            'resources/assets/bower_components/datatables.net-responsive-bs/css/responsive.bootstrap.min.css',
+        ],
+       'public/css/backend/plugin/datatables'
+     )
+     /**
+     * Copy needed files from Branding
+     * to /public directory.
+     */
      .copy('resources/assets/brand/hpe/font', 'public/build/fonts/hpe')
 
      /**
@@ -75,9 +97,8 @@ elixir(function(mix) {
       */
      .styles([
          '../bower_components/bootstrap-daterangepicker/daterangepicker.css',
-         '../bower_components/AdminLTE/plugins/datatables/extensions/Responsive/css/dataTables.responsive.css',
-         '../bower_components/AdminLTE/plugins/datatables/dataTables.bootstrap.css',
-         '../bower_components/dropzone/dist/min/dropzone.min.css',
+         '../bower_components/datatables.net-bs/css/dataTables.bootstrap.css',
+         '../bower_components/datatables.net-responsive-bs/css/responsive.bootstrap.css',
          '../bower_components/dropzone/dist/min/dropzone.min.css',
          '../bower_components/dropzone/dist/min/basic.min.css',
          '../bower_components/bootstrap-switch/dist/css/bootstrap3/bootstrap-switch.min.css',
@@ -97,9 +118,13 @@ elixir(function(mix) {
        '../bower_components/lodash/lodash.js',
        '../bower_components/moment/moment.js',
        '../bower_components/bootstrap-daterangepicker/daterangepicker.js',
-       '../bower_components/AdminLTE/plugins/datatables/jquery.dataTables.min.js',
-       '../bower_components/AdminLTE/plugins/datatables/dataTables.bootstrap.min.js',
-       '../bower_components/AdminLTE/plugins/datatables/extensions/Responsive/js/dataTables.responsive.min.js',
+//       '../bower_components/AdminLTE/plugins/datatables/jquery.dataTables.min.js',
+       '../bower_components/datatables.net/js/jquery.dataTables.min.js',
+//       '../bower_components/AdminLTE/plugins/datatables/dataTables.bootstrap.min.js',
+       '../bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js',
+//       '../bower_components/AdminLTE/plugins/datatables/extensions/Responsive/js/dataTables.responsive.min.js',
+       '../bower_components/datatables.net-responsive/js/dataTables.responsive.min.js',
+       '../bower_components/datatables.net-responsive-bs/js/responsive.bootstrap.js',
        '../bower_components/AdminLTE/plugins/chartjs/Chart.min.js',
        '../bower_components/matchHeight/dist/jquery.matchHeight.js',
        '../bower_components/vue/dist/vue.js',
