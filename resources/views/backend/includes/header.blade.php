@@ -1,5 +1,5 @@
 <header class="main-header">
-    {{ link_to_route('frontend.index', app_name(), [], ['class' => 'logo']) }}
+    {{ link_to_route('admin.dashboard', app_name(), [], ['class' => 'logo']) }}
 
     <nav class="navbar navbar-static-top" role="navigation">
         <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
@@ -15,7 +15,7 @@
                         @include('includes.partials.lang')
                     </li>
                 @endif
-
+				@if(false)
                 <li class="dropdown messages-menu">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                         <i class="fa fa-envelope-o"></i>
@@ -43,7 +43,7 @@
                         </li>
                     </ul>
                 </li><!-- /.notifications-menu -->
-
+				@endif
                 <li class="dropdown tasks-menu">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                         <i class="fa fa-flag-o"></i>
@@ -74,7 +74,7 @@
 							
                         </li>
 
-                        <li class="user-body">
+<!--                        <li class="user-body">
                             <div class="col-xs-4 text-center">
                                 {{ link_to('#', 'Link') }}
                             </div>
@@ -84,7 +84,7 @@
                             <div class="col-xs-4 text-center">
                                 {{ link_to('#', 'Link') }}
                             </div>
-                        </li>
+                        </li>-->
 
                         <li class="user-footer">
 							@if(false)

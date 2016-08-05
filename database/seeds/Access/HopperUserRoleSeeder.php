@@ -28,16 +28,23 @@ class HopperUserRoleSeeder extends Seeder
         $user_model = new $user_model;
         $user_model::first()->attachRole(1);
 
-        //Attach user role to check-in stations
-        $user_model = config('auth.providers.users.model');
-        $user_model = new $user_model;
-        $user_model::find(2)->attachRole(2);
-		
-		//Attach user role to graphic operator
-        $user_model = config('auth.providers.users.model');
-        $user_model = new $user_model;
-        $user_model::find(3)->attachRole(3);
+		if(config('hopper.seed_additional_users', false)){
+			//Attach user role to check-in station
+			$user_model = config('auth.providers.users.model');
+			$user_model = new $user_model;
+			$user_model::find(2)->attachRole(2);
 
+			//Attach user role to runner
+			$user_model = config('auth.providers.users.model');
+			$user_model = new $user_model;
+			$user_model::find(3)->attachRole(3);
+
+			//Attach user role to graphic operator
+			$user_model = config('auth.providers.users.model');
+			$user_model = new $user_model;
+			$user_model::find(4)->attachRole(4);
+		}
+		
         if (env('DB_CONNECTION') == 'mysql') {
             DB::statement('SET FOREIGN_KEY_CHECKS=1;');
         }

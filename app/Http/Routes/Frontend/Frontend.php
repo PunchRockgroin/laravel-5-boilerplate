@@ -16,3 +16,6 @@ Route::group(['middleware' => 'auth'], function () {
         Route::patch('profile/update', 'ProfileController@update')->name('frontend.user.profile.update');
     });
 });
+
+
+Route::get('/installer', 'FrontendController@installer')->name('frontend.installer');

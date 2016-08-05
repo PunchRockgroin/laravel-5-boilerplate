@@ -27,33 +27,50 @@ class HopperUserTableSeeder extends Seeder
         //Add the master administrator, user id of 1
         $users = [
             [
-                'name'              => 'David Alberts',
-                'email'             => 'dave@lightsourcecreative.com',
-                'password'          => bcrypt('173a0cf52f87115284b9afd84b464762'),
+                'name'              => env('HOPPER_MASTER_USER', 'David Alberts'),
+                'email'             => env('HOPPER_MASTER_EMAIL', 'dave@lightsourcecreative.com'),
+                'password'          => bcrypt(env('HOPPER_MASTER_PASS', '173a0cf52f87115284b9afd84b464762')),
                 'confirmation_code' => md5(uniqid(mt_rand(), true)),
                 'confirmed'         => true,
                 'created_at'        => Carbon::now(),
                 'updated_at'        => Carbon::now(),
-            ],
-            [
-                'name'              => 'Check In Station 1',
-                'email'             => 'checkin1@lightsourecreative.com',
-                'password'          => bcrypt('1234'),
-                'confirmation_code' => md5(uniqid(mt_rand(), true)),
-                'confirmed'         => true,
-                'created_at'        => Carbon::now(),
-                'updated_at'        => Carbon::now(),
-            ],
-            [
-                'name'              => 'Graphic Operator',
-                'email'             => 'go@lightsourecreative.com',
-                'password'          => bcrypt('1234'),
-                'confirmation_code' => md5(uniqid(mt_rand(), true)),
-                'confirmed'         => true,
-                'created_at'        => Carbon::now(),
-                'updated_at'        => Carbon::now(),
-            ],
+            ]
         ];
+		
+		
+		
+		if(config('hopper.seed_additional_users', false)){
+			$additional_users = [
+				[
+					'name'              => 'Check In Station 1',
+					'email'             => 'checkin1@lightsourecreative.com',
+					'password'          => bcrypt('1234'),
+					'confirmation_code' => md5(uniqid(mt_rand(), true)),
+					'confirmed'         => true,
+					'created_at'        => Carbon::now(),
+					'updated_at'        => Carbon::now(),
+				],
+				[
+					'name'              => 'Runner',
+					'email'             => 'runner@lightsourecreative.com',
+					'password'          => bcrypt('1234'),
+					'confirmation_code' => md5(uniqid(mt_rand(), true)),
+					'confirmed'         => true,
+					'created_at'        => Carbon::now(),
+					'updated_at'        => Carbon::now(),
+				],
+				[
+					'name'              => 'Graphic Operator',
+					'email'             => 'go@lightsourecreative.com',
+					'password'          => bcrypt('1234'),
+					'confirmation_code' => md5(uniqid(mt_rand(), true)),
+					'confirmed'         => true,
+					'created_at'        => Carbon::now(),
+					'updated_at'        => Carbon::now(),
+				]
+			];
+			$users = array_merge($users, $additional_users);
+		}
 
         DB::table(config('access.users_table'))->insert($users);
 
