@@ -86,6 +86,8 @@ class HopperEventSession {
     public function edit(EventSession $eventsession) {
 
         $this->parseDateTimeforEdit($eventsession);
+		
+		event(new EventSessionUpdated($eventsession->id, $eventsession, 'opened'));
         
         //$this->hopperfile->purgeDupesToArchive();
 
@@ -121,7 +123,7 @@ class HopperEventSession {
 					'check_in_datetime' => \Carbon\Carbon::now( config('hopper.event_timezone') ),
 				]);
                 $messagebag->add('checked_in', "<strong class='lead'>Checked In</strong>");
-//                event(new EventSessionUpdated($id, 'checked_in', 'Checked in'));
+                event(new EventSessionUpdated($id, $request->session_id, 'checked in'));
                 break;
             case 'check_out':
                 $request->merge(['checked_in' => 'NO', 'check_in_datetime' => null]);

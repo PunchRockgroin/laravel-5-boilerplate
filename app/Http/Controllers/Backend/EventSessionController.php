@@ -25,16 +25,13 @@ class EventSessionController extends Controller
     public function index(Request $request, Builder $htmlbuilder)
     {
         //
-
+		
         if ($request->ajax()) {
-            $eventsessions = EventSession::select(['id', 'session_id', 'checked_in', 'speakers', 'onsite_phone', 'presentation_owner', 'created_at', 'updated_at']);
+            $eventsessions = EventSession::select(['id', 'session_id', 'checked_in', 'speakers', 'onsite_phone', 'presentation_owner']);
+			
             return \Datatables::of($eventsessions)
-                    //->editColumn('created_at', '{!! $created_at->diffForHumans() !!}')
-                    // ->editColumn('updated_at', function ($eventsession) {
-                    //     return $eventsession->updated_at->format('Y/m/d');
-                    // })
 //                    ->setRowClass(function ($eventsession) {
-//                        return $eventsession->checked_in === 'NO' ? 'alert-success' : '';
+//                        return $eventsession->checked_in === 'YES' ? 'alert-success' : '';
 //                    })
                     ->editColumn('action', function ($eventsession) {
                         $content = '';
@@ -49,7 +46,9 @@ class EventSessionController extends Controller
                     ->make(true);
         }
 
-
+//		$eventsessions = EventSession::all();
+//		
+//		debugbar()->info($eventsessions);
 
         $html = $htmlbuilder
         ->addColumn(['data' => 'id', 'name' => 'id', 'title' => 'ID'])
@@ -57,15 +56,12 @@ class EventSessionController extends Controller
         ->addColumn(['data' => 'speakers', 'name' => 'speakers', 'title' => 'Speakers'])
         ->addColumn(['data' => 'onsite_phone', 'name' => 'onsite_phone', 'title' => 'On-site Phone'])
         ->addColumn(['data' => 'presentation_owner', 'name' => 'presentation_owner', 'title' => 'Presenation Owner'])
-//        ->addColumn(['data' => 'created_at', 'name' => 'created_at', 'title' => 'Created At'])
-//        ->addColumn(['data' => 'updated_at', 'name' => 'updated_at', 'title' => 'Updated At'])
-
         ->addAction();
 
         $data = [
             'html' => $html
         ];
-        event(new \App\Events\Backend\Hopper\Heartbeat(auth()->user(), request()->route(), \Carbon\Carbon::now()->toIso8601String()));
+//        event(new \App\Events\Backend\Hopper\Heartbeat(auth()->user(), request()->route(), \Carbon\Carbon::now()->toIso8601String()));
         return view('backend.eventsession.index', $data);
     }
 
@@ -93,7 +89,7 @@ class EventSessionController extends Controller
     public function create(HopperEventSession $hoppereventsession)
     {
         $data = $hoppereventsession->create([]); //Placeholder
-        event(new \App\Events\Backend\Hopper\Heartbeat(auth()->user(), request()->route(), \Carbon\Carbon::now()->toIso8601String()));
+//        event(new \App\Events\Backend\Hopper\Heartbeat(auth()->user(), request()->route(), \Carbon\Carbon::now()->toIso8601String()));
         return view('backend.eventsession.create', $data);
     }
 
@@ -105,17 +101,13 @@ class EventSessionController extends Controller
      */
     public function store(Request $request, HopperEventSession $hoppereventsession)
     {
-        //
-         //debugbar()->info($request->all());
-
-         $this->validate($request, [
+		$this->validate($request, [
             'session_id' => 'required',
         ],
         [
             'session_id.required' => 'A Session ID is required to create a new session',
         ]);
 
-//         $eventsession = EventSession::create($request->all());
          $eventsession = $hoppereventsession->store($request->all());
          return redirect()->back()->withFlashSuccess('Event '. $eventsession->session_id .' Created');
     }
@@ -147,8 +139,7 @@ class EventSessionController extends Controller
     {
 
         $data = $hoppereventsession->edit($eventsession);
-//        debugbar()->info($data);
-        //event(new \App\Events\Backend\Hopper\Heartbeat(auth()->user(), request()->route(), \Carbon\Carbon::now()->toIso8601String()));
+		
         return view('backend.eventsession.edit', $data);
     }
 

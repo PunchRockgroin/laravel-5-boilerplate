@@ -55,6 +55,8 @@ class HopperAdminController extends Controller {
 	 */
 	public function index() {
 		$data = [ ];
+		
+		debugbar()->info($this->hopperfile->getCurrentVersion('BB10105_Patel_[Z4001A]_LCC13.pptx'));
 
 		return view( 'backend.hopper.admin.index', $data );
 	}

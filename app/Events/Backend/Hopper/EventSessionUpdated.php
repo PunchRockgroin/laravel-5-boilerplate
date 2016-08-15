@@ -11,6 +11,7 @@ class EventSessionUpdated extends Event
     use SerializesModels;
     
     public $id;
+    public $eventsession;
     public $event;
     public $request;
     public $notes;
@@ -22,11 +23,12 @@ class EventSessionUpdated extends Event
      *
      * @return void
      */
-    public function __construct($id, $event, $notes = '', $tasks = [], $user = 'Hopper', $request = null)
+    public function __construct($id, $eventsession, $event, $notes = '', $tasks = [], $user = 'Hopper', $request = null)
     {
         
         
         $this->id = $id;
+		$this->eventsession = $eventsession;
         $this->event = $event;
         $this->request = $request;
         $this->notes = $notes;

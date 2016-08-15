@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 use Validator;
 use Event;
+use Cache;
 use GrahamCampbell\Dropbox\Facades\Dropbox;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Carbon\Carbon as Carbon;
 use Vinkla\Pusher\PusherManager;
@@ -63,16 +63,16 @@ class HopperFile implements HopperFileContract {
 		$stream = Storage::disk($disk)->getDriver()->readStream($oldFilePath);
         if ($newFile_exists && Storage::disk($disk)->delete($newFilePath)) {
 			if(Storage::disk($disk)->put($newFilePath, $stream)){
-				\Log::info('Copy File: '.$oldFilePath .' to ' . $newFilePath);
+				//\Log::info('Copy File: '.$oldFilePath .' to ' . $newFilePath);
 				return true;
 			}
         } else {
 			if(Storage::disk($disk)->put($newFilePath, $stream)){
-				\Log::info('Copy File: '.$oldFilePath .' to ' . $newFilePath);
+				//\Log::info('Copy File: '.$oldFilePath .' to ' . $newFilePath);
 				return true;
 			}
         }	
-		\Log::info('File Operation: '.$oldFilePath .' to ' . $newFilePath);
+		//\Log::info('File Operation: '.$oldFilePath .' to ' . $newFilePath);
         return true;
     }
 
@@ -569,41 +569,43 @@ class HopperFile implements HopperFileContract {
         }
         
 //        debugbar()->info($masterFiles);
-        
+        return true;
     }
 
     public static function getCurrentVersion($currentFileName) {
-        $currentFileParts = pathinfo($currentFileName)['filename'];
+//        $currentFileParts = pathinfo($currentFileName)['filename'];
+        $currentFileParts = pathinfo($currentFileName, PATHINFO_FILENAME);
         $currentFileNameParts = explode('_', $currentFileParts);
         if (empty($currentFileNameParts)) {
             return false;
         }
+		//We only care about the end
+		$version = collect($currentFileNameParts)->take(-1)->implode('');
+
         //If there is no file in Master but placeholer LCCNOFILE is there
-        if ($currentFileNameParts[3] === 'LCCNOFILE') {
+        if ($version === 'LCCNOFILE') {
             //The Next version is 7
             $currentVersion = 7;
         } else { //Do the usual thing
-            $currentVersion = (int) preg_replace("/[^0-9]/", '', $currentFileNameParts[3]);
+            $currentVersion = (int) preg_replace("/[^0-9]/", '', $version);
         }
         return str_pad($currentVersion, 2, '0', STR_PAD_LEFT);
     }
 
     public function renameFileVersion($currentFileName, $nextVersion, $currentFileExtension = null) {
 
-        $currentFileParts = pathinfo($currentFileName)['filename'];
-        if ($currentFileExtension === null) {
-            $currentFileExtension = pathinfo($currentFileName)['extension'];
+		if ($currentFileExtension === null) {
+            $currentFileExtension = pathinfo($currentFileName, PATHINFO_EXTENSION);
         }
-//        
-        $currentFileNameArray = $this->getFileParts($currentFileParts);
+        $currentFileNameArray = $this->getFileParts($currentFileName);
 
-        $newFileName = $currentFileNameArray['sessionID']
-                . '_' . $currentFileNameArray['speaker']
-                . '_' . $currentFileNameArray['roomIDs']
-                . '_LCC' . $nextVersion
-                . (empty($currentFileNameArray['shareStatus']) ? '' : '_' . $currentFileNameArray['shareStatus']) //Sometimes, share status isn't there
-                . '.' . $currentFileExtension;
-
+		//Pop the end off
+		$currentFileNameArray->pop();
+		//Put the New version at the end
+		$currentFileNameArray->put('version', config('hopper.version_prefix', 'LCC') . $nextVersion);
+		//Merge to new file name
+		$newFileName = $currentFileNameArray->implode('_') . '.' . $currentFileExtension;		
+		
         return $newFileName;
     }
     
@@ -631,7 +633,7 @@ class HopperFile implements HopperFileContract {
             }
         }
         
-        return $currentFileNameArray;
+        return collect($currentFileNameArray);
     }
     
     
@@ -641,7 +643,9 @@ class HopperFile implements HopperFileContract {
      * @return \Illuminate\Support\Collection
      */
     public function getAllInMaster(){
-        $collection = collect(Storage::disk('hopper')->files($this->hopper_master_name));
+        $collection = collect(Cache::remember('hopper_master_files', 1, function() {
+			return Storage::disk('hopper')->files($this->hopper_master_name);
+		}));
         return $collection;
     }
     

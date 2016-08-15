@@ -49,6 +49,18 @@ class EventSessionUpdatedHandler
 //        }
 
         try {
+			history()->log(
+				'Event Session',
+				$event->event.' <strong>$1</strong>',
+				$event->eventsession->id,
+				'plus',
+				'bg-green',
+				[
+					'link' => ['admin.eventsession.edit', $event->eventsession->session_id, [$event->eventsession->id]]
+				]
+			);
+			
+			
 //            $History = [
 //                'event' => $event->event,
 //                'user' => $event->user,
