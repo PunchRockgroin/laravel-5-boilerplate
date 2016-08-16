@@ -72,4 +72,3 @@
         @yield('after-scripts-end')
     </body>
 </html>
-@stop
