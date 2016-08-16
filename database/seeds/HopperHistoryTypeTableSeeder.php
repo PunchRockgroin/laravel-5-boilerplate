@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 /**
  * Class HistoryTypeTableSeeder
  */
-class HistoryTypeTableSeeder extends Seeder {
+class HopperHistoryTypeTableSeeder extends Seeder {
 
 	/**
 	 *
