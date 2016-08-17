@@ -492,7 +492,11 @@ class HopperAdminController extends Controller {
 		$data = [ ];
 		
 		
-		$this->hopperfile->copyfile('1_Master/BB6269_Hurt_[TH6]_LCC16.pptx', 'temporary/BB6269_Hurt_[TH6]_LCC16.pptx', 'hopper', 'local');
+		$this->dispatch(
+			new \App\Jobs\Hopper\CopyFile('1_Master/BB6269_Hurt_[TH6]_LCC16.pptx', 'temporary/BB6269_Hurt_[TH6]_LCC16.pptx', 'hopper', 'local')
+		);
+		
+//		$this->hopperfile->copyfile('1_Master/BB6269_Hurt_[TH6]_LCC16.pptx', 'temporary/BB6269_Hurt_[TH6]_LCC16.pptx', 'hopper', 'local');
 		
 
 		return view( 'backend.hopper.admin.tests.fileopstest', $data );

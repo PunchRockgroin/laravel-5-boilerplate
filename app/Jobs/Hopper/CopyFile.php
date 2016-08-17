@@ -18,19 +18,21 @@ class CopyFile extends Job implements SelfHandling, ShouldQueue
     protected $hopperfile;
     protected $oldFilePath;
     protected $newFilePath;
-    protected $fileEntity;
+    protected $sourcedisk;
+	protected $targetdisk;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($oldFilePath, $newFilePath, $fileEntity = null)
+    public function __construct($oldFilePath, $newFilePath, $sourcedisk = 'hopper', $targetdisk = 'hopper')
     {
         $this->hopperfile = app('hopper.file');
         $this->oldFilePath = $oldFilePath;
         $this->newFilePath = $newFilePath;
-        $this->fileEntity = $fileEntity;
+        $this->sourcedisk = $sourcedisk;
+        $this->targetdisk = $targetdisk;
     }
 
     /**
@@ -44,7 +46,7 @@ class CopyFile extends Job implements SelfHandling, ShouldQueue
             \Log::error("File Copy Job Failed: ".$this->oldFilePath .' to ' . $this->newFilePath);
             throw new \Exception; 
         }
-        $this->hopperfile->copyfile($this->oldFilePath, $this->newFilePath);
+        $this->hopperfile->copyfile($this->oldFilePath, $this->newFilePath, $this->sourcedisk, $this->targetdisk);
         \Log::info('Copy File: '.$this->oldFilePath .' to ' . $this->newFilePath);
         
     }
