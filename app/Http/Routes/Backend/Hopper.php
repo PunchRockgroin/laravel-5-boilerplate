@@ -13,5 +13,8 @@ Route::group([
             Route::post('/import/upload/{model}', ['as' => 'backend.hopper.admin.import.upload', 'uses' => 'HopperAdminController@importUpload']);
             Route::post('/import/process', ['as' => 'backend.hopper.admin.import.process', 'uses' => 'HopperAdminController@processUpload']);
 			Route::get('/import/eventsessions', ['as' => 'backend.hopper.admin.import.eventsessions', 'uses' => 'HopperAdminController@importEventSessions']);
-           Route::post('/update', ['as' => 'backend.hopper.admin.master_file_update', 'uses' => 'HopperAdminController@masterFileUpdate']); 
+            Route::post('/update', ['as' => 'backend.hopper.admin.master_file_update', 'uses' => 'HopperAdminController@masterFileUpdate']); 
+			
+			Route::get('/fileopstest', ['as' => 'backend.hopper.admin.fileopstest', 'uses' => 'HopperAdminController@fileopstest']);
+			
         });
