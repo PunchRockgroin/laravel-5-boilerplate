@@ -53,21 +53,21 @@ class HopperFile implements HopperFileContract {
 		return Storage::disk($disk)->exists($target);
 	}
 
-    public function copyfile($oldFilePath, $newFilePath, $disk = 'hopper') {
-        $oldFile_exists = Storage::disk($disk)->exists($oldFilePath);
-        $newFile_exists = Storage::disk($disk)->exists($newFilePath);
+    public function copyfile($oldFilePath, $newFilePath, $sourcedisk = 'hopper', $targetdisk = 'hopper') {
+        $oldFile_exists = Storage::disk($sourcedisk)->exists($oldFilePath);
+        $newFile_exists = Storage::disk($targetdisk)->exists($newFilePath);
         if (!$oldFile_exists) {
             return false;
         }
         //$fd = fopen($this->getDriverStoragePath($disk) . $oldFilePath, "rb");
-		$stream = Storage::disk($disk)->getDriver()->readStream($oldFilePath);
-        if ($newFile_exists && Storage::disk($disk)->delete($newFilePath)) {
-			if(Storage::disk($disk)->put($newFilePath, $stream)){
+		$stream = Storage::disk($sourcedisk)->getDriver()->readStream($oldFilePath);
+        if ($newFile_exists && Storage::disk($targetdisk)->delete($newFilePath)) {
+			if(Storage::disk($targetdisk)->put($newFilePath, $stream)){
 				//\Log::info('Copy File: '.$oldFilePath .' to ' . $newFilePath);
 				return true;
 			}
         } else {
-			if(Storage::disk($disk)->put($newFilePath, $stream)){
+			if(Storage::disk($targetdisk)->put($newFilePath, $stream)){
 				//\Log::info('Copy File: '.$oldFilePath .' to ' . $newFilePath);
 				return true;
 			}
@@ -76,17 +76,17 @@ class HopperFile implements HopperFileContract {
         return true;
     }
 
-    public function movefile($oldFilePath, $newFilePath, $disk = 'hopper') {
-        if ($this->copyfile($oldFilePath, $newFilePath, $disk)) {
+    public function movefile($oldFilePath, $newFilePath, $sourcedisk = 'hopper', $targetdisk = 'hopper') {
+        if ($this->copyfile($oldFilePath, $newFilePath, $sourcedisk, $targetdisk)) {
             //Storage::disk($disk)->delete($oldFilePath);
-			if(Storage::disk($disk)->delete($oldFilePath)){
+			if(Storage::disk($targetdisk)->delete($oldFilePath)){
 				return true;
 			}
         }
     }
 	
-    public function renamefile($oldFilePath, $newFilePath, $disk = 'hopper') {
-			Storage::disk($disk)->move($oldFilePath, $newFilePath);
+    public function renamefile($oldFilePath, $newFilePath, $targetdisk = 'hopper') {
+			Storage::disk($targetdisk)->move($oldFilePath, $newFilePath);
     }
 	
 	
@@ -115,12 +115,12 @@ class HopperFile implements HopperFileContract {
         }
     }
 
-    public function uploadToTemporary($file, $newFileName) {
+    public function uploadToTemporary($file, $newFileName, $disk = 'local') {
         try {
-            $upload_success = Storage::disk('hopper')->put($this->hopper_temporary_name . $newFileName, $file);
-            $filemeta = Storage::disk('hopper')->getMetaData($this->hopper_temporary_name . $newFileName);
-            $filemeta['storage_disk'] = 'hopper';
-            $filemeta['mime'] = Storage::disk('hopper')->mimeType($this->hopper_temporary_name . $newFileName);
+            $upload_success = Storage::disk($disk)->put($this->hopper_temporary_name . $newFileName, $file);
+            $filemeta = Storage::disk($disk)->getMetaData($this->hopper_temporary_name . $newFileName);
+            $filemeta['storage_disk'] = $disk;
+            $filemeta['mime'] = Storage::disk($disk)->mimeType($this->hopper_temporary_name . $newFileName);
 //            $this->dispatch(
 //                    new \App\Jobs\Hopper\CopyFile($this->hopper_temporary_name . $newFileName, $this->hopper_master_name . $newFileName)
 //            );
@@ -130,20 +130,20 @@ class HopperFile implements HopperFileContract {
         }
     }
     
-	public function updateTemporary($from, $to) {
+	public function updateTemporary($from, $to, $disk = 'local') {
         try {
-            $from_exists = Storage::disk('hopper')->exists($this->hopper_temporary_name . $from);
-			$to_exists = Storage::disk('hopper')->exists($this->hopper_temporary_name . $to);
+            $from_exists = Storage::disk($disk)->exists($this->hopper_temporary_name . $from);
+			$to_exists = Storage::disk($disk)->exists($this->hopper_temporary_name . $to);
 			//If there is a new file name and it exists in temporary and the newfile also exists
 			if ($from_exists && !$to_exists) {
 				//Update Filename
-				$this->renamefile($this->hopper_temporary_name . $from, $this->hopper_temporary_name . $to);
+				$this->renamefile($this->hopper_temporary_name . $from, $this->hopper_temporary_name . $to, $disk);
 				return true;
 			} elseif ($from_exists && $to_exists) { //If there is a new file name and it exists in temporary and the target exitst too
 				// Delete the File in Temporary
-				if (Storage::disk('hopper')->delete($this->hopper_temporary_name . $to)) {
+				if (Storage::disk($disk)->delete($this->hopper_temporary_name . $to)) {
 					//Copy the temporary file over
-					$this->renamefile($this->hopper_temporary_name . $from, $this->hopper_temporary_name . $to);
+					$this->renamefile($this->hopper_temporary_name . $from, $this->hopper_temporary_name . $to, $disk);
 					return true;
 				}
 			} else {
@@ -165,7 +165,7 @@ class HopperFile implements HopperFileContract {
         return false;
     }
 
-    public function moveTemporaryNewFileToWorking($newFileName) {
+    public function moveTemporaryNewFileToWorking($newFileName, $sourcedisk = 'local', $targetdisk = 'hopper') {
         if (config('hopper.working_storage') === 'dropbox') {
             $hopperDBX = new HopperDBX();
             return $hopperDBX->moveTemporaryToWorking($newFileName);
@@ -174,13 +174,13 @@ class HopperFile implements HopperFileContract {
                 $hopperDBX = new HopperDBX();
                 $dbWorking = $hopperDBX->moveTemporaryToWorking($newFileName);
             }
-            return $this->_moveHopperTemporaryToHopperWorking($newFileName);
+            return $this->_moveHopperTemporaryToHopperWorking($newFileName, $sourcedisk, $targetdisk);
         }
     }
 
-    public function _moveHopperTemporaryToHopperWorking($newFileName) {
-        $newFile_exists = Storage::disk('hopper')->exists($this->hopper_temporary_name . $newFileName);
-        $newFile_exists_in_working = Storage::disk('hopper')->exists($this->hopper_working_name . $newFileName);
+    public function _moveHopperTemporaryToHopperWorking($newFileName, $sourcedisk = 'local', $targetdisk = 'hopper') {
+        $newFile_exists = Storage::disk($sourcedisk)->exists($this->hopper_temporary_name . $newFileName);
+        $newFile_exists_in_working = Storage::disk($targetdisk)->exists($this->hopper_working_name . $newFileName);
         //If there is a new file name and it exists in temporary and not in working
         if ($newFileName && $newFile_exists && !$newFile_exists_in_working) {
             //Move that file out of Temporary and into Working
@@ -197,9 +197,9 @@ class HopperFile implements HopperFileContract {
             return $newFileName;
         } elseif ($newFileName && $newFile_exists && $newFile_exists_in_working) { //If there is a new file name and it exists in temporary and in working
             // Delete the File in Working
-            if (Storage::disk('hopper')->delete($this->hopper_working_name . $newFileName)) {
+            if (Storage::disk($targetdisk)->delete($this->hopper_working_name . $newFileName)) {
                 //Copy the temporary file over to Working
-				$this->movefile($this->hopper_temporary_name . $newFileName, $this->hopper_working_name . $newFileName);
+				$this->movefile($this->hopper_temporary_name . $newFileName, $this->hopper_working_name . $newFileName, $sourcedisk, $targetdisk);
 				return $newFileName;
             }
         } else {
@@ -207,7 +207,7 @@ class HopperFile implements HopperFileContract {
         }
     }
 
-    public function copyTemporaryNewFileToMaster($newFileName, $delete = false) {
+    public function copyTemporaryNewFileToMaster($newFileName, $delete = false, $sourcedisk = 'local', $targetdisk = 'hopper') {
         if (config('hopper.master_storage') === 'dropbox') {
             $hopperDBX = new HopperDBX();
             return $hopperDBX->copyTemporaryToMaster($newFileName);
@@ -216,37 +216,37 @@ class HopperFile implements HopperFileContract {
                 $hopperDBX = new HopperDBX();
                 $dbMaster = $hopperDBX->copyTemporaryToMaster($newFileName);
             }
-            return $this->_copyHopperTemporaryNewFileToHopperMaster($newFileName, $delete);
+            return $this->_copyHopperTemporaryNewFileToHopperMaster($newFileName, $delete, $sourcedisk, $targetdisk);
         }
-		return $this->_copyHopperTemporaryNewFileToHopperMaster($newFileName, $delete);
+		return $this->_copyHopperTemporaryNewFileToHopperMaster($newFileName, $delete, $sourcedisk, $targetdisk);
     }
 
-    public function _copyHopperTemporaryNewFileToHopperMaster($newFileName, $delete = false) {
-        $newFile_exists = Storage::disk('hopper')->exists($this->hopper_temporary_name . $newFileName);
-        $newFile_exists_in_master = Storage::disk('hopper')->exists($this->hopper_master_name . $newFileName);
+    public function _copyHopperTemporaryNewFileToHopperMaster($newFileName, $delete = false, $sourcedisk = 'local', $targetdisk = 'hopper') {
+        $newFile_exists = Storage::disk($sourcedisk)->exists($this->hopper_temporary_name . $newFileName);
+        $newFile_exists_in_master = Storage::disk($targetdisk)->exists($this->hopper_master_name . $newFileName);
 		
         //If there is a new file name and it exists in Temporary and not in Master
         if ($newFileName && $newFile_exists && !$newFile_exists_in_master) {
             //Copy the file from Temporary to master
             if(!$delete){
 
-				$this->copyfile($this->hopper_temporary_name . $newFileName, $this->hopper_master_name . $newFileName);
+				$this->copyfile($this->hopper_temporary_name . $newFileName, $this->hopper_master_name . $newFileName, $sourcedisk, $targetdisk);
             }else{
 
-				$this->movefile($this->hopper_temporary_name . $newFileName, $this->hopper_master_name . $newFileName);
+				$this->movefile($this->hopper_temporary_name . $newFileName, $this->hopper_master_name . $newFileName, $sourcedisk, $targetdisk);
             }
             
             return $this->hopper_master_name . $newFileName;
         } elseif ($newFile_exists && $newFile_exists_in_master) {  //If there is a new file name and it exists in Temporary and in Master
             //Delete the file from master	
-            if (Storage::disk('hopper')->delete($this->hopper_master_name . $newFileName)) {
+            if (Storage::disk($targetdisk)->delete($this->hopper_master_name . $newFileName)) {
                 //Copy the file from Temporary to Master
                 if(!$delete){
 					
-					$this->copyfile($this->hopper_temporary_name . $newFileName, $this->hopper_master_name . $newFileName);
+					$this->copyfile($this->hopper_temporary_name . $newFileName, $this->hopper_master_name . $newFileName, $sourcedisk, $targetdisk);
 					
                 }else{
-					$this->movefile($this->hopper_temporary_name . $newFileName, $this->hopper_master_name . $newFileName);
+					$this->movefile($this->hopper_temporary_name . $newFileName, $this->hopper_master_name . $newFileName, $sourcedisk, $targetdisk);
                 }
                 //event(new \App\Events\Backend\Hopper\MasterUpdated($this->hopper_temporary_name . $newFileName, $this->hopper_master_name . $newFileName)); 
                 return $this->hopper_master_name . $newFileName;
@@ -256,7 +256,7 @@ class HopperFile implements HopperFileContract {
         }
     }
 
-    public function copyMasterToWorking($currentMaster, $updateVersionTo = false) {
+    public function copyMasterToWorking($currentMaster, $updateVersionTo = false, $sourcedisk = 'hopper', $targetdisk = 'hopper') {
         if (config('hopper.master_storage') === 'dropbox' && config('hopper.working_storage') === 'dropbox') {
             $hopperDBX = new HopperDBX();
             $dbMaster = $hopperDBX->copyMasterToWorking($currentMaster, $updateVersionTo);
@@ -267,14 +267,14 @@ class HopperFile implements HopperFileContract {
                 $dbMaster = $hopperDBX->copyMasterToWorking($currentMaster, $updateVersionTo);
             }
 //            event(new \App\Events\Backend\Hopper\MasterUpdated($oldFilePath, $newFilePath, $uuid = null));
-            $newMaster = $this->_copyMasterHopperToWorkingHopper($currentMaster, $updateVersionTo);
+            $newMaster = $this->_copyMasterHopperToWorkingHopper($currentMaster, $updateVersionTo, $sourcedisk, $targetdisk);
         }
         return $newMaster;
     }
 
-    public function _copyMasterHopperToWorkingHopper($currentMaster, $updateVersionTo = false) {
-        $master_exists = Storage::disk('hopper')->exists($this->hopper_master_name . $currentMaster);
-        $master_exists_in_working = Storage::disk('hopper')->exists($this->hopper_working_name . $currentMaster);
+    public function _copyMasterHopperToWorkingHopper($currentMaster, $updateVersionTo = false, $sourcedisk = 'hopper', $targetdisk = 'hopper') {
+        $master_exists = Storage::disk($sourcedisk)->exists($this->hopper_master_name . $currentMaster);
+        $master_exists_in_working = Storage::disk($targetdisk)->exists($this->hopper_working_name . $currentMaster);
         $fileData = [];
         $fileData = $currentMaster;
 		\Log::info('MasterHopperToWorkingHopper triggered: '. $this->hopper_master_name . $currentMaster .' to '. $this->hopper_working_name . $currentMaster);
@@ -283,21 +283,21 @@ class HopperFile implements HopperFileContract {
             //Get a new file name
             $newFileName = $this->renameFileVersion($currentMaster, $updateVersionTo);
             //Check if the new master exists in working
-            $newFileName_exists_in_working = Storage::disk('hopper')->exists($this->hopper_working_name . $newFileName);
+            $newFileName_exists_in_working = Storage::disk($targetdisk)->exists($this->hopper_working_name . $newFileName);
             //If the new master exists in working
             //Delete the master in Working
-            if ($newFileName_exists_in_working && Storage::disk('hopper')->delete($this->hopper_working_name . $newFileName)) {
+            if ($newFileName_exists_in_working && Storage::disk($targetdisk)->delete($this->hopper_working_name . $newFileName)) {
                 //Copy the master over
 				\Log::info('MasterHopperToWorkingHopper: '. $this->hopper_master_name . $currentMaster .' to '. $this->hopper_working_name . $newFileName);
 
-				$this->copyfile($this->hopper_master_name . $currentMaster, $this->hopper_working_name . $newFileName);
+				$this->copyfile($this->hopper_master_name . $currentMaster, $this->hopper_working_name . $newFileName, $sourcedisk, $targetdisk);
 
             } else { //If the new master does not exist
                 //Copy the Master Over
 				\Log::info('MasterHopperToWorkingHopper: '. $this->hopper_master_name . $currentMaster .' to '. $this->hopper_working_name . $newFileName);
 
 				
-				$this->copyfile($this->hopper_master_name . $currentMaster, $this->hopper_working_name . $newFileName);
+				$this->copyfile($this->hopper_master_name . $currentMaster, $this->hopper_working_name . $newFileName, $sourcedisk, $targetdisk);
 				
 
             }
@@ -307,11 +307,11 @@ class HopperFile implements HopperFileContract {
             //If the Master file exists in Working
             if ($master_exists_in_working) {
                 //Delete the master in Working
-                if (Storage::disk('hopper')->delete($this->hopper_working_name . $currentMaster)) {
+                if (Storage::disk($targetdisk)->delete($this->hopper_working_name . $currentMaster)) {
                     //Copy the master over
 					\Log::info('MasterHopperToWorkingHopper: '. $this->hopper_master_name . $currentMaster .' to '. $this->hopper_working_name . $currentMaster);
 					
-					$this->copyfile($this->hopper_master_name . $currentMaster, $this->hopper_working_name . $currentMaster);
+					$this->copyfile($this->hopper_master_name . $currentMaster, $this->hopper_working_name . $currentMaster, $sourcedisk, $targetdisk);
 					
                     //event(new \App\Events\Backend\Hopper\MasterUpdated($this->hopper_master_name  . $currentMaster, $this->hopper_working_name . $currentMaster));
                 }
@@ -319,7 +319,7 @@ class HopperFile implements HopperFileContract {
                 //Copy the master over
 				\Log::info('MasterHopperToWorkingHopper: '. $this->hopper_master_name . $currentMaster .' to '. $this->hopper_working_name . $currentMaster);
 				
-				$this->copyfile($this->hopper_master_name . $currentMaster, $this->hopper_working_name . $currentMaster);
+				$this->copyfile($this->hopper_master_name . $currentMaster, $this->hopper_working_name . $currentMaster, $sourcedisk, $targetdisk);
 
                 //event(new \App\Events\Backend\Hopper\MasterUpdated($this->hopper_master_name  . $currentMaster, $this->hopper_working_name . $currentMaster));
             }
@@ -331,7 +331,7 @@ class HopperFile implements HopperFileContract {
         return $fileData;
     }
 
-    public function copyMasterToMaster($currentMaster, $updateVersionTo = false) {
+    public function copyMasterToMaster($currentMaster, $updateVersionTo = false, $sourcedisk = 'hopper', $targetdisk = 'hopper') {
         if (config('hopper.master_storage') === 'dropbox' && config('hopper.working_storage') === 'dropbox') {
             $hopperDBX = new HopperDBX();
             $dbMaster = $hopperDBX->copyMasterToMaster($currentMaster, $updateVersionTo);
@@ -342,27 +342,27 @@ class HopperFile implements HopperFileContract {
                 $dbMaster = $hopperDBX->copyMasterToMaster($currentMaster, $updateVersionTo);
 //                debugbar()->info($dbMaster);
             }
-            $newMaster = $this->_copyMasterHopperToMasterHopper($currentMaster, $updateVersionTo);
+            $newMaster = $this->_copyMasterHopperToMasterHopper($currentMaster, $updateVersionTo, $sourcedisk, $targetdisk);
         }
         return $newMaster;
     }
 
-    public function _copyMasterHopperToMasterHopper($currentMaster, $updateVersionTo = false) {
-        $master_exists = Storage::disk('hopper')->exists($this->hopper_master_name . $currentMaster);
+    public function _copyMasterHopperToMasterHopper($currentMaster, $updateVersionTo = false, $sourcedisk = 'hopper', $targetdisk = 'hopper') {
+        $master_exists = Storage::disk($sourcedisk)->exists($this->hopper_master_name . $currentMaster);
         //If we are updating Master Version and the Master Exists    
         if ($updateVersionTo && $master_exists) {
             //Get a new file name
             $newFileName = $this->renameFileVersion($currentMaster, $updateVersionTo);
 
-            $renamed_master_exists_in_master = Storage::disk('hopper')->exists($this->hopper_master_name . $newFileName);
+            $renamed_master_exists_in_master = Storage::disk($targetdisk)->exists($this->hopper_master_name . $newFileName);
 //			debugbar()->info('Update'); 
-            if ($renamed_master_exists_in_master && Storage::disk('hopper')->delete($this->hopper_master_name . $newFileName)) {			
-				$this->copyfile($this->hopper_master_name . $currentMaster, $this->hopper_master_name . $currentMaster);
+            if ($renamed_master_exists_in_master && Storage::disk($targetdisk)->delete($this->hopper_master_name . $newFileName)) {			
+				$this->copyfile($this->hopper_master_name . $currentMaster, $this->hopper_master_name . $currentMaster, $sourcedisk, $targetdisk);
 				
             } else {
                 //Copy the Current Master to a new filename
 
-				$this->copyfile($this->hopper_master_name . $currentMaster, $this->hopper_master_name . $newFileName);
+				$this->copyfile($this->hopper_master_name . $currentMaster, $this->hopper_master_name . $newFileName, $sourcedisk, $targetdisk);
             }
             return $this->hopper_master_name . $newFileName;
         } else {
@@ -371,7 +371,7 @@ class HopperFile implements HopperFileContract {
         }
     }
 	
-    public function moveMasterToMaster($currentMaster, $updateVersionTo = false) {
+    public function moveMasterToMaster($currentMaster, $updateVersionTo = false, $sourcedisk = 'hopper', $targetdisk = 'hopper') {
         if (config('hopper.master_storage') === 'dropbox' && config('hopper.working_storage') === 'dropbox') {
             $hopperDBX = new HopperDBX();
             $dbMaster = $hopperDBX->copyMasterToMaster($currentMaster, $updateVersionTo);
@@ -382,27 +382,27 @@ class HopperFile implements HopperFileContract {
                 $dbMaster = $hopperDBX->copyMasterToMaster($currentMaster, $updateVersionTo);
 //                debugbar()->info($dbMaster);
             }
-            $newMaster = $this->_copyMasterHopperToMasterHopper($currentMaster, $updateVersionTo);
+            $newMaster = $this->_copyMasterHopperToMasterHopper($currentMaster, $updateVersionTo, $sourcedisk, $targetdisk);
         }
         return $newMaster;
     }
 
-    public function _moveMasterHopperToMasterHopper($currentMaster, $updateVersionTo = false) {
-        $master_exists = Storage::disk('hopper')->exists($this->hopper_master_name . $currentMaster);
+    public function _moveMasterHopperToMasterHopper($currentMaster, $updateVersionTo = false, $sourcedisk = 'hopper', $targetdisk = 'hopper') {
+        $master_exists = Storage::disk($sourcedisk)->exists($this->hopper_master_name . $currentMaster);
         //If we are updating Master Version and the Master Exists    
         if ($updateVersionTo && $master_exists) {
             //Get a new file name
             $newFileName = $this->renameFileVersion($currentMaster, $updateVersionTo);
 
-            $renamed_master_exists_in_master = Storage::disk('hopper')->exists($this->hopper_master_name . $newFileName);
-            if ($renamed_master_exists_in_master && Storage::disk('hopper')->delete($this->hopper_master_name . $newFileName)) {
+            $renamed_master_exists_in_master = Storage::disk($targetdisk)->exists($this->hopper_master_name . $newFileName);
+            if ($renamed_master_exists_in_master && Storage::disk($targetdisk)->delete($this->hopper_master_name . $newFileName)) {
 
-				$this->movefile($this->hopper_master_name . $currentMaster, $this->hopper_master_name . $newFileName);
+				$this->movefile($this->hopper_master_name . $currentMaster, $this->hopper_master_name . $newFileName, $sourcedisk, $targetdisk);
 
             } else {
                 //Move the Current Master to a new filename
 
-				$this->movefile($this->hopper_master_name . $currentMaster, $this->hopper_master_name . $newFileName);
+				$this->movefile($this->hopper_master_name . $currentMaster, $this->hopper_master_name . $newFileName, $sourcedisk, $targetdisk);
             }
             return $this->hopper_master_name . $newFileName;
         } else {
@@ -411,7 +411,7 @@ class HopperFile implements HopperFileContract {
         }
     }
     
-    public function copyMasterToArchive($currentMaster, $updateVersionTo = false) {
+    public function copyMasterToArchive($currentMaster, $updateVersionTo = false, $sourcedisk = 'hopper', $targetdisk = 'hopper') {
         if (config('hopper.master_storage') === 'dropbox' && config('hopper.working_storage') === 'dropbox') {
             $hopperDBX = new HopperDBX();
             $dbMaster = $hopperDBX->copyMasterToArchive($currentMaster, $updateVersionTo);
@@ -422,14 +422,14 @@ class HopperFile implements HopperFileContract {
                 $dbMaster = $hopperDBX->copyMasterToArchive($currentMaster, $updateVersionTo);
 //                debugbar()->info($dbMaster);
             }
-            $newMaster = $this->_copyMasterHopperToArchiveHopper($currentMaster, $updateVersionTo);
+            $newMaster = $this->_copyMasterHopperToArchiveHopper($currentMaster, $updateVersionTo, $sourcedisk, $targetdisk);
         }
         return $newMaster;
     }
 
-    public function _copyMasterHopperToArchiveHopper($currentMaster, $updateVersionTo = false) {
-        $master_exists = Storage::disk('hopper')->exists($this->hopper_master_name . $currentMaster);
-        $master_exists_in_target = Storage::disk('hopper')->exists($this->hopper_archive_name . $currentMaster);
+    public function _copyMasterHopperToArchiveHopper($currentMaster, $updateVersionTo = false, $sourcedisk = 'hopper', $targetdisk = 'hopper') {
+        $master_exists = Storage::disk($sourcedisk)->exists($this->hopper_master_name . $currentMaster);
+        $master_exists_in_target = Storage::disk($targetdisk)->exists($this->hopper_archive_name . $currentMaster);
         $fileData = [];
         $fileData = $currentMaster;
 		
@@ -438,21 +438,21 @@ class HopperFile implements HopperFileContract {
             //Get a new file name
             $newFileName = $this->renameFileVersion($currentMaster, $updateVersionTo);
             //Check if the new master exists in archive
-            $newFileName_exists_in_target = Storage::disk('hopper')->exists($this->hopper_archive_name . $newFileName);
+            $newFileName_exists_in_target = Storage::disk($targetdisk)->exists($this->hopper_archive_name . $newFileName);
             //If the new master exists in working
             //Delete the master in Working
-            if ($newFileName_exists_in_target && Storage::disk('hopper')->delete($this->hopper_archive_name . $newFileName)) {
+            if ($newFileName_exists_in_target && Storage::disk($targetdisk)->delete($this->hopper_archive_name . $newFileName)) {
                 //Copy the master over
 
 				
-				$this->copyfile($this->hopper_master_name . $currentMaster, $this->hopper_archive_name . $newFileName);
+				$this->copyfile($this->hopper_master_name . $currentMaster, $this->hopper_archive_name . $newFileName, $sourcedisk, $targetdisk);
 				
                 //event(new \App\Events\Backend\Hopper\MasterUpdated($this->hopper_master_name  . $currentMaster, $this->hopper_working_name . $newFileName));
             } else { //If the new master does not exist
                 //Copy the Master Over
 
 				
-				$this->copyfile($this->hopper_master_name . $currentMaster, $this->hopper_archive_name . $newFileName);
+				$this->copyfile($this->hopper_master_name . $currentMaster, $this->hopper_archive_name . $newFileName, $sourcedisk, $targetdisk);
 				
 
                 //event(new \App\Events\Backend\Hopper\MasterUpdated($this->hopper_master_name  . $currentMaster, $this->hopper_working_name . $newFileName));
@@ -467,15 +467,15 @@ class HopperFile implements HopperFileContract {
                     //Copy the master over
 
 					
-					$this->copyfile($this->hopper_master_name . $currentMaster, $this->hopper_archive_name . $currentMaster);
+					$this->copyfile($this->hopper_master_name . $currentMaster, $this->hopper_archive_name . $currentMaster, $sourcedisk, $targetdisk);
 					
                     //event(new \App\Events\Backend\Hopper\MasterUpdated($this->hopper_master_name  . $currentMaster, $this->hopper_working_name . $currentMaster));
                 }
             } else {//If the Master file doesnt exist in Working
                 //Copy the master over
-
+ 
 				
-				$this->copyfile($this->hopper_master_name . $currentMaster, $this->hopper_archive_name . $currentMaster);
+				$this->copyfile($this->hopper_master_name . $currentMaster, $this->hopper_archive_name . $currentMaster, $sourcedisk, $targetdisk);
 				
                 //event(new \App\Events\Backend\Hopper\MasterUpdated($this->hopper_master_name  . $currentMaster, $this->hopper_working_name . $currentMaster));
             }
@@ -486,10 +486,10 @@ class HopperFile implements HopperFileContract {
         }
         return $fileData;
     }
-
+ 
 
     
-    public function moveMasterToArchive($currentMaster) {
+    public function moveMasterToArchive($currentMaster, $sourcedisk = 'hopper', $targetdisk = 'hopper') {
         if (config('hopper.master_storage') === 'dropbox' && config('hopper.working_storage') === 'dropbox') {
             $hopperDBX = new HopperDBX();
             $dbMaster = $hopperDBX->moveMasterToArchive($currentMaster);
@@ -500,29 +500,29 @@ class HopperFile implements HopperFileContract {
                 $dbMaster = $hopperDBX->moveMasterToArchive($currentMaster);
 //                debugbar()->info($dbMaster);
             }
-            $newMaster = $this->_moveMasterHopperToArchiveHopper($currentMaster);
+            $newMaster = $this->_moveMasterHopperToArchiveHopper($currentMaster, $sourcedisk, $targetdisk);
         }
         return $newMaster;
     }
 
-    public function _moveMasterHopperToArchiveHopper($currentMaster) {
-        $master_exists = Storage::disk('hopper')->exists($this->hopper_master_name . $currentMaster);
+    public function _moveMasterHopperToArchiveHopper($currentMaster, $sourcedisk = 'hopper', $targetdisk = 'hopper') {
+        $master_exists = Storage::disk($sourcedisk)->exists($this->hopper_master_name . $currentMaster);
         //If the Master Exists    
         if ($master_exists) {
             //Check if master exists in archive
-            $master_exists_in_master = Storage::disk('hopper')->exists($this->hopper_archive_name . $currentMaster);
+            $master_exists_in_master = Storage::disk($targetdisk)->exists($this->hopper_archive_name . $currentMaster);
 //			debugbar()->info('Update'); 
-            if ($master_exists_in_master && Storage::disk('hopper')->delete($this->hopper_archive_name . $currentMaster)) {
+            if ($master_exists_in_master && Storage::disk($targetdisk)->delete($this->hopper_archive_name . $currentMaster)) {
 
 				
-				$this->movefile($this->hopper_master_name . $currentMaster, $this->hopper_archive_name . $currentMaster);
+				$this->movefile($this->hopper_master_name . $currentMaster, $this->hopper_archive_name . $currentMaster, $sourcedisk, $targetdisk);
 				
                 //event(new \App\Events\Backend\Hopper\MasterUpdated($this->hopper_master_name  . $currentMaster, $this->hopper_archive_name  . $currentMaster));
             } else {
                 //Copy the Current Master to archive
 
 				
-				$this->movefile($this->hopper_master_name . $currentMaster, $this->hopper_archive_name . $currentMaster);
+				$this->movefile($this->hopper_master_name . $currentMaster, $this->hopper_archive_name . $currentMaster, $sourcedisk, $targetdisk);
 				
             }
             return $this->hopper_archive_name . $currentMaster;
@@ -642,9 +642,9 @@ class HopperFile implements HopperFileContract {
      *
      * @return \Illuminate\Support\Collection
      */
-    public function getAllInMaster(){
-        $collection = collect(Cache::remember('hopper_master_files', 1, function() {
-			return Storage::disk('hopper')->files($this->hopper_master_name);
+    public function getAllInMaster($sourcedisk = 'hopper'){
+        $collection = collect(Cache::remember('hopper_master_files', 1, function() use ($sourcedisk){
+			return Storage::disk($sourcedisk)->files($this->hopper_master_name);
 		}));
         return $collection;
     }
@@ -677,21 +677,21 @@ class HopperFile implements HopperFileContract {
      *
      * @return \Illuminate\Support\Collection
      */
-    public function mapFileMeta($collection, $disk = 'hopper'){
+    public function mapFileMeta($collection, $sourcedisk = 'hopper'){
 		
         $collection = $collection
-            ->map(function ($item) use ($disk) {
+            ->map(function ($item) use ($sourcedisk) {
                 $fileparts = explode('/', $item);
 				$hopperfileparts = $this->getFileParts($fileparts[1]);
 				$currentVersion = \App\Services\Hopper\Facades\Hopper::getCurrentVersion($fileparts[1]);
-                $filemeta = Storage::disk($disk)->getMetaData($item);
-                $filemeta['mime'] = Storage::disk($disk)->mimeType($item);
+                $filemeta = Storage::disk($sourcedisk)->getMetaData($item);
+                $filemeta['mime'] = Storage::disk($sourcedisk)->mimeType($item);
                 return [
                     'filename' => $fileparts[1],
 					'fileparts' => $hopperfileparts,
 					'currentVersion' => (int) $currentVersion,
 					'nextVersion' => str_pad($currentVersion + 1, 2, '0', STR_PAD_LEFT),
-                    'storage_disk' => $disk,
+                    'storage_disk' => $sourcedisk,
                     'type' => $filemeta['type'],
                     'filemeta' => $filemeta,
                 ];

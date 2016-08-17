@@ -157,4 +157,13 @@ return [
       |
      */
     'use_dates' => env('HOPPER_USE_DATES', true),
+	/*
+      |--------------------------------------------------------------------------
+      | Report Only Mode
+      |--------------------------------------------------------------------------
+      |
+      | Puts hopper into Report Only mode (no file operations)
+      |
+     */
+    'report_only_mode' => env('HOPPER_REPORT_ONLY_MODE', false),
 ];
