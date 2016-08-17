@@ -482,4 +482,19 @@ class HopperAdminController extends Controller {
 //                                ->with('flash_warning', "Updated");
 //			
 //	}
+	
+	/**
+	 * Display a listing of the resource.
+	 *
+	 * @return \Illuminate\Http\Response
+	 */
+	public function fileopstest() {
+		$data = [ ];
+		
+		
+		$this->hopperfile->copyfile('1_Master/BB6269_Hurt_[TH6]_LCC16.pptx', 'temporary/BB6269_Hurt_[TH6]_LCC16.pptx', 'hopper', 'local');
+		
+
+		return view( 'backend.hopper.admin.tests.fileopstest', $data );
+	}
 }
