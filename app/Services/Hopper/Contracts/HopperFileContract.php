@@ -7,34 +7,45 @@ Interface HopperFileContract
 
     public function getDriverStoragePath($disk);
     
-    public function copyfile($oldFilePath, $newFilePath, $disk);
+    public function copyfile($oldFilePath, $newFilePath, $sourcedisk = 'hopper', $targetdisk = 'hopper');
     
-    public function movefile($oldFilePath, $newFilePath, $disk);
+    public function movefile($oldFilePath, $newFilePath, $sourcedisk = 'hopper', $targetdisk = 'hopper');
+	
+    public function renamefile($oldFilePath, $newFilePath, $targetdisk = 'hopper');
+	
+	public function locate($query);
     
     public function validateFile($request);
     
-    public function uploadToTemporary($file, $newFileName);
+    public function uploadToTemporary($file, $newFileName, $disk = 'local');
     
-	public function updateTemporary($from, $to);
+	public function updateTemporary($from, $to, $disk = 'local');
     
-    public function moveTemporaryNewFileToWorking($newFileName);
+    public function moveTemporaryNewFileToWorking($newFileName, $sourcedisk = 'local', $targetdisk = 'hopper');
     
-    public function copyTemporaryNewFileToMaster($newFileName, $delete = false);
+    public function copyTemporaryNewFileToMaster($newFileName, $delete = false, $sourcedisk = 'local', $targetdisk = 'hopper');
     
-    public function copyMasterToWorking($currentMaster, $updateVersionTo);
+    public function copyMasterToWorking($currentMaster, $updateVersionTo = false, $sourcedisk = 'hopper', $targetdisk = 'hopper');
     
-    public function copyMasterToMaster($currentMaster, $updateVersionTo);
+    public function copyMasterToMaster($currentMaster, $updateVersionTo = false, $sourcedisk = 'hopper', $targetdisk = 'hopper');
+	
+	public function moveMasterToMaster($currentMaster, $updateVersionTo = false, $sourcedisk = 'hopper', $targetdisk = 'hopper');
     
-    public function copyMasterToArchive($currentMaster, $updateVersionTo);
+    public function copyMasterToArchive($currentMaster, $updateVersionTo = false, $sourcedisk = 'hopper', $targetdisk = 'hopper');
+	
+    public function moveMasterToArchive($currentMaster, $sourcedisk = 'hopper', $targetdisk = 'hopper');
     
-    public function moveMasterToArchive($currentMaster);
-    
-    public function renameFileVersion($currentFileName, $nextVersion, $currentFileExtension = null);
+    public function renameFileVersion($currentFileName, $nextVersion, $currentFileExtension = null) ;
     
     public function purgeDupesToArchive();
 	
-	public function getAllInMaster();
+	public function getFileParts($currentFileParts);
+	
+	public function getAllInMaster($sourcedisk = 'hopper');
+	
+	public function filterValidFiles($query, $collection, $disk = 'hopper');
     
+	public function mapFileMeta($collection, $sourcedisk = 'hopper');
 //    public function parseDateTimeforEdit(&$data);
     
 

@@ -74,7 +74,7 @@ class HopperServiceProvider extends ServiceProvider
                 
         //Announce the creation of a new Event Session
         \App\Models\Hopper\EventSession::created(function ($eventsession) {
-            event(new \App\Events\Backend\Hopper\EventSessionUpdated($eventsession->id, 'created', 'I was born'));
+            //event(new \App\Events\Backend\Hopper\EventSessionUpdated($eventsession->id, 'created', 'I was born'));
         });
         
     }

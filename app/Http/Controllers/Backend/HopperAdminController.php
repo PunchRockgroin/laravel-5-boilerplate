@@ -491,10 +491,11 @@ class HopperAdminController extends Controller {
 	public function fileopstest() {
 		$data = [ ];
 		
-		
-		$this->dispatch(
-			new \App\Jobs\Hopper\CopyFile('1_Master/BB6269_Hurt_[TH6]_LCC16.pptx', 'temporary/BB6269_Hurt_[TH6]_LCC16.pptx', 'hopper', 'local')
-		);
+		if(config('hopper.use_queue', false)){
+			$this->dispatch(
+				new \App\Jobs\Hopper\CopyFile('1_Master/BB6269_Hurt_[TH6]_LCC16.pptx', 'working/BB6269_Hurt_[TH6]_LCC16.pptx', 'hopper', 'local')
+			);
+		}
 		
 //		$this->hopperfile->copyfile('1_Master/BB6269_Hurt_[TH6]_LCC16.pptx', 'temporary/BB6269_Hurt_[TH6]_LCC16.pptx', 'hopper', 'local');
 		

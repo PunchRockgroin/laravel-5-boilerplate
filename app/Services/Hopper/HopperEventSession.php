@@ -62,7 +62,7 @@ class HopperEventSession {
         $eventsession = EventSession::create($data);
 
 
-        event(new EventSessionUpdated($eventsession->id, 'created', 'Created a new Event Session'));
+        //event(new EventSessionUpdated($eventsession->id, 'created', 'Created a new Event Session'));
 
         return $eventsession;
     }
@@ -87,7 +87,7 @@ class HopperEventSession {
 
         $this->parseDateTimeforEdit($eventsession);
 		
-		event(new EventSessionUpdated($eventsession->id, $eventsession, 'opened'));
+		//event(new EventSessionUpdated($eventsession->id, $eventsession, 'opened'));
         
         //$this->hopperfile->purgeDupesToArchive();
 
@@ -123,7 +123,7 @@ class HopperEventSession {
 					'check_in_datetime' => \Carbon\Carbon::now( config('hopper.event_timezone') ),
 				]);
                 $messagebag->add('checked_in', "<strong class='lead'>Checked In</strong>");
-                event(new EventSessionUpdated($id, $request->session_id, 'checked in'));
+                //event(new EventSessionUpdated($id, $request->session_id, 'checked in'));
                 break;
             case 'check_out':
                 $request->merge(['checked_in' => 'NO', 'check_in_datetime' => null]);
@@ -147,10 +147,11 @@ class HopperEventSession {
         if (!$request->has('checkin_username')) {
             $request->merge(['checkin_username' => \Auth::user()->name]);
         }		
-//        $request->merge(['file_entity_id' => $request->primary_file_entity_id]);
-        //$visit = $hoppervisit->store($request->all());
-//        event(new EventSessionUpdated($request->event_session_id, 'visit_created', 'Created a new Visit: ' . $visit->id));
 		
+		if(config('hopper.report_only_mode', true)){
+			$visit = $hoppervisit->store($request->all());
+			return true;
+		}
 		
         //If it's a blind update
         if($request->blind_update === "YES"){
@@ -158,22 +159,11 @@ class HopperEventSession {
 //			debugbar()->info($request->currentfilename);
 //			debugbar()->info($request->filename);
 			
-			$master_stream = $this->hopperfile->getStream($this->hopper_master_name . $request->currentfilename);
-			$new_file_stream = $this->hopperfile->getStream($this->hopper_temporary_name . $request->filename);
+//			$master_stream = $this->hopperfile->getStream($this->hopper_master_name . $request->currentfilename);
+//			$new_file_stream = $this->hopperfile->getStream($this->hopper_temporary_name . $request->filename);
 
-			$path = $this->hopperfile->copyTemporaryNewFileToMaster($request->filename, $master_stream);    
-//			$this->hopperfile->getStream
+			$path = $this->hopperfile->copyTemporaryNewFileToMaster($request->filename, true);    
 			
-			//Update Visitor Info
-//            $visit->visitors = "(blind update)";
-//            $visit->difficulty = "1";
-//            $visit->design_notes = "This was a blind update";
-//            $visit->design_username = \Auth::user()->name;
-			//Save
-//            $visit->save();
-//			\Log::info('Blind Update Occurred: '.$request->filename);
-			//Copy the new master to archive
-            //$this->hopperfile->copyMasterToArchive($request->filename, $master_stream);
 			
 			if($this->hopperfile->copyMasterToArchive($request->filename)){
 				//Move the old master to archive
@@ -250,8 +240,6 @@ class HopperEventSession {
         $request->merge(['event_session_id' => $eventsession->id]);
         $fileentity = $this->hopperfileentity->store($request->all());
 
-        event(new EventSessionUpdated($request->id, 'file_entity_created', 'Created a new File Entity: ' . $fileentity->id));
-
         return $fileentity;
     }
 
@@ -261,7 +249,6 @@ class HopperEventSession {
         //Update File Entity Referenced
         $updated_fileentity = $this->hopperfileentity->update($request, $fileentity);
 		//$id, $event, $notes = '', $filename = null, $tasks = [], $user = 'Hopper', $request = null
-        event(new EventSessionUpdated($request->id, 'file_entity_updated', 'Updated a File Entity: ' . $updated_fileentity->id));
 
         return $updated_fileentity;
     }
