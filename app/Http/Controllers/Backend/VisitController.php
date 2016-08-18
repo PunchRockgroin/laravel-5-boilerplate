@@ -35,48 +35,7 @@ class VisitController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request, Builder $htmlbuilder)
-    {
-//        if ($request->ajax()) {
-//            $Visits = Visit::select(['id', 'session_id', 'visitors', 'design_username', 'created_at', 'updated_at']);
-//            return \Datatables::of($Visits)
-//                    ->editColumn('created_at', '{!! $created_at->diffForHumans() !!}')
-//                    ->editColumn('updated_at', function ($visit) {
-//                        return $visit->updated_at->format('Y/m/d');
-//                    })
-//                     ->editColumn('action', function ($visit) {
-//                        $content = '';
-//                        $content .= '<a class="btn btn-primary btn-xs" href="'. route('admin.visit.edit', [$visit->id]).'">Edit</a> ';
-//                        $content .= '<a class="btn btn-info btn-xs" href="'. route('admin.visit.show', [$visit->id]).'">Show</a> ';
-//                        return $content;
-//                    })
-//                    ->make(true);
-//        }
-        
-        
-        
-//        $html = $htmlbuilder
-//        ->addColumn(['data' => 'id', 'name' => 'id', 'title' => 'ID'])
-//        ->addColumn(['data' => 'session_id', 'name' => 'session_id', 'title' => 'Session ID'])
-//        ->addColumn(['data' => 'visitors', 'name' => 'visitors', 'title' => 'Visitors'])
-//        ->addColumn(['data' => 'design_username', 'name' => 'design_username', 'title' => 'Graphic Operator'])
-//        ->addColumn(['data' => 'created_at', 'name' => 'created_at', 'title' => 'Created At'])
-//        ->addColumn(['data' => 'updated_at', 'name' => 'updated_at', 'title' => 'Updated At'])
-//		->parameters(
-//			['order' => [[0, 'desc']]]
-//		)
-//        ->addAction();
-		
-		
-//		$assignment_html = $htmlbuilder
-//		->addColumn(['data' => 'updated_at', 'name' => 'updated_at', 'title' => 'Updated At'])
-//        ->addColumn(['data' => 'id', 'name' => 'id', 'title' => 'ID'])
-//        ->addColumn(['data' => 'session_id', 'name' => 'session_id', 'title' => 'Session ID'])     
-//		->parameters(
-//			['order' => [[0, 'asc']]]
-//		)
-//		->ajax(route('admin.visit.myassignments'))
-//        ->addAction();
-		
+    {		
         
 		$hopperstats = new \App\Services\Hopper\HopperStats();
 		
@@ -120,8 +79,8 @@ class VisitController extends Controller
 							return "<div class='label label-warning'>Unassigned</div>";
 						}
                     })
-                    ->editColumn('created_at', '{!! $created_at->diffForHumans() !!}')
-                    ->editColumn('updated_at', '{!! $updated_at->diffForHumans() !!}')
+                    ->editColumn('created_at', '{!! Carbon\Carbon::parse($created_at)->diffForHumans() !!}')
+                    ->editColumn('updated_at', '{!! Carbon\Carbon::parse($updated_at)->diffForHumans() !!}')
                      ->editColumn('action', function ($visit) {
                         $content = '';
 						if(config('hopper.print.enable', false)){
