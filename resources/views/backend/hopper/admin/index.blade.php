@@ -48,6 +48,7 @@
             <a href="{!! route('backend.hopper.admin.update', ['action'=> 'reset-checkin']) !!}" class="btn btn-default destructive-btn"><i class="fa fa-table"></i> Reset Check-ins</a>
             <a href="{!! route('backend.hopper.admin.update', ['action'=> 'reset-sessions']) !!}" class="btn btn-default destructive-btn"><i class="fa fa-table"></i> Reset Sessions</a>
             <a href="{!! route('backend.hopper.admin.update', ['action'=> 'reset-visits']) !!}" class="btn btn-default destructive-btn"><i class="fa fa-table"></i> Reset Visits</a>
+            <a href="{!! route('backend.hopper.admin.update', ['action'=> 'reset-history']) !!}" class="btn btn-default destructive-btn"><i class="fa fa-table"></i> Reset History</a>
         </div><!-- /.box-body -->
       </div><!-- /.box -->
 @endsection

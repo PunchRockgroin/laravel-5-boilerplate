@@ -56,8 +56,6 @@ class HopperAdminController extends Controller {
 	public function index() {
 		$data = [ ];
 		
-		debugbar()->info($this->hopperfile->getCurrentVersion('BB10105_Patel_[Z4001A]_LCC13.pptx'));
-
 		return view( 'backend.hopper.admin.index', $data );
 	}
 
@@ -395,6 +393,12 @@ class HopperAdminController extends Controller {
 				//EventSession::whereNotNull('session_id')->update(['current_file' => '']);
 				return redirect()->route( 'backend.hopper.admin.index' )
 				->with( 'flash_danger', "You've reset all the File Entities" );
+				break;
+			case 'reset-history':
+				\App\Models\History\History::truncate();
+				//EventSession::whereNotNull('session_id')->update(['current_file' => '']);
+				return redirect()->route( 'backend.hopper.admin.index' )
+				->with( 'flash_danger', "You've reset History" );
 				break;
 			case 'fill-blanks':
 //                 EventSession::whereNotNull('session_id')->update(['current_file' => '']);
