@@ -17,4 +17,8 @@ Route::group([
 			
 			Route::get('/fileopstest', ['as' => 'backend.hopper.admin.fileopstest', 'uses' => 'HopperAdminController@fileopstest']);
 			
+			Route::get('/self-update', ['as' => 'backend.hopper.admin.self-update', 'uses' => 'HopperAdminController@selfUpdate']);
+			
+			
+			
         });
