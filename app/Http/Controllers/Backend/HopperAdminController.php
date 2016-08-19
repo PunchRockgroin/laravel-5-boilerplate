@@ -522,10 +522,10 @@ class HopperAdminController extends Controller {
 					$process = new Process('cd '.app_path().' && git pull');
 					break;
 				case 'check-current':
-					$process = new Process('cd '.app_path().' && git rev-parse origin/develop');
+					$process = new Process('cd '.app_path().' && git rev-parse '. $request->get('branch', 'origin/develop'));
 					break;
 				default:
-					$process = new Process('cd '.app_path().' && git rev-parse');
+					$process = new Process('cd '.app_path().' && git rev-parse ' . $request->get('branch', 'develop'));
 					break;
 			}
 			
@@ -536,7 +536,17 @@ class HopperAdminController extends Controller {
 //				throw new ProcessFailedException($process);
 				debugbar()->info($process->getErrorOutput());
 			}else{
-				
+				switch($request->get('type')){
+					case 'update':
+//						$process = new Process('cd '.app_path().' && git pull');
+						break;
+					case 'check-current':
+						
+						break;
+					default:
+						Storage::disk('local')->put('current.json', json_encode(['current'=> $process->getOutput()]));
+						break;
+				}
 				debugbar()->info($process->getOutput());
 			}
 			
