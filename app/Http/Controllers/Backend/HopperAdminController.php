@@ -516,7 +516,10 @@ class HopperAdminController extends Controller {
 	public function selfUpdate(Request $request){
 		if(!$request->ajax()){
 			$data = [];
-			
+			if($request->get('type') === 'set-update-required'){
+				Storage::disk('local')->put('update.json', json_encode(['status'=>'requires update']));
+				return view( 'backend.hopper.admin.tests.fileopstest', $data );
+			}
 			switch($request->get('type')){
 				case 'update':
 					$process = new Process('cd '.app_path().' && git pull');
@@ -539,9 +542,6 @@ class HopperAdminController extends Controller {
 				switch($request->get('type')){
 					case 'update':
 //						$process = new Process('cd '.app_path().' && git pull');
-						break;
-					case 'check-current':
-						
 						break;
 					default:
 						Storage::disk('local')->put('current.json', json_encode(['current'=> $process->getOutput()]));
