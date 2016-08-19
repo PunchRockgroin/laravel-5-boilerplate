@@ -541,10 +541,10 @@ class HopperAdminController extends Controller {
 			}else{
 				switch($request->get('type')){
 					case 'update':
-//						$process = new Process('cd '.app_path().' && git pull');
+						Storage::disk('local')->delete('update.json');
 						break;
 					default:
-						Storage::disk('local')->put('current.json', json_encode(['current'=> $process->getOutput()]));
+						Storage::disk('local')->put('current.json', json_encode( [ 'current'=> trim( preg_replace('/\s+/', ' ', $process->getOutput() ) ) ] ) );
 						break;
 				}
 				debugbar()->info($process->getOutput());

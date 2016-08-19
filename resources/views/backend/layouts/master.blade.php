@@ -54,6 +54,9 @@
 
                 <!-- Main content -->
                 <section class="content">
+					@if( Storage::disk('local')->exists('update.json') )
+					{!! Bootstrap::warning("Hopper Requires an update. <strong>" . link_to_route('backend.hopper.admin.self-update', 'Click to Update', ['type'=>'update'])) ."</strong>" !!}
+					@endif
                     @include('includes.partials.messages')
                     @yield('content')
                 </section><!-- /.content -->
