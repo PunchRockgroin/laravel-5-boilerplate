@@ -521,8 +521,11 @@ class HopperAdminController extends Controller {
 				case 'update':
 					$process = new Process('cd '.app_path().' && git pull');
 					break;
+				case 'check-current':
+					$process = new Process('cd '.app_path().' && git rev-parse origin/develop');
+					break;
 				default:
-					$process = new Process('cd '.app_path().' && git describe origin/develop');
+					$process = new Process('cd '.app_path().' && git rev-parse');
 					break;
 			}
 			
