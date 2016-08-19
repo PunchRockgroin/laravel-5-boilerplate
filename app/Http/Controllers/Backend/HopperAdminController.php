@@ -23,6 +23,11 @@ use Carbon\Carbon as Carbon;
 use App\Services\Hopper\Excel\EventSessionImport;
 use App\Services\Hopper\Contracts\HopperFileContract;
 
+use Symfony\Component\Process\Process;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+
+
+
 class HopperAdminController extends Controller {
 
 	private $messagebag;
@@ -506,4 +511,33 @@ class HopperAdminController extends Controller {
 
 		return view( 'backend.hopper.admin.tests.fileopstest', $data );
 	}
+	
+	
+	public function selfUpdate(Request $request){
+		if(!request()->ajax()){
+			
+			
+			$data = [];
+			
+			$process = new Process('cd '.app_path().' && git pull');
+			$process->run();
+
+			// executes after the command finishes
+			if (!$process->isSuccessful()) {
+//				throw new ProcessFailedException($process);
+				debugbar()->info($process->getErrorOutput());
+			}else{
+				
+				debugbar()->info($process->getOutput());
+			}
+
+			
+			
+			return view( 'backend.hopper.admin.tests.fileopstest', $data );
+			
+		}
+	}
+	
+	
+	
 }
