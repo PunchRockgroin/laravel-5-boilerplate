@@ -514,15 +514,21 @@ class HopperAdminController extends Controller {
 	
 	
 	public function selfUpdate(Request $request){
-		if(!request()->ajax()){
-			
-			
+		if(!$request->ajax()){
 			$data = [];
 			
-			$process = new Process('cd '.app_path().' && git pull');
+			switch($request->get('type')){
+				case 'update':
+					$process = new Process('cd '.app_path().' && git pull');
+					break;
+				default:
+					$process = new Process('cd '.app_path().' && git describe origin/develop');
+					break;
+			}
+			
 			$process->run();
-
 			// executes after the command finishes
+			
 			if (!$process->isSuccessful()) {
 //				throw new ProcessFailedException($process);
 				debugbar()->info($process->getErrorOutput());
@@ -530,7 +536,6 @@ class HopperAdminController extends Controller {
 				
 				debugbar()->info($process->getOutput());
 			}
-
 			
 			
 			return view( 'backend.hopper.admin.tests.fileopstest', $data );
