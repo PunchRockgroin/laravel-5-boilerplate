@@ -157,30 +157,23 @@ class HopperEventSession {
 		if($request->filename_uploaded){
 			//Copy the temp file to relics for "backup"
 			$this->hopperfile->copyTemporaryNewFileToRelics($request->filename, $request->filename_uploaded);
+//			$filename, $type, $entity, $event, $icon = 'file', $class = 'blue', $links = []
 		}
 		
         //If it's a blind update
         if($request->blind_update === "YES"){
-			
+			//Copy the new file to master, then delete from temporary
 			$path = $this->hopperfile->copyTemporaryNewFileToMaster($request->filename, true);    
-
+			//If we've copied the new master to Archive,
 			if($this->hopperfile->copyMasterToArchive($request->filename)){
 				//Move the old master to archive
 				$this->hopperfile->moveMasterToArchive($request->currentfilename);
 			}
-			
-			//Find the file entity by reference
-			//$fileentity = \App\Models\Hopper\FileEntity::find($request->primary_file_entity_id);
-			//Update File Entity Referenced
-			//$updated_fileentity = $this->hopperfileentity->update($request, $fileentity);
-			//$id, $event, $notes = '', $filename = null, $tasks = [], $user = 'Hopper', $request = null
-            //event(new \App\Events\Backend\Hopper\FileEntityUpdated($visit->file_entity->id, 'visit_behavior', 'Copied master file '.$visit->file_entity->filename.' to working', $request->filename, ['update_path' => $path]));
-			
             //We're done here
             return true;
             
         }
-		//If it's not a blind update
+		//If it's not a blind update:
 		//
         //If there is no updated file
         if($request->currentfilename === $request->filename){

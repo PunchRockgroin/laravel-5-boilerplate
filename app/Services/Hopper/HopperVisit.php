@@ -63,6 +63,19 @@ class HopperVisit{
 		//$id, $visit, $event, $icon = 'plus', $class = 'green'
 		event(new \App\Events\Backend\Hopper\VisitUpdated($visit->id, $visit, 'created visit'));
 		
+		if($visit->filename_uploaded){
+			event(new \App\Events\Backend\Hopper\FileOperation(
+				$visit->filename_uploaded, "Visit", $visit->id,
+				' recieved <strong>'.$visit->filename_uploaded.'</strong> for <strong>$1</strong> visit <strong>$2</strong>',
+				'file',
+				'blue',
+				[
+					'link' => ['admin.eventsession.edit', $visit->session_id, [$visit->session_id] ],
+					'link2' => ['admin.visit.edit', $visit->id, [$visit->id] ],
+				] 
+			));
+		}
+		
         return $visit;
     }
 
@@ -120,9 +133,9 @@ class HopperVisit{
         $this->updateLinkedFileEntity($data, $visit);
         $this->updateLinkedUser($data, $visit);
         
+		
 		//$id, $visit, $event, $icon = 'plus', $class = 'green'
-		event(new \App\Events\Backend\Hopper\VisitUpdated($visit->id, $visit, 'updated visit'));
-		//event(new \App\Events\Backend\Hopper\VisitUpdated($visit->id, 'visit_updated', 'Rejected branding'));
+		event(new \App\Events\Backend\Hopper\VisitUpdated($visit->id, $visit, 'completed visit'));
 		
         return $visit;
     }
@@ -174,6 +187,16 @@ class HopperVisit{
           if(isset($data['behavior']) && isset($data['filename']) && isset($data['newfile']) && $data['behavior'] === 'update_visit'){
                 
                 $path = $this->hopperfile->copyTemporaryNewFileToMaster($data['filename'], true);
+				event(new \App\Events\Backend\Hopper\FileOperation(
+					$data['filename'], "Visit", $visit->id,
+					' updated <strong>'.$data['filename'].'</strong> for <strong>$1</strong> visit <strong>$2</strong>',
+					'file',
+					'blue',
+					[
+						'link' => ['admin.eventsession.edit', $visit->session_id, [$visit->session_id] ],
+						'link2' => ['admin.visit.edit', $visit->id, [$visit->id] ],
+					] 
+				));
                 //$id, $event, $notes = '', $filename = null, $tasks = [], $user = 'Hopper', $request = null
                 //event(new \App\Events\Backend\Hopper\FileEntityUpdated($visit->file_entity->id, 'visit_behavior', 'Moved updated visit file '.$data['filename'].' to master', $data['filename'], ['update_path' => $path]));
                 

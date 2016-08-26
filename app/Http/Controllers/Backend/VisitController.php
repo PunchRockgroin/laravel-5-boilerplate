@@ -139,9 +139,7 @@ class VisitController extends Controller
      */
     public function edit(Visit $visit, HopperVisit $hoppervisit)
     {
-        $data = $hoppervisit->edit($visit);       
-		
-        event(new \App\Events\Backend\Hopper\Heartbeat(auth()->user(), request()->route(), \Carbon\Carbon::now()->toIso8601String()));		
+        $data = $hoppervisit->edit($visit);       		
 		
         return view('backend.visit.edit', $data);
     }
@@ -169,7 +167,6 @@ class VisitController extends Controller
         $this->messagebag->add('updated', "Visit " . $visit->id . " for ". $visit->session_id ." Updated");
 		
 		if(config('hopper.print.enable', false) && config('hopper.print.timing', false) === 'after_visit'){
-//			return redirect()->route('admin.visit.invoice', $visit->id)->withFlashSuccess($this->messagebag);	
 			return redirect()->route('admin.visit.index')->withFlashSuccess($this->messagebag);
 		}
         

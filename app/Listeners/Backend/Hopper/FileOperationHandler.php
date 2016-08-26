@@ -46,8 +46,9 @@ class FileOperationHandler
 			);
 		//Pusher
 		$payload = [
+			'filename' => $event->filename,
 			'event' => preg_replace('/\s+/S', " ", strip_tags(history()->buildItem($history), '<a><strong><i>')),
-			'id' => $event->entity->id,
+			//'id' => $event->entity->id,
 			'userID' => 0,
 			'user' => 'Hopper',
 			'icon' => $event->icon,

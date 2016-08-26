@@ -120,12 +120,11 @@ class EventSessionController extends Controller
      */
     public function show(EventSession $eventsession, HopperEventSession $hoppereventsession)
     {
-//        $eventsession = EventSession::findOrFail($id);
-        //debugbar()->info($eventsession);
+
         $data = [
             'EventSession' => $eventsession
         ];
-//        event(new \App\Events\Backend\Hopper\Heartbeat(auth()->user(), request()->route(), \Carbon\Carbon::now()->toIso8601String()));
+
         return view('backend.eventsession.show', $data);
     }
 
@@ -173,25 +172,7 @@ class EventSessionController extends Controller
 		$eventsession = $hoppereventsession->update($request->all(), $eventsession);
         $request->merge(['event_session_id' => $eventsession->id]);
         $messagebag->add('updated', "Event Session " . $eventsession->session_id . " Updated");
-
-		//If Has Filename, but no current file entity, create a new file enity
-//        if($request->filename && empty($request->primary_file_entity_id)){
-//            //Create New File Entity
-//            $fileentity = $hoppereventsession->createNewFileEntity($request, $eventsession);
-//            //Notify
-//            $messagebag->add('created', "File  " . $fileentity->filename . " Created");
-//        }elseif($request->filename && $request->primary_file_entity_id && ($request->currentfilename !== $request->filename)){
-//            //If Has Filename, and file entity id, and the current file name does not match the new file name (i.e. new upload)
-//            //Update File Entity Referenced
-//            $fileentity = $hoppereventsession->updateNewFileEntity($request, $eventsession);
-//            //Notify
-//            $messagebag->add('updated', "File  " . $fileentity->filename . " Updated");
-//
-//        }else{
-//            //Do nothing
-//            $request->merge(['file_entity_id' => $request->primary_file_entity_id]);
-//        }
-
+		
 		//If we are creating a new visit or checking in
         if($request->action === 'create_visit' || $request->action === 'check_in' ){
 

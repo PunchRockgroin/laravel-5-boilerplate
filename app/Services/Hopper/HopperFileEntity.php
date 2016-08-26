@@ -126,7 +126,7 @@ class HopperFileEntity extends HopperFile{
     
     public function _update($data = [], FileEntity $FileEntity){
         $FileEntity->update($data);
-        event(new \App\Events\Backend\Hopper\FileEntityUpdated($FileEntity->id, 'update', 'Updated', null, null));
+        //event(new \App\Events\Backend\Hopper\FileEntityUpdated($FileEntity->id, 'update', 'Updated', null, null));
         return $FileEntity;
     }
     
