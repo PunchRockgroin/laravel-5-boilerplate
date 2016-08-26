@@ -397,7 +397,8 @@ $( function () {
             $fileNameInput = $( 'input[name="filename"]' ), fileName,
             $currentFileNameInput = $( 'input[name="currentfilename"]' ), currentFileName,
             $nextVersionInput = $( 'select[name="next_version"]' ), next_version,
-            $behavior = $( 'input[name="behavior"]' ), behavior
+            $behavior = $( 'input[name="behavior"]' ), behavior,
+            $session_id = $( 'input[name="session_id"]' )
             ;
         behavior = $behavior.val() || false;
         currentFileName = $currentFileNameInput.val() || false;
@@ -497,6 +498,7 @@ $( function () {
                 currentFileName: currentFileName,
                 next_version: $nextVersionInput.val() || false,
                 behavior: $behavior.val() || false,
+                session_id: $session_id.val() || false,
             }
         } );
         Dropzone.options.fileEntityUploadDz = {

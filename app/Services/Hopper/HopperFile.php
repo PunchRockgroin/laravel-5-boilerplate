@@ -29,6 +29,7 @@ class HopperFile implements HopperFileContract {
     protected $pusher;
     protected $driver_storage_path;
     public $hopper_temporary_name;
+    public $hopper_relics_name;
     public $hopper_working_name;
     public $hopper_master_name;
     public $hopper_archive_name;
@@ -40,6 +41,7 @@ class HopperFile implements HopperFileContract {
         $this->driver_storage_path = $this->getDriverStoragePath();
 
         $this->hopper_temporary_name = env('HOPPER_TEMPORARY_NAME', 'temporary/');
+        $this->hopper_relics_name = env('HOPPER_RELICS_NAME', 'relics/');
         $this->hopper_working_name = env('HOPPER_WORKING_NAME', 'working/');
         $this->hopper_master_name = env('HOPPER_MASTER_NAME', '1_Master/');
         $this->hopper_archive_name = env('HOPPER_ARCHIVE_NAME', 'ZZ_Archive/');
@@ -277,6 +279,44 @@ class HopperFile implements HopperFileContract {
 				}
                 //event(new \App\Events\Backend\Hopper\MasterUpdated($this->hopper_temporary_name . $newFileName, $this->hopper_master_name . $newFileName)); 
                 return $this->hopper_master_name . $newFileName;
+            }
+        } else {
+            return false;
+        }
+    }
+	
+    public function copyTemporaryNewFileToRelics($filename, $uploaded_filename, $delete = false, $sourcedisk = 'local', $targetdisk = 'hopper') {
+		return $this->_copyHopperTemporaryNewFileToHopperRelics($filename, $uploaded_filename, $delete, $sourcedisk, $targetdisk);
+    }
+
+    public function _copyHopperTemporaryNewFileToHopperRelics($filename, $uploaded_filename, $delete = false, $sourcedisk = 'local', $targetdisk = 'hopper') {
+        $file_exists = Storage::disk($sourcedisk)->exists($this->hopper_temporary_name . $filename);
+        $file_exists_in_relics = Storage::disk($targetdisk)->exists($this->hopper_relics_name . $uploaded_filename);
+		
+        //If there is a new file name and it exists in Temporary and not in Relics
+        if ($uploaded_filename && $file_exists && !$file_exists_in_relics) {
+            //Copy the file from Temporary to master
+			if(config('hopper.use_queue', false)){
+				$this->dispatch(
+					new \App\Jobs\Hopper\CopyFile($this->hopper_temporary_name . $filename, $this->hopper_relics_name . $uploaded_filename, $sourcedisk, $targetdisk)
+				);
+			}else{
+				$this->copyfile($this->hopper_temporary_name . $filename, $this->hopper_relics_name . $uploaded_filename, $sourcedisk, $targetdisk);
+			}
+			
+            return $this->hopper_relics_name . $uploaded_filename;
+        } elseif ($file_exists && $file_exists_in_relics) {  //If there is a new file name and it exists in Temporary and in Master
+            //Delete the file from relics	
+            if (Storage::disk($targetdisk)->delete($this->hopper_relics_name . $uploaded_filename)) {
+                //Copy the file from Temporary to Relics
+                if(config('hopper.use_queue', false)){
+					$this->dispatch(
+						new \App\Jobs\Hopper\CopyFile($this->hopper_temporary_name . $filename, $this->hopper_relics_name . $uploaded_filename, $sourcedisk, $targetdisk)
+					);
+				}else{
+					$this->copyfile($this->hopper_temporary_name . $filename, $this->hopper_relics_name . $uploaded_filename, $sourcedisk, $targetdisk);
+				}
+                return $this->hopper_relics_name . $uploaded_filename;
             }
         } else {
             return false;

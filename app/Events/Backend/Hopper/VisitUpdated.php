@@ -11,32 +11,37 @@ class VisitUpdated extends Event
     use SerializesModels;
     
     public $id;
+	public $visit;
     public $event;
-    public $request;
-    public $filename;
+	public $icon;
+	public $class;
     public $notes;
+    public $filename;
     public $tasks;
     public $user;
+	public $request;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct($id, $event, $notes = '', $filename = '', $tasks = [], $user = 'Hopper', $request = null)
+    public function __construct($id, $visit, $event, $icon = 'plus', $class = 'green', $notes = '', $filename = '', $tasks = [], $user = 'Hopper', $request = null)
     {
         
         
         $this->id = $id;
+        $this->visit = $visit;
         $this->event = $event;
-        $this->request = $request;
-        $this->filename = $filename;
-        $this->notes = $notes;
-        $this->tasks = $tasks;
-        $this->user = $user;
+		$this->icon = $icon;
+		$this->class = $class;
+		$this->notes = $notes;
+		$this->filename = $filename;
+		$this->tasks = $tasks;
         if(\Auth::check()){
             $this->user = \Auth::user()->name;
         }
+		$this->request = $request;
     }
 
     /**

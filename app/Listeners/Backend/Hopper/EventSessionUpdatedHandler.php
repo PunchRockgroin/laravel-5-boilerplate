@@ -34,21 +34,8 @@ class EventSessionUpdatedHandler
      * @return void
      */
     public function handle(EventSessionUpdated $event) {
-        //
 
-//        if(!empty($event->tasks)){
-//          foreach($event->tasks as $key => $task){
-//            try{
-//              $taskStatus = 'complete';
-//              $event->tasks[$key]['status'] = $taskStatus;
-//            }catch(Exception $e){
-//              \Log::error($e);
-//              $event->tasks[$key]['status'] = $e->getMessage(); 
-//            }
-//          }
-//        }
-
-        try {
+		try {
 			history()->log(
 				'Event Session',
 				$event->event.' <strong>$1</strong>',
@@ -59,6 +46,7 @@ class EventSessionUpdatedHandler
 					'link' => ['admin.eventsession.edit', $event->eventsession->session_id, [$event->eventsession->id]]
 				]
 			);
+			
 			
 			
 //            $History = [

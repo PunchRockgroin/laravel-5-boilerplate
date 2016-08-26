@@ -22,6 +22,8 @@ Interface HopperFileContract
 	public function updateTemporary($from, $to, $disk = 'local');
     
     public function moveTemporaryNewFileToWorking($newFileName, $sourcedisk = 'local', $targetdisk = 'hopper');
+	
+	public function copyTemporaryNewFileToRelics($filename, $uploaded_filename, $delete = false, $sourcedisk = 'local', $targetdisk = 'hopper');
     
     public function copyTemporaryNewFileToMaster($newFileName, $delete = false, $sourcedisk = 'local', $targetdisk = 'hopper');
     

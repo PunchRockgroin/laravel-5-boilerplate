@@ -37,6 +37,9 @@ class EventServiceProvider extends ServiceProvider
      \App\Events\Backend\Hopper\Heartbeat::class => [
              \App\Listeners\Backend\Hopper\HeartbeatHandler::class,
      ],
+     \App\Events\Backend\Hopper\FileOperation::class => [
+             \App\Listeners\Backend\Hopper\FileOperationHandler::class,
+     ],
     ];
 
 	/**

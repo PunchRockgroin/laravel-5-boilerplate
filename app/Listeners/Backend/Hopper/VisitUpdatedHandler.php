@@ -9,7 +9,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Exception;
 use Session;
 
-
 use App\Services\Hopper\Contracts\HopperFileContract;
 use Vinkla\Pusher\PusherManager;
 
@@ -39,24 +38,36 @@ class VisitUpdatedHandler
     public function handle(VisitUpdated $event) {
 
         try {
-//            $History = [
-//                'event' => $event->event,
-//                'user' => $event->user,
-//                'filename' => $event->filename,
-//                'notes' => $event->notes,
-//                'tasks' => $event->tasks,
-//                'timestamp' => \Carbon\Carbon::now(),
-//            ];
-//            
-//            $Visit = \App\Models\Hopper\Visit::find($event->id);
-//            if(count($Visit)){
-//                $OldHistory = $Visit->history;
-//                $OldHistory[] = $History;
-//                $Visit->update(['history' => $OldHistory]);
-//            }
+			
+			
+			history()->log(
+				'Visit',
+				$event->event.' <strong>$1</strong> for <strong>$2</strong>',
+				$event->visit->id,
+				$event->icon,
+				'bg-'.$event->class,
+				[
+					'link' => ['admin.visit.invoice', $event->visit->id, [$event->visit->id]],
+					'link2' => ['admin.eventsession.edit', $event->visit->session_id, [$event->visit->session_id]],
+				]
+			);
+		
+		//Pusher
 		$payload = [
-			'id' => $event->id
+			'event' => $event->event,
+			'id' => $event->id,
+			'userID' => 0,
+			'user' => 'Hopper',
+			'icon' => $event->icon,
+			
 		];
+		
+		if(\Auth::check()){
+            $payload['userID'] = \Auth::user()->id;
+            $payload['user'] = \Auth::user()->name;
+        }
+
+		
 		
 		$this->pusher->trigger('hopper_channel', 'visit_status', ['message' => 'update', 'payload' => $payload ]);
 

@@ -60,6 +60,9 @@ class HopperVisit{
     {
         //
         $visit = Visit::create($data);
+		//$id, $visit, $event, $icon = 'plus', $class = 'green'
+		event(new \App\Events\Backend\Hopper\VisitUpdated($visit->id, $visit, 'created visit'));
+		
         return $visit;
     }
 
@@ -96,8 +99,8 @@ class HopperVisit{
 		}
 		
 		
-        //event(new EventSessionUpdated($visit->event_session->id, 'visit_behavior', 'Began Visit'));
-//        debugbar()->info($data['idleUsers']);
+        //$id, $visit, $event, $icon = 'plus', $class = 'green'
+		event(new \App\Events\Backend\Hopper\VisitUpdated($visit->id, $visit, 'began visit', 'play'));
         return $data;
     }
 
@@ -117,6 +120,8 @@ class HopperVisit{
         $this->updateLinkedFileEntity($data, $visit);
         $this->updateLinkedUser($data, $visit);
         
+		//$id, $visit, $event, $icon = 'plus', $class = 'green'
+		event(new \App\Events\Backend\Hopper\VisitUpdated($visit->id, $visit, 'updated visit'));
 		//event(new \App\Events\Backend\Hopper\VisitUpdated($visit->id, 'visit_updated', 'Rejected branding'));
 		
         return $visit;
@@ -135,6 +140,8 @@ class HopperVisit{
         $visit->update($data);
                 
         
+		
+		
         return $visit;
     }
     

@@ -36,6 +36,7 @@ class HopperEventSession {
         $this->hopperfileentity = $hopperfileentity;
 		
 		$this->hopper_temporary_name = env('HOPPER_TEMPORARY_NAME', 'temporary/');
+        $this->hopper_relics_name = env('HOPPER_RELICS_NAME', 'relics/');
         $this->hopper_working_name = env('HOPPER_WORKING_NAME', 'working/');
         $this->hopper_master_name = env('HOPPER_MASTER_NAME', '1_Master/');
         $this->hopper_archive_name = env('HOPPER_ARCHIVE_NAME', 'ZZ_Archive/');
@@ -153,18 +154,16 @@ class HopperEventSession {
 			return true;
 		}
 		
+		if($request->filename_uploaded){
+			//Copy the temp file to relics for "backup"
+			$this->hopperfile->copyTemporaryNewFileToRelics($request->filename, $request->filename_uploaded);
+		}
+		
         //If it's a blind update
         if($request->blind_update === "YES"){
-             
-//			debugbar()->info($request->currentfilename);
-//			debugbar()->info($request->filename);
 			
-//			$master_stream = $this->hopperfile->getStream($this->hopper_master_name . $request->currentfilename);
-//			$new_file_stream = $this->hopperfile->getStream($this->hopper_temporary_name . $request->filename);
-
 			$path = $this->hopperfile->copyTemporaryNewFileToMaster($request->filename, true);    
-			
-			
+
 			if($this->hopperfile->copyMasterToArchive($request->filename)){
 				//Move the old master to archive
 				$this->hopperfile->moveMasterToArchive($request->currentfilename);
@@ -231,8 +230,11 @@ class HopperEventSession {
         //Create a visit		
 		$visit = $hoppervisit->store($request->all());
 		
+		
         return $visit;
     }
+	
+	
 
     public function createNewFileEntity(Request $request, EventSession $eventsession) {
         

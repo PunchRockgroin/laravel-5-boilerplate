@@ -209,8 +209,10 @@ class FileEntityController extends Controller {
             $newFileName = $hopperFile->renameFileVersion($request->currentFileName, $request->next_version, $file->getClientOriginalExtension());
             $next_version = HopperFile::getCurrentVersion($newFileName) + 1;
         }
-              
-          
+//        $eventsession = false;
+//		if(!empty($request->session_id)){
+//			$eventsession = \App\Models\Hopper\EventSession::where('session_id', $request->session_id)->first();
+//		}
         $upload = $hopperFile->uploadToTemporary(File::get($file), $newFileName);
         
         if ($upload instanceof \Exception) {
@@ -219,7 +221,23 @@ class FileEntityController extends Controller {
                         'message' => $upload->getMessage(),
                             ], 400);
         } else {
-            Event::fire(new \App\Events\Backend\Hopper\FileUploaded($request->except('file'), $newFileName));            
+//			if($eventsession){
+//				//$filename, $type, $entity, $event, $icon = 'file', $class = 'blue', $links = []
+//				event(new \App\Events\Backend\Hopper\FileOperation(
+//						$uploadedFileName, 
+//						'Event Session',
+//						$eventsession,
+//						'uploaded file <strong>'.$uploadedFileName.'</strong> for <strong>$1</strong>',
+//						'cloud-upload',
+//						'green',
+//						[
+//							
+//							'link' => ['admin.eventsession.edit', $eventsession->session_id, [ $eventsession->session_id ] ]
+//						]
+//					)
+//				);	
+//			}
+
             return response()->json([
                         'success' => true,
                         'newFileName' => $newFileName,

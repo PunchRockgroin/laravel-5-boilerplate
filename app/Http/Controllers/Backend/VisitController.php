@@ -47,7 +47,6 @@ class VisitController extends Controller
 		
 		$TopVisits = collect( $hopperstats->top_user_visits() );
 		
-		// debugbar()->info($hopperstats->js_chart_user_visits());
 		
 		javascript()->put([
             'graphicOpsPie' => $hopperstats->js_chart_user_visits(),
@@ -155,10 +154,7 @@ class VisitController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, Visit $visit, HopperVisit $hoppervisit)
-    {
-        debugbar()->info($request->all());
-		
-		
+    {			
         $this->validate($request, [
             'visitor_type' => 'required',
             'difficulty' => 'required',
@@ -301,7 +297,7 @@ class VisitController extends Controller
 	}
 	
 	public function invoice(Request $request, $id) {
-        //\Debugbar::disable();
+        \Debugbar::disable();
 		
 		$visit = Visit::findOrFail($id);
 		
