@@ -13,15 +13,13 @@
     {!! Form::model($eventsession, ['route' => array('admin.eventsession.update', $eventsession->session_id), 'role' => 'form', 'method' => 'patch']) !!}
     {!! Form::hidden('behavior', 'update_eventsession') !!} 
 	
-    @include('backend.eventsession.partials.file_entity')
+	@include('backend.eventsession.partials.file_entity')
 
     @include('backend.eventsession.partials.form')   
     
     {!! Form::close() !!}
     
     @if(isset($History))
-        
-        @include('backend.eventsession.partials.timeline')
-    
+        @include('backend.eventsession.partials.timeline')    
     @endif
 @endsection

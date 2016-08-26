@@ -53,6 +53,7 @@
             <div class="">
 				{!! Form::hidden('temporaryfilename', null, ['class' => 'form-control']) !!}		
 				{!! Form::hidden('filename_uploaded', null, ['class' => 'form-control']) !!}		
+				{!! Form::hidden('_id', $eventsession['id'], ['class' => 'form-control', 'readonly'=>'readonly']) !!}		
                 {!! Form::text('filename', isset($eventsession['session_files']->first()['filename']) ? $eventsession['session_files']->first()['filename'] : null, ['class' => 'form-control', 'readonly'=>'readonly', 'placeholder' => trans('fileentity.backend.form.filename.placeholder')]) !!}
 				<div class="help-block">This will be the new file name</div>
             </div>
