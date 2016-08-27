@@ -28,9 +28,6 @@ Vue.transition( 'zoom', {
 Vue.http.headers.common['X-CSRF-TOKEN'] = document.querySelector( 'meta[name="_token"]' ).getAttribute( 'content' );
 
 if ( $( '#Hopper' ).length ) {
-
-
-
     var hopperVue = new Vue( {
         el: '#Hopper',
         data: {
@@ -42,6 +39,13 @@ if ( $( '#Hopper' ).length ) {
             currentVisit: { },
             inVisit: { },
             idleUsers: { }
+        },
+        computed: {
+            idleGraphicOperators: function () {
+                return this.Users.filter(function(user){
+                    return user.idle = 'false';
+                }.bind(this));
+            }
         },
         filters: {
             moment: function ( date ) {
@@ -208,12 +212,12 @@ if ( $( '#Hopper' ).length ) {
                         toastr.success( payload.user.name + ' state changed to: <strong>' + payload.user.state + '</strong>', 'Hopper Says' );
                     } else {
                         toastr.error( 'Something happened', 'Hopper Says' );
-                        console.log( response.data );
+                        //console.log( response.data );
                     }
 
                 }, function ( response ) {
                     // error callback
-                    console.log( response );
+                    //console.log( response );
                 } );
             },
             triggerRefresh: function () {
@@ -267,10 +271,6 @@ if ( $( '#Hopper' ).length ) {
 
 }
 
-//$.get('/admin/visit/stats').done(function(data){
-//    console.log(data);
-//})
-
 $( function () {
     if ( typeof window.hopper !== "undefined" && typeof window.hopper.heartbeat_detector_enable !== "undefined" && window.hopper.heartbeat_detector_enable === true ) {
         //hopperVue.getDashboardData();
@@ -297,7 +297,7 @@ $( function () {
         } );
         $( document ).on( "click", ".assign-visit-to-user", function () {
             var $el = $( this );
-            hopperVue.assignVisitToUserModal( $el.data() );
+            hopperVue.assignVisitToUserModal( $el.data('id') );
         } );
     }
 } );

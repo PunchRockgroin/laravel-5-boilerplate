@@ -4,7 +4,7 @@
 	</div>
 </div>
 <div class="row">
-	<template v-for="user in Users | filterBy 'false' in 'idle'" track-by="uid">
+	<template v-for="user in Users | filterBy 'true' in 'idle'" track-by="uid">
 		@include('backend.hopper.dashboard.partials.usercard')
 	</template>
 </div>
@@ -15,8 +15,9 @@
 	</div>
 </div>
 <div class="row">
-	<template v-for="user in Users | filterBy 'true' in 'idle'" track-by="uid">
+	<template v-for="user in Users | filterBy 'false' in 'idle'" track-by="uid">
 		@include('backend.hopper.dashboard.partials.usercard')
 	</template>
+	
 </div>
 

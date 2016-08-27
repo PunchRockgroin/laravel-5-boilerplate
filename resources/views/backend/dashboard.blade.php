@@ -131,7 +131,14 @@
 </div>
 
 @include('backend.hopper.dashboard.partials.userbehavior')
-
+<div class='row'>
+<div class="col-xs-12">
+<div class="callout callout-warning">
+<h4>Hopper Assignments is in Alpha</h4>
+<p>Your milage may vary.</p>
+</div>
+</div>
+</div>
 <div class='row'>
   <div class="col-sm-12">
     <div class="box box-info">
@@ -142,7 +149,7 @@
             </div><!-- /.box tools -->
         </div><!-- /.box-header -->
         <div class="box-body">
-            {!! history()->render() !!}
+            {!! history()->render(30) !!}
         </div><!-- /.box-body -->
     </div><!--box box-success-->
   </div>

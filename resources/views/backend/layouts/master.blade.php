@@ -35,7 +35,7 @@
         {{ HTML::script('https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js') }}
         <![endif]-->
     </head>
-    <body class="skin-{{ config('backend.theme') }} {{ config('backend.layout') }}">
+    <body id='Hopper' class="skin-{{ config('backend.theme') }} {{ config('backend.layout') }}">
         @include('includes.partials.logged-in-as')
 
         <div class="wrapper">

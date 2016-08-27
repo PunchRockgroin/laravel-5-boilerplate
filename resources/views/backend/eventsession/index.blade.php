@@ -21,7 +21,7 @@
              {!! $html->table(['class' => 'table responsive table-bordered table-striped', 'width' => '100%' ]) !!}
         </div><!-- /.box-body -->
     </div><!--box box-success-->
-	{!! history()->renderType('Event Session', null, true, 1) !!}
+	{!! history()->renderType('Visit', 10, true) !!}
 @endsection
 
 

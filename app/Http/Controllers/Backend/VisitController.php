@@ -247,10 +247,16 @@ class VisitController extends Controller
 	
 	public function myassignments(Request $request){
 		if ($request->ajax()) {
-            $Visits = Visit::select(['id', 'session_id', 'updated_at'])
+			if(config('hopper.use_assignments')){
+				$Visits = Visit::select(['id', 'session_id', 'updated_at'])
 							 ->where('assignment_user_id', '=', auth()->user()->id );
+			}else{
+				$Visits = Visit::select(['id', 'session_id', 'updated_at'])
+							->whereNull('difficulty');
+			}
+            
             return \Datatables::of($Visits)
-					->editColumn('updated_at', '<span class="lead">{!! $updated_at->diffForHumans() !!}</span>')
+					->editColumn('updated_at', '<span class="lead">{!! Carbon\Carbon::parse($updated_at)->diffForHumans() !!}</span>')
                     ->editColumn('session_id', '<span class="lead">{!! $session_id !!}</span>')
                     ->editColumn('action', function ($visit) {
                         $content = '';

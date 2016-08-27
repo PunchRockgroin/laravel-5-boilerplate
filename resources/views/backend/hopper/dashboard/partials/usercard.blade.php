@@ -28,7 +28,7 @@
 		</div>
 		<div class="box-footer">
 			<div class="padding-left">
-				Total Visits <span class="pull-right badge bg-blue">@{{ user.visit_count.aggregate }}</span>
+				<span v-if="user.visit_count > 0">Total Visits <span class="pull-right badge bg-blue">@{{ user.visit_count.aggregate }}</span></span>
 			</div>
 		</div>
 	</div>
