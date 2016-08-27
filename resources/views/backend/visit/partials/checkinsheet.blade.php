@@ -1,10 +1,10 @@
 <section class="">
     <!-- title row -->
     <div class="row">
-        <div class="col-xs-12 col-sm-8">
+        <div class="col-xs-8">
             <img src="{!! config('hopper.print.logo.dataURI') !!}" class="img-responsive" alt="" style='width:175px;'/>
         </div><!-- /.col -->
-        <div class="col-xs-12 col-sm-4">
+        <div class="col-xs-4">
             Visit Date/Time: {!! $visit->created_at !!}
             <h4>Visit ID: <strong>{!! $visit->id !!}</strong></h4>
             <h4>Session ID: <strong>{!! $visit->event_session->session_id !!}</strong></h4>
@@ -13,7 +13,7 @@
     <hr>
 
     <div class="row" style='height:130px'>
-        <div class="col-xs-12 col-sm-8">
+        <div class="col-xs-12 col-xs-8">
             <h4><strong>Speaker check-in form</strong></h4>
             <div class="">Session ID: <strong>{!! $visit->event_session->session_id !!}</strong></div>
 			@if($visit->working_filename)
@@ -28,7 +28,7 @@
 			<div class="">Visit Type: <strong>{!! ucwords($visit->visitor_type) !!}</strong></div>
 			@endif
         </div>
-        <div class="col-xs-12 col-sm-4">
+        <div class="col-xs-12 col-xs-4">
            
             
         </div>
@@ -72,11 +72,11 @@
         </div><!-- /.col -->
     </div>
     <div class="row" style='margin-bottom: 20px; height: 130px;'>
-        <div class="col-xs-12 col-sm-6">
+        <div class="col-xs-6">
             <div class="">Session ID: <strong>{!! $visit->event_session->session_id !!}</strong></div>
             
         </div>
-        <div class="col-xs-12 col-sm-6">
+        <div class="col-xs-6">
             <h5 style='margin-top:0;'>To Find your Presentation</h5>
 			<div class='small'>	
 			<ol>

@@ -16,7 +16,8 @@
             </style>
         @yield('after-styles-end')
     </head>
-    <body class="skin-green-light" onload="@if( config('hopper.print.location', 'internal') === 'internal') window.print(); @endif">
+    <body class="skin-green-light" onload="@if( config('hopper.print.location', 'internal') === 'internal')  setTimeout(function () { window.print(); }, 500);
+    window.onfocus = function () { setTimeout(function () { window.close(); }, 500); } @endif">
         <div class="">
             <!-- Content Wrapper. Contains page content -->
             <div class="invoice">

@@ -205,7 +205,7 @@ class EventSessionController extends Controller
             }
 
 			if(config('hopper.print.enable', false) && config('hopper.print.timing', false) == 'before_visit' && $request->print_form !== 'NO' ){
-				return redirect()->route('admin.visit.invoice', $visit->id)->withFlashMessage($messagebag);
+				return redirect()->route('admin.visit.invoice', [$visit->id, 'eventsession' => 'true'])->withFlashMessage($messagebag);
 			}
 			return redirect()->route('admin.eventsession.index')->withFlashMessage($messagebag);
 
