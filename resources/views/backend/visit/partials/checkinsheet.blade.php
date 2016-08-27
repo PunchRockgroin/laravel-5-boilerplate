@@ -18,6 +18,8 @@
             <div class="">Session ID: <strong>{!! $visit->event_session->session_id !!}</strong></div>
 			@if($visit->working_filename)
             <div class="">Visit filename: <strong>{!! $visit->working_filename !!}</strong></div>
+			@else
+			<div class=""><span class='label label-info'>Blind Update</span></div>
 			@endif
 			@if($visit->filename_uploaded)
             <div class="">Name of file brought in: <strong>{!! $visit->filename_uploaded !!}</strong></div>

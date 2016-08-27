@@ -21,6 +21,11 @@
 
             <div class="info-box-content">
                 <span class="info-box-text">Filename</span>
+				@if($visit->working_filename)
+				<div class="">Visit filename: <strong>{!! $visit->working_filename !!}</strong></div>
+				@else
+				<div class="">Visit filename: {!! $visit->filename_uploaded !!} <span class='label label-info'>Blind Update</span></div>
+				@endif
                 <span class="info-box-number">{!! $visit->working_filename !!}</span>
 				<span class="info-box-header small">File uploaded: {!! $visit->filename_uploaded !!}</span>
             </div>
