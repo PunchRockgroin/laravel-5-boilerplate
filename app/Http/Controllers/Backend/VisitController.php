@@ -220,7 +220,7 @@ class VisitController extends Controller
             return \Datatables::of($Visits)
 //                    ->editColumn('created_at', '{!! $created_at->diffForHumans() !!}')
                     ->editColumn('updated_at', function ($visit) {
-                        return $visit->updated_at->format('h:m:s');
+                        return $visit->updated_at->format('h:i:s');
                     })
                     ->editColumn('assignment_user_id', function ($visit) {
 						if($visit->user){

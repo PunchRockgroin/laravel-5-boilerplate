@@ -42,9 +42,12 @@ if ( $( '#Hopper' ).length ) {
         },
         computed: {
             idleGraphicOperators: function () {
-                return this.Users.filter(function(user){
-                    return user.idle = 'false';
-                }.bind(this));
+                var filter = Vue.filter('filterBy');
+                return filter(this.Users, 'true', 'idle');
+            },
+            activeGraphicOperators: function () {
+                var filter = Vue.filter('filterBy');
+                return filter(this.Users, 'false', 'idle');
             }
         },
         filters: {

@@ -70,7 +70,7 @@ class User extends Authenticatable
 
     public function getIdleAttribute()
     {
-      return $this->assignments()->exists();
+      return ! $this->assignments()->exists();
     }
 
     public function scopeGraphicOperatorStatus(){
