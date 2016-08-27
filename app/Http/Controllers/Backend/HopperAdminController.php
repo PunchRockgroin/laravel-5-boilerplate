@@ -537,7 +537,7 @@ class HopperAdminController extends Controller {
 			
 			if (!$process->isSuccessful()) {
 //				throw new ProcessFailedException($process);
-				debugbar()->info($process->getErrorOutput());
+				//debugbar()->info($process->getErrorOutput());
 			}else{
 				switch($request->get('type')){
 					case 'update':
@@ -547,7 +547,7 @@ class HopperAdminController extends Controller {
 						Storage::disk('local')->put('current.json', json_encode( [ 'current'=> trim( preg_replace('/\s+/', ' ', $process->getOutput() ) ) ] ) );
 						break;
 				}
-				debugbar()->info($process->getOutput());
+				//debugbar()->info($process->getOutput());
 			}
 			
 			
