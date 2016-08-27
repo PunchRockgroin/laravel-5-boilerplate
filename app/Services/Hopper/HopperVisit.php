@@ -59,6 +59,8 @@ class HopperVisit{
     public function store($data)
     {
         //
+		
+		
         $visit = Visit::create($data);
 		//$id, $visit, $event, $icon = 'plus', $class = 'green'
 		event(new \App\Events\Backend\Hopper\VisitUpdated($visit->id, $visit, 'created visit'));
@@ -151,10 +153,6 @@ class HopperVisit{
     {
         //
         $visit->update($data);
-                
-        
-		
-		
         return $visit;
     }
     
@@ -183,7 +181,7 @@ class HopperVisit{
     }
             
     public function updateLinkedFileEntity($data, Visit $visit){
-           
+          
           if(isset($data['behavior']) && isset($data['filename']) && isset($data['newfile']) && $data['behavior'] === 'update_visit'){
                 
                 $path = $this->hopperfile->copyTemporaryNewFileToMaster($data['filename'], true);

@@ -23,6 +23,7 @@ class Visit extends Model
 		'assignment_user_id',
 		'visitor_type',
 		'working_filename',
+		'blind_update'
     );
     
     /**
@@ -35,6 +36,7 @@ class Visit extends Model
         'file_entity_id' => 'integer',
         'history' => 'array',    
 		'assignment_user_id' => 'integer',
+		'blind_update' => 'boolean',
     ];
 
     public function event_session()

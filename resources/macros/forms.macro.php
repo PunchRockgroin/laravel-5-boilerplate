@@ -1,6 +1,6 @@
 <?php
 
-Html::macro('checkboxswitch', function($name='', $label='', $value='', $checkboxAttributes=[], $onValue='YES', $offValue='NO')
+Html::macro('checkboxswitch', function($name='', $label='', $value='', $checkboxAttributes=[], $labelAttributes=[], $onValue='YES', $offValue='NO', $description = false)
 {
     
     if(empty($value)){
@@ -25,9 +25,11 @@ Html::macro('checkboxswitch', function($name='', $label='', $value='', $checkbox
     return view('includes.partials.checkboxswitch')
             ->with('name', $name)
             ->with('label', $label)
+            ->with('labelAttributes', $labelAttributes)
             ->with('value', $value)
             ->with('checked', $checked)
             ->with('switchAttributes', $switchAttributes)
+            ->with('description', $description)
         ;
     
 });

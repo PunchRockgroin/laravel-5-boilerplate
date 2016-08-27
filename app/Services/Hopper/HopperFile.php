@@ -93,10 +93,21 @@ class HopperFile implements HopperFileContract {
 	
 	
 	public function locate($query) {
-			$filesInMaster = $this->getAllInMaster();
-			$validFiles = $this->filterValidFiles($query, $filesInMaster);
-			$mappedFiles = $this->mapFileMeta($validFiles);
-			return $mappedFiles;
+
+			try { 
+				$filesInMaster = $this->getAllInMaster();
+				$validFiles = $this->filterValidFiles($query, $filesInMaster);
+				$mappedFiles = $this->mapFileMeta($validFiles);
+				return $mappedFiles;
+			  } catch (Exception $e) {
+				$filesInMaster = $this->flushMasterCache();
+				$validFiles = $this->filterValidFiles($query, $filesInMaster);
+				$mappedFiles = $this->mapFileMeta($validFiles);
+				return $mappedFiles;
+			} 
+			
+			
+			
     }
 
     public function validateFile($request) {
@@ -698,10 +709,19 @@ class HopperFile implements HopperFileContract {
      * @return \Illuminate\Support\Collection
      */
     public function getAllInMaster($sourcedisk = 'hopper'){
-        $collection = collect(Cache::remember('hopper_master_files', 1, function() use ($sourcedisk){
+        return collect(Cache::remember('hopper_master_files', 1, function() use ($sourcedisk){
 			return Storage::disk($sourcedisk)->files($this->hopper_master_name);
 		}));
-        return $collection;
+        //return collect(Storage::disk($sourcedisk)->files($this->hopper_master_name));
+    }
+	
+    /**
+     * Gets all files in Master with pathname removed.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function flushMasterCache($sourcedisk = 'hopper'){
+		Cache::forget('hopper_master_files');
     }
     
     /**

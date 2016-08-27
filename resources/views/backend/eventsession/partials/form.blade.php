@@ -1,12 +1,55 @@
 <div class="box box-success">
     <div class="box-header with-border">
+        <h3 class="box-title">Check in options</h3>
+    </div><!-- /.box-header -->
+    <div class="box-body">
+		{!! Html::checkboxswitch(
+			'visitor_type',
+			'Is the visitor physically present?',
+			'YES',
+			[ 'data-on-color'=>'success', 'data-off-color'=>'warning',]
+			)
+		!!}
+		{!! Html::checkboxswitch(
+			'blind_update',
+			'If there is an updated file, are we bypassing review/additional changes by a Graphic Operator?',
+			'NO',
+			[ 'data-on-color'=>'warning', 'data-off-color'=>'default',],
+			null,
+			'YES',
+			'NO',
+			'This is also known as a "blind update"'
+			)													
+		!!}
+		@if( config('hopper.print.enable') )
+		{!! Html::checkboxswitch(
+			'print_form',
+			'Print a check-in form?',
+			'YES',
+			[ 'data-on-color'=>'success', 'data-off-color'=>'warning',]
+			)													
+		!!}
+		@endif
+		
+	</div>
+	<div class="box-footer">
+		<div class='clearfix'>
+            <div class=" pull-right">
+                @include('backend.eventsession.partials.actions')
+            </div>
+        </div>
+	</div>
+</div>
+
+<div class="box box-success">
+    <div class="box-header with-border">
         <h3 class="box-title">{{ $eventsession->session_id or '' }} Event Session Data</h3>
     </div><!-- /.box-header -->
     <div class="box-body">
         <div class="form-group">
             {!! Form::label('session_id', trans('eventsession.backend.form.session_id.label'), ['class' => 'control-label']) !!}
             <div class="">
-                {!! Form::text('session_id', null,['class' => 'form-control', 'placeholder' => trans('eventsession.backend.form.session_id.placeholder')]) !!}
+                {!! Form::text('session_id', null,['class' => 'form-control', 'placeholder' => trans('eventsession.backend.form.session_id.placeholder'), 'readonly'=>'readonly']) !!}
                 <div class="help-block">{{ trans('eventsession.backend.form.session_id.help_block') }}</div>
             </div>
         </div>
@@ -45,11 +88,12 @@
             <a data-repeater-create class='btn btn-success' >Add</a>
         </div>
 		@endif
-		
-        <div class='clearfix'>
+    </div><!-- /.box-body -->
+	<div class="box-footer">
+		<div class='clearfix'>
             <div class=" pull-right">
                 @include('backend.eventsession.partials.actions')
             </div>
         </div>
-    </div><!-- /.box-body -->
+	</div>
 </div><!--box-->

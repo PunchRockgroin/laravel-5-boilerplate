@@ -110,7 +110,7 @@ class HopperEventSession {
     public function update($data, EventSession $eventsession) {
         //Manipulate Dates
         $this->parseDateTimeforStorage($data);
-
+		
         $eventsession->update($data);
 
         return $eventsession;
@@ -138,21 +138,19 @@ class HopperEventSession {
 
                 break;
             default:
-//                event(new EventSessionUpdated($id, 'update', ''));
+
                 break;
         }
     }
 
     public function createNewVisit(Request $request, HopperVisit $hoppervisit) {
         
+		
+		
         if (!$request->has('checkin_username')) {
             $request->merge(['checkin_username' => \Auth::user()->name]);
         }		
 		
-		if(config('hopper.report_only_mode', true)){
-			$visit = $hoppervisit->store($request->all());
-			return true;
-		}
 		
 		if($request->filename_uploaded){
 			//Copy the temp file to relics for "backup"
@@ -161,16 +159,17 @@ class HopperEventSession {
 		}
 		
         //If it's a blind update
-        if($request->blind_update === "YES"){
+        if( $request->blind_update ){
 			//Copy the new file to master, then delete from temporary
 			$path = $this->hopperfile->copyTemporaryNewFileToMaster($request->filename, true);    
-			//If we've copied the new master to Archive,
-			if($this->hopperfile->copyMasterToArchive($request->filename)){
-				//Move the old master to archive
-				$this->hopperfile->moveMasterToArchive($request->currentfilename);
-			}
-            //We're done here
-            return true;
+			//Copy the new master to Archive,
+			$this->hopperfile->copyMasterToArchive($request->filename);
+			//Move the old master to archive
+			$this->hopperfile->moveMasterToArchive($request->currentfilename);
+			
+			$visit = $hoppervisit->store($request->all());
+			//We're done here
+            return $visit;
             
         }
 		//If it's not a blind update:
@@ -222,6 +221,7 @@ class HopperEventSession {
 //		
         //Create a visit		
 		$visit = $hoppervisit->store($request->all());
+		
 		
 		
         return $visit;

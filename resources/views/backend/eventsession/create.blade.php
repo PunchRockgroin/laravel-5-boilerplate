@@ -13,9 +13,9 @@
     
     {!! Form::open(['route' => 'admin.eventsession.store', 'class' => '', 'role' => 'form']) !!}    
     {!! Form::hidden('behavior', 'create_eventsession') !!}
-    @include('backend.eventsession.partials.file_entity')
+    
     
     @include('backend.eventsession.partials.form')   
-    
+    {!!  Form::button('Create New Event Session', ['type'=>'submit', 'name' => 'action', 'value'=>'create_eventsession', 'class' => 'btn btn-primary']) !!}
     {!! Form::close() !!}
 @endsection

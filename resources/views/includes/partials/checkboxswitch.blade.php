@@ -8,7 +8,10 @@
 
 ?>
 <div class="form-group">
-    {!! Form::label($name.'-pseudo', $label) !!}<br />
+    {!! Form::label($name.'-pseudo', $label, $labelAttributes) !!} <br />
     {!! Form::checkbox($name.'-pseudo', true, $checked, $switchAttributes) !!}
     {!! Form::hidden($name, $value) !!}
+	@if($description)
+	<div class="description">{!! $description !!}</div>
+	@endif
 </div>

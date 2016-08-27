@@ -13,6 +13,8 @@ use App\Services\Hopper\HopperEventSession;
 use App\Services\Hopper\HopperFileEntity;
 use App\Services\Hopper\HopperVisit;
 
+use App\Services\Hopper\Contracts\HopperFileContract;
+
 use App\Models\Hopper\EventSession;
 
 class EventSessionController extends Controller
@@ -22,9 +24,11 @@ class EventSessionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request, Builder $htmlbuilder)
+    public function index(Request $request, Builder $htmlbuilder, HopperFileContract $hopperfile)
     {
         //
+		$hopperfile = new \App\Services\Hopper\HopperFile;
+		$hopperfile->flushMasterCache();
 		
         if ($request->ajax()) {
             $eventsessions = EventSession::select(['id', 'session_id', 'checked_in', 'speakers', 'onsite_phone', 'presentation_owner']);
@@ -153,6 +157,22 @@ class EventSessionController extends Controller
      */
     public function update(Request $request, EventSession $eventsession, HopperEventSession $hoppereventsession, HopperVisit $hoppervisit)
     {
+		
+		
+		
+		$blind_update = FALSE;
+		if($request->blind_update === "YES"){
+			$blind_update = TRUE;
+		}
+		$request->merge( ['blind_update' => $blind_update ] );
+		
+		if($request->visitor_type == 'NO'){
+			$request->merge(['visitor_type' => 'none']);
+		}else{
+			$request->merge(['visitor_type' => 'normal']);
+		}
+		
+		
         $messagebag = new \Illuminate\Support\MessageBag();
 
 		if(isset($request->temporaryfilename) && !empty($request->temporaryfilename) && isset($request->filename) && ($request->temporaryfilename !== $request->filename)){
@@ -162,7 +182,7 @@ class EventSessionController extends Controller
 		}
 
 		//If it's a blind update and things haven't changed, notify
-		if($request->blind_update === "YES" && ($request->currentfilename === $request->filename)){
+		if($request->blind_update && ($request->currentfilename === $request->filename)){
 			$messagebag->add('file_warning', "<strong class=''>You did not attach a file to update to</strong>");
 			return redirect()->back()->withFlashWarning($messagebag);
 		}
@@ -175,16 +195,16 @@ class EventSessionController extends Controller
 		
 		//If we are creating a new visit or checking in
         if($request->action === 'create_visit' || $request->action === 'check_in' ){
-
+			
             $request->merge( ['checkin_username'=> \Auth::user()->name ] );
             $visit = $hoppereventsession->createNewVisit($request, $hoppervisit);
 			//If this is not a blind update, notify of new visit created.
-            if($request->blind_update !== "YES"){
+            if( ! $blind_update ){
                 $messagebag->add('create_visit', "<strong class='lead'>Visit Created</strong>");
                 $messagebag->add('create_visit', "<a href='".route('admin.visit.edit', ['id' => $visit->id] )."' target='_blank'>View this visit now</a>");
             }
 
-			if(config('hopper.print.enable', false) && config('hopper.print.timing', false) == 'before_visit'){
+			if(config('hopper.print.enable', false) && config('hopper.print.timing', false) == 'before_visit' && $request->print_form !== 'NO' ){
 				return redirect()->route('admin.visit.invoice', $visit->id)->withFlashMessage($messagebag);
 			}
 			return redirect()->route('admin.eventsession.index')->withFlashMessage($messagebag);

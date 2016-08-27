@@ -22,6 +22,9 @@
 			@if($visit->filename_uploaded)
             <div class="">Name of file brought in: <strong>{!! $visit->filename_uploaded !!}</strong></div>
 			@endif
+			@if($visit->visitor_type)
+			<div class="">Visit Type: <strong>{!! ucwords($visit->visitor_type) !!}</strong></div>
+			@endif
         </div>
         <div class="col-xs-12 col-sm-4">
            
@@ -45,7 +48,13 @@
                     <tr style="height: 200px">
                         <td>{{ $visit->created_at->format('d-m-y') }}</td>
                         <td>{{ $visit->created_at->format('h:m:s') }}</td>
-                        <td>{{ $visit->visitors }}</td>
+                        <td>
+							@if($visit->visitor_type !== 'none')
+							{{ $visit->visitors }}
+							@else
+							{!! ucwords($visit->visitor_type) !!}
+							@endif
+						</td>
                         <td>{{ $visit->design_username }}</td>
                         <td>{{ $visit->design_notes }}</td>
                     </tr>

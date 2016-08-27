@@ -45,6 +45,8 @@ Interface HopperFileContract
 	
 	public function getAllInMaster($sourcedisk = 'hopper');
 	
+	public function flushMasterCache($sourcedisk = 'hopper');
+	
 	public function filterValidFiles($query, $collection, $disk = 'hopper');
     
 	public function mapFileMeta($collection, $sourcedisk = 'hopper');

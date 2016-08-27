@@ -1,14 +1,4 @@
 @include('backend.fileentity.partials.file_upload')
-<div class="form-group">
-{!! Html::checkboxswitch(
-	'blind_update',
-	'Is this an instance where the visitor brought in a file, but does not want or does not need to visit a Graphic Operator? ',
-	'NO',
-	[ 'data-on-color'=>'warning', 'data-off-color'=>'default',]
-	)
-!!}
-</div>
-
 <div class="box box-success">
     <div class="box-header with-border">
         <h3 class="box-title">Event Session File Data</h3>
