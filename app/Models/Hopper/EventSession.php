@@ -20,6 +20,10 @@ class EventSession extends Model
         'presentation_owner',
         'check_in_datetime',
         'history',
+		'share_internal',
+        'share_external',
+        'share_recording_internal',
+        'share_recording_external'
     );
     
     protected $dates = ['created_at', 'updated_at', 'check_in_datetime'];

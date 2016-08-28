@@ -32,15 +32,51 @@
 		@endif
 		
 	</div>
+</div>
+<div class="box box-primary">
+	<div class="box-header with-border">
+	  <h3 class="box-title">Session Sharing Questions</h3>
+	</div><!-- /.box-header -->
+	<div class="box-body">
+		<div class="row">
+			<div class='col-sm-12'>
+
+				{!! HTML::checkboxswitch(
+						'share_internal',
+						'May we share your presentation internally?',
+						'NO',
+						[ 'data-on-color'=>'success', 'data-off-color'=>'danger',]
+					) !!}
+				{!! HTML::checkboxswitch(
+						'share_external',
+						'May we share your presentation externally?',
+						'NO',
+						[ 'data-on-color'=>'success', 'data-off-color'=>'danger',]
+					) !!}
+				{!! HTML::checkboxswitch(
+						'share_recording_internal',
+						'Can the video or recording of this session be shared internally?',
+						'NO',
+						[ 'data-on-color'=>'success', 'data-off-color'=>'danger',]
+					) !!}
+				{!! HTML::checkboxswitch(
+						'share_recording_external',
+						'Can the video or recording of this session be shared externally?',
+						'NO',
+						[ 'data-on-color'=>'success', 'data-off-color'=>'danger',]
+					) !!}
+			</div>
+
+		</div>
+	</div><!-- /.box-body -->
 	<div class="box-footer">
-		<div class='clearfix'>
+        <div class='clearfix'>
             <div class=" pull-right">
                 @include('backend.eventsession.partials.actions')
             </div>
         </div>
 	</div>
 </div>
-
 <div class="box box-success">
     <div class="box-header with-border">
         <h3 class="box-title">{{ $eventsession->session_id or '' }} Event Session Data</h3>
