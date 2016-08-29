@@ -40,29 +40,16 @@
 	<div class="box-body">
 		<div class="row">
 			<div class='col-sm-12'>
-
 				{!! HTML::checkboxswitch(
 						'share_internal',
 						'May we share your presentation internally?',
-						'NO',
+						$eventsession->share_internal,
 						[ 'data-on-color'=>'success', 'data-off-color'=>'danger',]
 					) !!}
 				{!! HTML::checkboxswitch(
 						'share_external',
 						'May we share your presentation externally?',
-						'NO',
-						[ 'data-on-color'=>'success', 'data-off-color'=>'danger',]
-					) !!}
-				{!! HTML::checkboxswitch(
-						'share_recording_internal',
-						'Can the video or recording of this session be shared internally?',
-						'NO',
-						[ 'data-on-color'=>'success', 'data-off-color'=>'danger',]
-					) !!}
-				{!! HTML::checkboxswitch(
-						'share_recording_external',
-						'Can the video or recording of this session be shared externally?',
-						'NO',
+						$eventsession->share_external,
 						[ 'data-on-color'=>'success', 'data-off-color'=>'danger',]
 					) !!}
 			</div>
