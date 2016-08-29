@@ -35,17 +35,16 @@ class Hopper implements HopperContract {
         if(!$currentFileName){
             return false;
         }
-        $currentFileParts = pathinfo($currentFileName)['filename'];
-        $currentFileNameParts = explode('_', $currentFileParts);
-    		if(empty($currentFileNameParts)){
-    			return false;
-    		}
+		$hopperfile = new HopperFile();
+		
+        $currentFileParts = $hopperfile->getFileParts( $currentFileName );
+		
         //If there is no file in Master but placeholer LCCNOFILE is there
-        if($currentFileNameParts[3] === 'LCCNOFILE'){
+        if($currentFileParts['version'] === 'LCCNOFILE'){
             //The Next version is 7
             $currentVersion = 7;
         }else{ //Do the usual thing
-            $currentVersion = (int) preg_replace("/[^0-9]/", '', $currentFileNameParts[3]);
+            $currentVersion = (int) preg_replace("/[^0-9]/", '', $currentFileParts['version']);
         }
         return str_pad($currentVersion, 2, '0', STR_PAD_LEFT);
     }

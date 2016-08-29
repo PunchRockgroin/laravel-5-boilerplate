@@ -112,7 +112,7 @@ return [
       | Mime types that can legitimatley use the uploader(s)
       |
      */
-    'filenameparts' => ['sessionID', 'speaker', 'roomIDs', 'version', 'shareStatus'],
+    'filenameparts' => env('HOPPER_FILENAMEPARTS', ['sessionID', 'roomIDs', 'version']),
 	/*
       |--------------------------------------------------------------------------
       | Use Queue for Filesystem/Etc

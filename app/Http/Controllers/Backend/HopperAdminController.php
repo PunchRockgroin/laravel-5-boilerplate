@@ -60,7 +60,23 @@ class HopperAdminController extends Controller {
 	 */
 	public function index() {
 		$data = [ ];
-		
+		if(request()->has('import')){
+			\Excel::filter( 'chunk' )->load( request()->get('import') )->chunk( 250, function($results) {
+				foreach ( $results as $row ) {
+					if ( !empty( $row[ 'id' ] ) ) {
+						$row[ 'id' ] = (int) $row[ 'id' ];
+					}
+					if ( !empty( $row[ 'dates_rooms' ] ) ) {
+						$row[ 'dates_rooms' ] = \App\Services\Hopper\HopperEventSession::modifyFromDateTimesString( $row[ 'dates_rooms' ] );
+					}
+
+					$searchParams = [
+						'session_id' => $row[ 'session_id' ],
+					];
+					EventSession::firstOrNew( $searchParams )->fill( $row->all() )->save();
+				}
+			} );
+		} 
 		return view( 'backend.hopper.admin.index', $data );
 	}
 
