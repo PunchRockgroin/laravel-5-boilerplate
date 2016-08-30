@@ -172,6 +172,10 @@ class EventSessionController extends Controller
 			$request->merge(['visitor_type' => 'normal']);
 		}
 		
+		if($request->simple_checkin === "YES"){
+			
+		}
+		
 		
         $messagebag = new \Illuminate\Support\MessageBag();
 

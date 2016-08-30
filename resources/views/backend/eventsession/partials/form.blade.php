@@ -10,6 +10,12 @@
 			[ 'data-on-color'=>'success', 'data-off-color'=>'warning',]
 			)
 		!!}
+        <div class="form-group">
+            {!! Form::label('visitors', "Visitor(s) names, if any", ['class' => 'control-label']) !!}
+            <div class="">
+                {!! Form::text('visitors', null,['class' => 'form-control', 'placeholder' => trans('eventsession.backend.form.speakers.placeholder')]) !!}
+            </div>
+        </div>
 		{!! Html::checkboxswitch(
 			'blind_update',
 			'If there is an updated file, are we bypassing review/additional changes by a Graphic Operator?',
@@ -19,6 +25,17 @@
 			'YES',
 			'NO',
 			'This is also known as a "blind update"'
+			)													
+		!!}
+		{!! Html::checkboxswitch(
+			'simple_checkin',
+			'Are we simply checking this person into the event?',
+			'NO',
+			[ 'data-on-color'=>'warning', 'data-off-color'=>'default',],
+			null,
+			'YES',
+			'NO',
+			'We will not move any files out of Master.'
 			)													
 		!!}
 		@if( config('hopper.print.enable') )

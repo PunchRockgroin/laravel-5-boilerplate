@@ -147,9 +147,16 @@ class HopperEventSession {
         
 		
 		
+		
         if (!$request->has('checkin_username')) {
             $request->merge(['checkin_username' => \Auth::user()->name]);
-        }		
+        }
+
+		if ($request->simple_checkin === "YES" ){
+			$visit = $hoppervisit->store($request->all());
+			//We are done, no need to do anything else
+			return $visit;
+		}		
 		
 		
 		if($request->filename_uploaded){
