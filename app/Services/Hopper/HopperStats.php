@@ -195,7 +195,7 @@ class HopperStats {
           return $item->created_at->timezone(config('hopper.event_timezone', 'America/Los_Angeles'))->format('Y-m-d');
         });
 
-//          $visits_array = $this->arrayFlipAndZero($this->buildDateRangeArray($first, $last));
+          $visits_array = $this->arrayFlipAndZero($this->buildDateRangeArray($first, $last));
           
           foreach($data as $key => $entry) {
               $visits_array[$key] = $entry->count();
