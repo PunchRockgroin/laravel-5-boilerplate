@@ -160,7 +160,12 @@ class HopperEventSession {
 		}	
 		
 		if ($request->using_hopper_client === "true" ){
+			//Use filename as working_filename
+			$request->merge(['working_filename' => $request->filename]);
+			//Make a visit
 			$visit = $hoppervisit->store($request->all());
+			//Notify Client that it can finish
+			Pusher::trigger('private-hopper_channel', 'event_session_update_complete', ['user_id'=>auth()->user()->id.'-server','session_id' => $request->session_id]);
 			//We are done, no need to do anything else
 			return $visit;
 		}	
