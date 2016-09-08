@@ -31,7 +31,7 @@
 			<div class="help-block">The Current File in Master</div>
 		</div>
 		<div class='file-update-section hidden'>
-			<div class="form-group">
+			<div class="form-group hidden">
 				{!! Form::label('next_version', trans('fileentity.backend.form.next_version.label'), ['class' => 'control-label']) !!}
 				<div class="">
 					{!! Form::versionRange('next_version', null, isset($eventsession['session_files']->first()['nextVersion']) ? $eventsession['session_files']->first()['nextVersion'] : '0', ['class' => 'form-control']) !!}
@@ -41,6 +41,7 @@
 			<div class="form-group">
             {!! Form::label('filename', 'New '.trans('fileentity.backend.form.filename.label'), ['class' => 'control-label']) !!}
             <div class="">
+									
 				{!! Form::hidden('temporaryfilename', null, ['class' => 'form-control']) !!}		
 				{!! Form::hidden('filename_uploaded', null, ['class' => 'form-control']) !!}		
 				{!! Form::hidden('_id', $eventsession['id'], ['class' => 'form-control', 'readonly'=>'readonly']) !!}		
@@ -49,6 +50,13 @@
             </div>
 			</div>
 			
+			
+		</div>
+		<div id='usingHopperClient' class='hidden'>
+				<div class='alert alert-info'>
+					<i class="fa fa-info-circle" ></i> Using Hopper Client
+				</div>
+			{!! Form::hidden('using_hopper_client', 'false', ['class' => 'form-control']) !!}	
 		</div>
 	</div>
 </div>	

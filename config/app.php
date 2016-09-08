@@ -203,7 +203,9 @@ return [
         JasonLewis\ResourceWatcher\Integration\LaravelServiceProvider::class,
         Maknz\Slack\SlackServiceProvider::class,
         Yajra\Datatables\DatatablesServiceProvider::class,
-	Cornford\Bootstrapper\BootstrapServiceProvider::class,
+		Cornford\Bootstrapper\BootstrapServiceProvider::class,
+		
+		Tymon\JWTAuth\Providers\JWTAuthServiceProvider::class,
 
         /*
          * Has to override the Collective\Html\HtmlServiceProvider form singleton
@@ -270,6 +272,9 @@ return [
         'Gravatar'    => Creativeorange\Gravatar\Facades\Gravatar::class,
         'Html'        => Collective\Html\HtmlFacade::class,
         'Socialite'   => Laravel\Socialite\Facades\Socialite::class,
+		
+		'JWTAuth'   => Tymon\JWTAuth\Facades\JWTAuth::class,
+		'JWTFactory' => Tymon\JWTAuth\Facades\JWTFactory::class,
 
         'Dropbox' =>  GrahamCampbell\Dropbox\Facades\Dropbox::class,
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,

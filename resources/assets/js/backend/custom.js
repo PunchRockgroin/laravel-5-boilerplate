@@ -1,3 +1,5 @@
+var hopperVue;
+
 $( function () {
     toastr.options = {
         "closeButton": true,
@@ -28,7 +30,7 @@ Vue.transition( 'zoom', {
 Vue.http.headers.common['X-CSRF-TOKEN'] = document.querySelector( 'meta[name="_token"]' ).getAttribute( 'content' );
 
 if ( $( '#Hopper' ).length ) {
-    var hopperVue = new Vue( {
+    hopperVue = new Vue( {
         el: '#Hopper',
         data: {
             message: '',
@@ -38,7 +40,8 @@ if ( $( '#Hopper' ).length ) {
             currentUser: { },
             currentVisit: { },
             inVisit: { },
-            idleUsers: { }
+            idleUsers: { },
+            hopperClient : false
         },
         computed: {
             idleGraphicOperators: function () {
@@ -254,7 +257,16 @@ if ( $( '#Hopper' ).length ) {
                     $el.find( '.btn-content' ).html( '<i class="fa fa-check"></i> Assigned' ).parent().removeClass( 'btn-warning' ).addClass( 'btn-success' );
                     this.triggerRefresh();
                 } );
-            }
+            },
+            notifyHopperClient: function (action, data ) {
+                    this.$http.post(window.hopper.routes.notify_client,{
+                        'action' : action,
+                        'payload' : data
+                    }).then( function ( response ) {
+                        console.log(response);
+                    } );
+            },
+            
         },
         ready: function () {
 //        this.getHeartbeat();
@@ -275,11 +287,6 @@ if ( $( '#Hopper' ).length ) {
 }
 
 $( function () {
-    if ( typeof window.hopper !== "undefined" && typeof window.hopper.heartbeat_detector_enable !== "undefined" && window.hopper.heartbeat_detector_enable === true ) {
-        //hopperVue.getDashboardData();
-        //hopperVue.getPusherPresence();
-    }
-
     $( '.user-status-refresh' ).on( 'click', function () {
         hopperVue.getUserStatusData();
     } );

@@ -7,3 +7,4 @@
  */
 
 Route::post('authorize', 'PusherController@doAuth')->name('pusher.auth');
+Route::get('authorize', 'PusherController@doAuthJsonP')->name('pusher.auth.jsonp');

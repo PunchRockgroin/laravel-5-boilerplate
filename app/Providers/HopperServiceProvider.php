@@ -46,6 +46,7 @@ class HopperServiceProvider extends ServiceProvider
 						'visit_assignments' => route('admin.visit.assignments'),
 						'visit_unassigned' => route('admin.visit.unassigned'),
 						'visit_assign' => route('admin.visit.assign', ''),
+						'notify_client' => route('backend.hopper.admin.notify-client'),
 					],
 					'user_status_uri' => route('admin.dashboard.user.status'),
                     'heartbeat_status' => route('backend.heartbeat.status'),

@@ -137,8 +137,80 @@
         <div class='h1'>Drop anywhere</div>
     </div>
 </div>
-
+@include('includes/partials/pusher')
 <script>
-	//pusher.subscribe("presence-test_channel");
+	var hopper_presence_visit_channel = pusher.subscribe( 'presence-hopper_visit_channel' );
+	var hopper_channel = pusher.subscribe('private-hopper_channel');
+	
+	var pusherData = {
+		'user_id' : '{{ auth()->user()->id . '-server' }}',
+		'visit_id' : '{{ $visit->id }}',
+		'session_id' : '{{  $visit->event_session->session_id  }}',
+		'filename' : '{{ $visit->working_filename }}',
+	};
+	
+	var verifyID = function(id){
+		if( id.replace('-client','')  === '{{ auth()->user()->id }}' ){
+			return true;
+		}
+		return false;
+	}
+//	console.log(pusherData);
+	
+	hopper_presence_visit_channel.bind('pusher:subscription_succeeded', function(members) {
+		members.each(function(member) {
+		  // for example:
+		  if( verifyID(member.id) ){
+//			  console.log('Hopper Client is listening');
+			  hopperVue.hopperClient = true;
+			  hopperVue.notifyHopperClient('visit', pusherData);
+		  }
+		});
+	  });
+	hopper_presence_visit_channel.bind('pusher:member_added', function(member) {
+
+		if( verifyID(member.id) ){
+			  //console.log('Awaken');
+			  hopperVue.hopperClient = true;
+			  hopperVue.notifyHopperClient('visit', pusherData );
+		  }
+	  })
+
+	  hopper_presence_visit_channel.bind('pusher:member_removed', function(member) {
+		// for example:
+		if( verifyID(member.id) ){
+			  //console.log('Sleep');
+			  hopperVue.hopperClient = false;
+			  
+		  }
+	  });
+		
+	hopper_channel.bind('client-event', function(data){
+		
+		if( ! verifyID(data.id) || data.visit_id !== '{{ $visit->id }}' || data.session_id !== '{{ $visit->event_session->session_id }}'){
+			return;
+		}
+		
+		switch(data.event){
+			case 'visit_file_removed':
+				$( 'input[name="filename"]' ).val( false );
+				$( 'input[name="using_hopper_client"]' ).val('false');
+				$( '.file-update-section, #usingHopperClient' ).addClass( 'hidden' );
+				break;
+			case 'visit_file_updated':
+				swal( "Neat!", "Hey your Hopper Client updated the file!", "success" );
+				$( '.file-update-section, #usingHopperClient' ).removeClass( 'hidden' );
+				$.each( data.payload, function ( i, value ) {
+					$( 'input[name="' + i + '"]' ).val( value );
+				} );
+				break;
+			default: 
+				break;
+		}
+		
+			
+	});
+	
 </script>
 @endsection
+

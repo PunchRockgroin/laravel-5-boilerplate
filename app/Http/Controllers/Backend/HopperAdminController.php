@@ -23,6 +23,8 @@ use Carbon\Carbon as Carbon;
 use App\Services\Hopper\Excel\EventSessionImport;
 use App\Services\Hopper\Contracts\HopperFileContract;
 
+use Vinkla\Pusher\Facades\Pusher;
+
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
@@ -101,25 +103,38 @@ class HopperAdminController extends Controller {
 
 		$results = \Excel::load($file->getRealPath())->first();
 
-		if (0 === count(array_diff($required_headers, $results->keys()->toArray()))) {
-			$uploadedFileName	 = $file->getClientOriginalName(); // Get File Name
-			$upload				 = $this->hopperfile->uploadToTemporary( File::get( $file ), $uploadedFileName );
-			return response()->json( [
-				'success'	 => true,
-				'payload'	 => [
-					'upload'	 => $upload,
-					'headers'	 => $results->keys(),
-				],
-			], 200 );
-		  } else {
+		if (count(array_diff($required_headers, $results->keys()->toArray()))) {
 			return response()->json('The required columns are not present', 400 );
-		  }	
+		}
+		
+		\Excel::load($file->getRealPath(), function($reader) {
 
-		return response()->json(
-		[
-			'success'	 => false,
-			'reason'	 => 'Invalid File Upload',
-		], 400 );
+				// Getting all results
+			$results = $reader->get();
+
+			foreach ( $results as $row ) {
+				if ( !empty( $row[ 'id' ] ) ) {
+					$row[ 'id' ] = (int) $row[ 'id' ];
+				}
+				if ( !empty( $row[ 'dates_rooms' ] ) ) {
+					$row[ 'dates_rooms' ] = \App\Services\Hopper\HopperEventSession::modifyFromDateTimesString( $row[ 'dates_rooms' ] );
+				}
+
+				$searchParams = [
+					'session_id' => $row[ 'session_id' ],
+				];
+				EventSession::firstOrNew( $searchParams )->fill( $row->all() )->save();
+			}
+			
+		});
+		return response()->json( [
+			'success'	 => true,
+			'payload'	 => [
+				'upload'	 => 'true',
+				'headers'	 => $results->keys(),
+				'count' => EventSession::all()->count()
+			],
+		], 200 );
 	}
 	
 	public function processUpload( Request $request, EventSessionImport $eventsessionimport){
@@ -133,7 +148,7 @@ class HopperAdminController extends Controller {
 				
 				try {
 					$basepath = Storage::disk('hopper')->getDriver()->getAdapter()->getPathPrefix();
-					\Excel::filter( 'chunk' )->load( $basepath . $request->filename )->chunk( 250, function($results) {
+					\Excel::load( $basepath . $request->filename, function($results) {
 						foreach ( $results as $row ) {
 							if ( !empty( $row[ 'id' ] ) ) {
 								$row[ 'id' ] = (int) $row[ 'id' ];
@@ -572,6 +587,45 @@ class HopperAdminController extends Controller {
 		}
 	}
 	
+	
+	public function notifyClient(Request $request){
+//		if($request->ajax()){
+			$action = $request->get( 'action' );
+
+			if ( empty( $action ) ) {
+				return response()->json( [
+					'success'	 => false,
+					'payload'	 => "I'm not sure what you to do.",
+				], 200 );
+			}
+			if( empty( $request->get('payload') ) ){
+				return response()->json( [
+					'success'	 => false,
+					'payload'	 => "We need some data",
+				], 200 );
+			}
+			switch ( $action ) {
+				case 'event_session':
+							Pusher::trigger('private-hopper_channel', 'event_session_opened', $request->get('payload'));
+					break;
+				case 'visit':
+							Pusher::trigger('private-hopper_channel', 'visit_opened', $request->get('payload'));
+					break;
+				default:
+					if($request->ajax()){
+						return response()->json( [
+							'success'	 => false,
+							'payload'	 => "I'm not sure what you to do.",
+						], 200 );
+					}
+					return redirect()->route( 'backend.hopper.admin.index' )
+					->with( 'flash_warning', "I'm not sure what you to do." );
+				break;
+			}
+			
+		
+		
+	}
 	
 	
 }

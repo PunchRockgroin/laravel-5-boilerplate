@@ -68,5 +68,8 @@ class Kernel extends HttpKernel
          */
         'access.routeNeedsRole' => \App\Http\Middleware\RouteNeedsRole::class,
         'access.routeNeedsPermission' => \App\Http\Middleware\RouteNeedsPermission::class,
+		
+		'jwt.auth' => Tymon\JWTAuth\MiddlewareGetUserFromToken::class,
+        'jwt.refresh' => TymonJWTAuth\MiddlewareRefreshToken::class
     ];
 }

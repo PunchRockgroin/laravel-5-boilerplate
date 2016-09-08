@@ -9,6 +9,7 @@ use App\Services\Hopper\HopperVisit;
 use App\Services\Hopper\Contracts\HopperContract;
 use App\Services\Hopper\Contracts\HopperFileContract;
 use App\Events\Backend\Hopper\EventSessionUpdated;
+use Vinkla\Pusher\Facades\Pusher;
 
 use Storage;
 
@@ -89,11 +90,11 @@ class HopperEventSession {
         $this->parseDateTimeforEdit($eventsession);
 		
 		//event(new EventSessionUpdated($eventsession->id, $eventsession, 'opened'));
-        
-        //$this->hopperfile->purgeDupesToArchive();
-
+		$session_file = collect($eventsession['session_files'])->first();
         $data = [
             'eventsession' => $eventsession,
+			'session_file' => $session_file,
+			'next_version_filename' => $this->hopperfile->renameFileVersion($session_file['filename'], $session_file['nextVersion']),
            // 'History' => $this->hopper->groupedHistory($eventsession->history),
         ];
 
@@ -156,7 +157,13 @@ class HopperEventSession {
 			$visit = $hoppervisit->store($request->all());
 			//We are done, no need to do anything else
 			return $visit;
-		}		
+		}	
+		
+		if ($request->using_hopper_client === "true" ){
+			$visit = $hoppervisit->store($request->all());
+			//We are done, no need to do anything else
+			return $visit;
+		}	
 		
 		
 		if($request->filename_uploaded){

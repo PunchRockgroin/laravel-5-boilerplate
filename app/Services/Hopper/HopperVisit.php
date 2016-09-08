@@ -182,6 +182,22 @@ class HopperVisit{
             
     public function updateLinkedFileEntity($data, Visit $visit){
           
+		if (isset($data['behavior']) && isset($data['filename']) && $data['behavior'] === 'update_visit' && ( $data['using_hopper_client'] === "true" ) ){
+			//We're using the Hopper Client
+			event(new \App\Events\Backend\Hopper\FileOperation(
+					$data['filename'], "Visit", $visit->id,
+					' updated <strong>'.$data['filename'].'</strong> for <strong>$1</strong> visit <strong>$2</strong> via Hopper Client',
+					'file',
+					'blue',
+					[
+						'link' => ['admin.eventsession.edit', $visit->session_id, [$visit->session_id] ],
+						'link2' => ['admin.visit.edit', $visit->id, [$visit->id] ],
+					] 
+				));
+			return true;
+		}	
+		
+		
           if(isset($data['behavior']) && isset($data['filename']) && isset($data['newfile']) && $data['behavior'] === 'update_visit'){
                 
                 $path = $this->hopperfile->copyTemporaryNewFileToMaster($data['filename'], true);
@@ -200,7 +216,7 @@ class HopperVisit{
                 
 				$this->hopperfile->copyMasterToArchive($data['filename']);
                 //event(new \App\Events\Backend\Hopper\FileEntityUpdated($visit->file_entity->id, 'visit_behavior', 'Copied updated visit file '.$data['filename'].' to archive', $data['filename']));
-                
+                return true;
           }        
     }
 	

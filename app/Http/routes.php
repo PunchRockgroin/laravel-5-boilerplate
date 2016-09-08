@@ -51,3 +51,15 @@ Route::group(['namespace' => 'Backend', 'prefix' => 'admin', 'middleware' => 'ad
 Route::group(['namespace' => 'Backend', 'prefix' => 'heartbeat'], function(){
     require (__DIR__ . '/Routes/Backend/Heartbeat.php');
 });
+
+Route::group(['namespace' => 'Auth','prefix'=>'api'], function(){
+	Route::resource('authenticate', 'AuthenticateController', ['only' => ['index']]);
+    Route::post('authenticate', 'AuthenticateController@authenticate');
+	Route::get('something', function(){
+		$user = \App\Models\Access\User\User::first();
+		$token = JWTAuth::fromUser($user);
+		return response()->json(compact('token'));
+	});
+});
+
+Route::post('/notify-client', ['as' => 'backend.hopper.admin.notify-client', 'uses' => '\App\Http\Controllers\Backend\HopperAdminController@notifyClient']);

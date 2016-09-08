@@ -45,7 +45,7 @@
 					$('.file-update-section').addClass('hidden');
 				});
                 this.on( "success", function ( file, response ) {
-                    $('.file-update-section').removeClass('hidden');
+//                    $('.file-update-section').removeClass('hidden');
                     $('input[name="filename"]').val(response.payload.upload.path);
                     var $el = $(file.previewElement);
                     $el.find('.info-box-icon')
@@ -53,7 +53,7 @@
                             .find('i')
                             .toggleClass('fa-cog fa-spin fa-check-circle-o');
                     $el.find('.message')
-                            .html('has verified required column headers')
+                            .html('has verified required column headers. Imported ' + response.payload.count + ' sessions.')
                             ;
                 } );
                 this.on( "error", function ( file, response ) {

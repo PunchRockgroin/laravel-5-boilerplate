@@ -44,7 +44,11 @@
                 </div><!-- /.info-box -->
 
             </div>
-        
-
+		<div v-show="hopperClient" class="alert alert-success">
+			<i class="fa fa-signal" aria-hidden="true"></i> Your Hopper Client is <strong>Online</strong>
+		</div>
+		<div v-else class='alert alert-warning'>
+			<i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Your Hopper Client is <strong>Offline</strong>
+		</div>
     </div><!-- /.box-body -->
 </div><!-- /.box -->
