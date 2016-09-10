@@ -73,8 +73,12 @@
             <span class="info-box-icon bg-aqua"><i class="fa fa-calendar"></i></span>
 
             <div class="info-box-content">
-              <span class="info-box-text">Days Left</span>
-              <span class="info-box-number">{!! \Carbon\Carbon::createFromDate(2016, 6, 10)->diffInDays(\Carbon\Carbon::now() ) !!}</span>
+				<span class="info-box-text">Days Left</span>
+				@if(env('HOPPER_END_DATE', false))
+				<span class="info-box-number">{!! \Carbon\Carbon::createFromDate(env('HOPPER_END_DATE', false))->diffInDays(\Carbon\Carbon::now() ) !!}</span>
+				@else
+				<span class="info-box-number">I Don't Know</span>
+				@endif
             </div>
             <!-- /.info-box-content -->
           </div>
