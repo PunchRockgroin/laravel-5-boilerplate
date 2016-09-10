@@ -76,7 +76,7 @@ class HopperEventSession {
      * @return App\Models\Hopper\EventSession
      */
     public function show($id) {
-        //
+        // 
     }
 
     /**
@@ -91,6 +91,11 @@ class HopperEventSession {
 		
 		//event(new EventSessionUpdated($eventsession->id, $eventsession, 'opened'));
 		$session_file = collect($eventsession['session_files'])->first();
+		$next_version_filename = null;
+		if(!empty($session_file)){
+			$next_version_filename = $this->hopperfile->renameFileVersion($session_file['filename'], $session_file['nextVersion']);
+		}
+		
         $data = [
             'eventsession' => $eventsession,
 			'session_file' => $session_file,
