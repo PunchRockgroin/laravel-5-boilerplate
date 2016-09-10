@@ -34,6 +34,7 @@ class PusherController extends Controller
 			'email' => auth()->user()->email,
 			'originator' => $request->get('originator'),
 			'target' => $request->get('target'),
+			'client_version' => config('hopper.client_version'),
 		];
 		
 		
@@ -48,6 +49,7 @@ class PusherController extends Controller
 		$presence_data = [
 			'name' => $user->name,
 			'email' => $user->email,
+			'client_version' => config('hopper.client_version'),
 		];
 		
 		$auth = json_decode($this->pusher->presence_auth($request->channel_name, $request->socket_id, $user->id, $presence_data));	

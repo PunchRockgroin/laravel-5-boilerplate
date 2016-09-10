@@ -176,4 +176,15 @@ return [
       |
      */
     'report_only_mode' => env('HOPPER_REPORT_ONLY_MODE', false),
+	
+	/*
+      |--------------------------------------------------------------------------
+      | Client Mode
+      |--------------------------------------------------------------------------
+      |
+      | Puts hopper into Client Mode
+      |
+     */
+    'client_mode' => env('HOPPER_CLIENT_MODE', true),
+	'client_version' => env('HOPPER_CLIENT_VERSION', '0.0.0')
 ];
