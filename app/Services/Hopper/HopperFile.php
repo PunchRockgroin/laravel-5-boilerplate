@@ -664,7 +664,9 @@ class HopperFile implements HopperFileContract {
             $currentFileExtension = pathinfo($currentFileName, PATHINFO_EXTENSION);
         }
         $currentFileNameArray = $this->getFileParts($currentFileName);
-
+		if(empty($currentFileNameArray)){
+			return false;
+		}
 		//Pop the end off
 		$currentFileNameArray->pop();
 		//Put the New version at the end
@@ -735,8 +737,8 @@ class HopperFile implements HopperFileContract {
 				$fileparts = explode('/', $item);
 				
 				if(isset($fileparts[1])
-					&& starts_with( $fileparts[1] , $query )
-					&& ends_with( $fileparts[1], explode(',', config('hopper.checkin_upload_mimes') ) )
+					&& str_is( $query, head( explode('_', $fileparts[1] ) ) )
+					&& in_array(pathinfo($item, PATHINFO_EXTENSION), explode(',', config('hopper.checkin_upload_mimes') ) )
 				){
 					return true;				
 				}
