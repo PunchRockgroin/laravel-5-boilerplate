@@ -110,9 +110,9 @@ return [
       |--------------------------------------------------------------------------
       |
       | Mime types that can legitimatley use the uploader(s)
-      |
+      | 
      */
-    'filenameparts' => env('HOPPER_FILENAMEPARTS', ['sessionID', 'roomIDs', 'version']),
+    'filenameparts' => explode(',', env('HOPPER_FILENAMEPARTS', "sessionID, datetimes, roomIDs, version") ),
 	/*
       |--------------------------------------------------------------------------
       | Use Queue for Filesystem/Etc

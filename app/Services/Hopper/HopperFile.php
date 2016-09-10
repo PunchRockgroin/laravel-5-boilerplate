@@ -672,6 +672,9 @@ class HopperFile implements HopperFileContract {
 		//Put the New version at the end
 		$currentFileNameArray->put('version', config('hopper.version_prefix', 'LCC') . $nextVersion);
 		//Merge to new file name
+		if($currentFileExtension === 'txt'){
+			$currentFileExtension = 'pptx';
+		}
 		$newFileName = $currentFileNameArray->implode('_') . '.' . $currentFileExtension;		
 		
         return $newFileName;
@@ -760,7 +763,7 @@ class HopperFile implements HopperFileContract {
             ->map(function ($item) use ($sourcedisk) {
                 $fileparts = explode('/', $item);
 				$hopperfileparts = $this->getFileParts($fileparts[1]);
-				$currentVersion = \App\Services\Hopper\Facades\Hopper::getCurrentVersion($fileparts[1]);
+				$currentVersion = $this->getCurrentVersion($fileparts[1]);
                 $filemeta = Storage::disk($sourcedisk)->getMetaData($item);
                 $filemeta['mime'] = Storage::disk($sourcedisk)->mimeType($item);
                 return [

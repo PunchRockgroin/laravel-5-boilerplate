@@ -32,48 +32,63 @@ class Hopper implements HopperContract {
     }
     
     public function getCurrentVersion($currentFileName = null) {
-        if(!$currentFileName){
+        //        $currentFileParts = pathinfo($currentFileName)['filename'];
+        $currentFileParts = pathinfo($currentFileName, PATHINFO_FILENAME);
+        $currentFileNameParts = explode('_', $currentFileParts);
+        if (empty($currentFileNameParts)) {
             return false;
         }
-		$hopperfile = new HopperFile();
-		
-        $currentFileParts = $hopperfile->getFileParts( $currentFileName );
-		
+		//We only care about the end
+		$version = collect($currentFileNameParts)->take(-1)->implode('');
+
         //If there is no file in Master but placeholer LCCNOFILE is there
-        if($currentFileParts['version'] === 'LCCNOFILE'){
+        if ($version === 'LCCNOFILE') {
             //The Next version is 7
             $currentVersion = 7;
-        }else{ //Do the usual thing
-            $currentVersion = (int) preg_replace("/[^0-9]/", '', $currentFileParts['version']);
+        } else { //Do the usual thing
+            $currentVersion = (int) preg_replace("/[^0-9]/", '', $version);
         }
         return str_pad($currentVersion, 2, '0', STR_PAD_LEFT);
     }
 
     public function renameFileVersion($currentFileName = null, $nextVersion = null, $currentFileExtension = null) {
-        if(!$currentFileName || !$nextVersion){
-            return false;
-        }
-        $currentFileParts = pathinfo($currentFileName)['filename'];
+		
         if ($currentFileExtension === null) {
-            $currentFileExtension = pathinfo($currentFileName)['extension'];
+            $currentFileExtension = pathinfo($currentFileName, PATHINFO_EXTENSION);
         }
-        $currentFileNameParts = explode('_', $currentFileParts);
-        $currentFileNameArray = [
-            'sessionID' => $currentFileNameParts[0],
-            'speaker' => $currentFileNameParts[1],
-            'roomIDs' => $currentFileNameParts[2],
-            'version' => $currentFileNameParts[3],
-            'shareStatus' => $currentFileNameParts[4]
-        ];
-
-        $newFileName = $currentFileNameArray['sessionID']
-                . '_' . $currentFileNameArray['speaker']
-                . '_' . $currentFileNameArray['roomIDs']
-                . '_LCC' . $nextVersion
-                . '_' . $currentFileNameArray['shareStatus']
-                . '.' . $currentFileExtension;
-
+        $currentFileNameArray = $this->getFileParts($currentFileName);
+		if(empty($currentFileNameArray)){
+			return false;
+		}
+		//Pop the end off
+		$currentFileNameArray->pop();
+		//Put the New version at the end
+		$currentFileNameArray->put('version', config('hopper.version_prefix', 'LCC') . $nextVersion);
+		//Merge to new file name
+		$newFileName = $currentFileNameArray->implode('_') . '.' . $currentFileExtension;		
+		
         return $newFileName;
+    }
+	
+	public function getFileParts($currentFileParts){
+
+        $fileNameArrayParts = config('hopper.filenameparts');
+        $currentFileNameParts = explode('_', pathinfo($currentFileParts, PATHINFO_FILENAME) );
+        $currentFileNameArray = [];
+        if(count($currentFileNameParts) < 3){
+            //Probably a non-session file
+            return $currentFileParts;
+        }
+        
+        foreach($fileNameArrayParts as $key => $partname){
+            if(array_key_exists($key, $currentFileNameParts)){
+                $currentFileNameArray[$partname] = $currentFileNameParts[$key];
+            }else{
+                $currentFileNameArray[$partname] = null;
+            }
+        }
+        
+        return collect($currentFileNameArray);
     }
     
     
