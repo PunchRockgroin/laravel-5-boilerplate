@@ -1,3 +1,4 @@
+@if(!empty($eventsession))
 <div class="box box-success">
     <div class="box-header with-border">
         <h3 class="box-title">Check in options</h3>
@@ -81,6 +82,7 @@
         </div>
 	</div>
 </div>
+@endif
 <div class="box box-success">
     <div class="box-header with-border">
         <h3 class="box-title">{{ $eventsession->session_id or '' }} Event Session Data</h3>
