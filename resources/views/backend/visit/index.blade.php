@@ -75,7 +75,7 @@
             <div class="info-box-content">
 				<span class="info-box-text">Days Left</span>
 				@if(env('HOPPER_END_DATE', false))
-				<span class="info-box-number">{!! \Carbon\Carbon::createFromDate(env('HOPPER_END_DATE', false))->diffInDays(\Carbon\Carbon::now() ) !!}</span>
+				<span class="info-box-number">{!! \Carbon\Carbon::parse(env('HOPPER_END_DATE', false))->diffInDays(\Carbon\Carbon::now() ) !!}</span>
 				@else
 				<span class="info-box-number">I Don't Know</span>
 				@endif
