@@ -25,7 +25,8 @@
         "jasonlewis/resource-watcher": "^1.2",
         "maknz/slack": "^1.7",
         "laravelcollective/bus": "5.2.*",
-        "cornford/bootstrapper": "^2.2"
+        "cornford/bootstrapper": "^2.2",
+        "tymon/jwt-auth": "0.5.*"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
