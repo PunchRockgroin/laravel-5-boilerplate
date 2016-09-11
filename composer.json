@@ -21,12 +21,12 @@
         "guzzlehttp/guzzle": "^6.1",
         "predis/predis": "^1.0",
         "graham-campbell/dropbox": "^3.2",
-        "vinkla/pusher": "^2.2",
+        "vinkla/pusher": "^2.4",
         "jasonlewis/resource-watcher": "^1.2",
         "maknz/slack": "^1.7",
         "laravelcollective/bus": "5.2.*",
         "cornford/bootstrapper": "^2.2",
-        "tymon/jwt-auth": "0.5.*"
+        "tymon/jwt-auth": "^0.5.9"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
