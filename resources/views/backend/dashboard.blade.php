@@ -103,7 +103,21 @@
 		@include('backend.includes.partials.checkinlinechart')
 	</div>
 </div>
-
+<div class='row'>
+  <div class="col-sm-12">
+    <div class="box box-info">
+        <div class="box-header with-border">
+            <h3 class="box-title">{{ trans('history.backend.recent_history') }}</h3>
+            <div class="box-tools pull-right">
+                <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+            </div><!-- /.box tools -->
+        </div><!-- /.box-header -->
+        <div class="box-body">
+            {!! history()->render(30) !!}
+        </div><!-- /.box-body -->
+    </div><!--box box-success-->
+  </div>
+</div>
 <div class='row'>
 	<div class="col-sm-8">
 		<div class="box box-success">
@@ -143,21 +157,7 @@
 </div>
 </div>
 </div>
-<div class='row'>
-  <div class="col-sm-12">
-    <div class="box box-info">
-        <div class="box-header with-border">
-            <h3 class="box-title">{{ trans('history.backend.recent_history') }}</h3>
-            <div class="box-tools pull-right">
-                <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-            </div><!-- /.box tools -->
-        </div><!-- /.box-header -->
-        <div class="box-body">
-            {!! history()->render(30) !!}
-        </div><!-- /.box-body -->
-    </div><!--box box-success-->
-  </div>
-</div>
+
 
 @endsection
 @section('before-scripts-end')

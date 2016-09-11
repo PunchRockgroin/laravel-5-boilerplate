@@ -25,27 +25,8 @@
         </div>
         <!-- /.col -->
 	</div>
-	<div class="row">
-		<div class="col-sm-12 col-md-6">
-			<div class="box box-success">
-				<div class="box-header with-border">
-					<h3 class="box-title">{{ !empty(config('hopper.use_assignments')) ? 'My Assignments' : 'Visits Ready' }}</h3>
-					<div class="box-tools pull-right">
-						<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-					</div><!-- /.box tools -->
-				</div><!-- /.box-header -->
-				<div class="box-body">
-					<table id='assignedVisitsTable' class="table responsive table-bordered table-striped" width='100%'>
-						<thead>
-							<th width='150px'>Updated At</th>
-							<th>Session ID</th>
-							<th width='100px'>Action</th>
-						</thead>
-					</table>
-				</div><!-- /.box-body -->
-			</div><!--box box-success-->
-		</div>
-		<div class="col-sm-12 col-md-6">
+<div class="row">
+	<div class="col-sm-12">
 			 <div class="box">
           <div class="box-header">
             <h3 class="box-title">Find a Visit ID or Session ID</h3>
@@ -64,6 +45,28 @@
 					{!! Form::close() !!}
 				</div>
 			</div>
+		</div>
+</div>
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="box box-success">
+				<div class="box-header with-border">
+					<h3 class="box-title">{{ !empty(config('hopper.use_assignments')) ? 'My Assignments' : 'Visits Ready' }}</h3>
+					<div class="box-tools pull-right">
+						<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+					</div><!-- /.box tools -->
+				</div><!-- /.box-header -->
+				<div class="box-body">
+					<table id='assignedVisitsTable' class="table responsive table-bordered table-striped" width='100%'>
+						<thead>
+						<th>ID</th>
+							<th width='150px'>Updated At</th>
+							<th>Session ID</th>
+							<th width='100px'>Action</th>
+						</thead>
+					</table>
+				</div><!-- /.box-body -->
+			</div><!--box box-success-->
 		</div>
 	</div>
 
@@ -204,10 +207,12 @@
         serverSide: true,
         ajax: "{!! route('admin.visit.myassignments') !!}",
         columns: [
+			{data: 'id', name: 'id'},
 			{data: 'updated_at', name: 'updated_at'},
             {data: 'session_id', name: 'session_id'},
 			{data: 'action', name: 'action', orderable: false, searchable: false}
-        ]
+        ],
+		"order": [[ 0, "desc" ]]
     });
 	@permission('view-access-management')
 	$('#allVisitsTable').DataTable({
@@ -223,7 +228,8 @@
             {data: 'created_at', name: 'created_at'},
             {data: 'updated_at', name: 'updated_at'},
 			{data: 'action', name: 'action', orderable: false, searchable: false}
-        ]
+        ],
+		"order": [[ 0, "desc" ]]
     });
 	@endauth
 	var updateTables = function(){
