@@ -450,6 +450,15 @@ $( function () {
                     fileName = $fileNameInput.val();
                     next_version = $nextVersionInput.val() || false;
                     $( '.checkin-button' ).prop( 'disabled', true );
+                    swal({
+                        title: "Uploading",
+                        text: "Please wait for your file to upload",
+                        type: "info",
+                        showCancelButton: false,
+                        showConfirmButton: false,  
+                        closeOnConfirm: false,
+                        showLoaderOnConfirm: true
+                      });
 //                    console.log(behavior);
                 } );
                 this.on( "success", function ( file, response ) {
@@ -489,6 +498,13 @@ $( function () {
 //
 //                    });
 //                        console.log($el);
+                     swal({
+                        title: "Success",
+                        text: "Your file has been uploaded!",
+                        type: "success",
+                        showCancelButton: false,
+                        closeOnConfirm: true,
+                      });
                 } );
                 this.on( "error", function ( file, response ) {
 //                        console.log(response);
@@ -500,6 +516,14 @@ $( function () {
                     $el.find( '.dz-error' )
                         .wrapInner( '<div class="alert alert-danger" />' );
 //                        console.log($el);
+
+                    swal({
+                        title: "Error",
+                        text: "Something went wrong...",
+                        type: "error",
+                        showCancelButton: false,
+                        closeOnConfirm: true,
+                      });
                 } );
             },
             params: {
@@ -575,6 +599,16 @@ $( function () {
                 this.on( "addedfile", function ( file ) {
                     $( '.dz-overtop' ).removeClass( 'dragging' );
                     $( '#visit-upload' ).addClass( 'dz-started' );
+                    $( '.visit-update-button' ).prop( 'disabled', true ).toggleClass('btn-success btn-disabled');                     
+                    swal({
+                        title: "Uploading",
+                        text: "Please wait for your file to upload",
+                        type: "info",
+                        showCancelButton: false,
+                        showConfirmButton: false,  
+                        closeOnConfirm: false,
+                        showLoaderOnConfirm: true
+                      });
 //                    channel = pusher.subscribe('hopper_channel');
                     //$('.checkin-button').prop('disabled', true);
                 } );
@@ -592,11 +626,21 @@ $( function () {
                     $el.find( '.renamed-to' )
                         .html( 'uploaded' )
                         ;
-//                    $el.find('.dz-wait')
+//                    swal.close();
+                    swal({
+                        title: "Success",
+                        text: "Your file has been uploaded!",
+                        type: "success",
+                        showCancelButton: false,
+                        closeOnConfirm: true,
+                      });
+                      $( '.visit-update-button' ).prop( 'disabled', null ).toggleClass('btn-success btn-disabled');     
+                      
 //                            .html('<div class="alert alert-info"><i class="fa fa-cog fa-spin"></i> Please wait while we transfer the file to Dropbox...</div>')
 //                            ;
                     $el.append( '<input type="hidden" name="newfile" value="' + response.newFileName + '" \>' );
 
+                    
 
 //                    channel.bind('dropbox_action', function(data) {
 //
@@ -618,6 +662,14 @@ $( function () {
                     $el.find( '.dz-error' )
                         .wrapInner( '<div class="alert alert-danger" />' );
 //                        console.log($el);
+                    swal({
+                        title: "Error",
+                        text: "Something went wrong...",
+                        type: "error",
+                        showCancelButton: false,
+                        closeOnConfirm: true,
+                      });
+                      $( '.visit-update-button' ).prop( 'disabled', false ).toggleClass('btn-success btn-disabled');   
                 } );
                 this.on( "reset", function () {
                     $( '#visit-upload' ).removeClass( 'dz-started' );
