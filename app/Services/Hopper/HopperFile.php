@@ -601,38 +601,38 @@ class HopperFile implements HopperFileContract {
     
     
     public function purgeDupesToArchive(){
-        $masterFiles = $this->getAllInMaster();
-        
-        $masterFiles = $masterFiles->map(function ($item, $key) {
-            $item = str_replace($this->hopper_master_name, '', $item);
-            $file_array = $this->getFileParts($item);
-            if(is_array($file_array)){
-               $file_array['filename'] = $item;
-                return $file_array; 
-            }
-            return $item;
-        });
-        
-        $masterFiles = $masterFiles->reject(function ($item) {
-            return !is_array($item);
-        });
-//        debugbar()->info($masterFiles);
-        $masterFiles = $masterFiles->groupBy('sessionID');
-        $masterFiles = $masterFiles->reject(function ($item) {
-            return $item->count() < 2;
-        });
-//        debugbar()->info($masterFiles);
-        foreach($masterFiles as $masterFilesWithDupes){
-             $masterFilesWithDupes->pop();
-             $masterFilesWithDupes = $masterFilesWithDupes->sortBy('version');
-             foreach($masterFilesWithDupes as $dupeFile){
-
-				
-				$this->movefile($this->hopper_master_name . $dupeFile['filename'], $this->hopper_archive_name . $dupeFile['filename']);
-				
-             }
-             
-        }
+//        $masterFiles = $this->getAllInMaster();
+//        
+//        $masterFiles = $masterFiles->map(function ($item, $key) {
+//            $item = str_replace($this->hopper_master_name, '', $item);
+//            $file_array = $this->getFileParts($item);
+//            if(is_array($file_array)){
+//               $file_array['filename'] = $item;
+//                return $file_array; 
+//            }
+//            return $item;
+//        });
+//        
+//        $masterFiles = $masterFiles->reject(function ($item) {
+//            return !is_array($item);
+//        });
+////        debugbar()->info($masterFiles);
+//        $masterFiles = $masterFiles->groupBy('sessionID');
+//        $masterFiles = $masterFiles->reject(function ($item) {
+//            return $item->count() < 2;
+//        });
+////        debugbar()->info($masterFiles);
+//        foreach($masterFiles as $masterFilesWithDupes){
+//             $masterFilesWithDupes->pop();
+//             $masterFilesWithDupes = $masterFilesWithDupes->sortBy('version');
+//             foreach($masterFilesWithDupes as $dupeFile){
+//
+//				
+//				$this->movefile($this->hopper_master_name . $dupeFile['filename'], $this->hopper_archive_name . $dupeFile['filename']);
+//				
+//             }
+//             
+//        }
         
 //        debugbar()->info($masterFiles);
         return true;
