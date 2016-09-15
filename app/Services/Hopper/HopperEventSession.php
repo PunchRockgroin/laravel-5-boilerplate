@@ -10,6 +10,7 @@ use App\Services\Hopper\Contracts\HopperContract;
 use App\Services\Hopper\Contracts\HopperFileContract;
 use App\Events\Backend\Hopper\EventSessionUpdated;
 use Vinkla\Pusher\Facades\Pusher;
+use App\Models\History\History as HistoryModel;
 
 use Storage;
 
@@ -91,15 +92,20 @@ class HopperEventSession {
 		
 		//event(new EventSessionUpdated($eventsession->id, $eventsession, 'opened'));
 		$session_file = collect($eventsession['session_files'])->first();
+		$visits = $eventsession->visits()->get();
 		$next_version_filename = null;
 		if(!empty($session_file)){
 			$next_version_filename = $this->hopperfile->renameFileVersion($session_file['filename'], $session_file['nextVersion']);
 		}
 		
+		
+		
+		
         $data = [
             'eventsession' => $eventsession,
 			'session_file' => $session_file,
 			'next_version_filename' => $this->hopperfile->renameFileVersion($session_file['filename'], $session_file['nextVersion']),
+			'visits' => $visits			
            // 'History' => $this->hopper->groupedHistory($eventsession->history),
         ];
 

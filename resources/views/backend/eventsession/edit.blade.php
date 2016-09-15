@@ -15,13 +15,60 @@
 	
 	@include('backend.eventsession.partials.file_entity')
 
-    @include('backend.eventsession.partials.form')   
+    <div class="row">
+		<div class="col-sm-8">
+			@include('backend.eventsession.partials.form')   
+		</div>
+		<div class="col-sm-4">
+			<div class="box box-success">
+				<div class="box-header with-border">
+					<h3 class="box-title">Session visits</h3>
+				</div><!-- /.box-header -->
+				<div class="box-body">
+					<ul class="timeline">
+					@foreach($visits as $visit)
+						<?php 
+							$theVisit = $visit->get();
+							$history = \App\Models\History\History::with('user', 'type')->where('entity_id', $visit->id)->latest()->get();
+//							debugbar()->info($history);
+							$totalVisit = $theVisit->merge($history)->sortByDesc('updated_at');							
+							foreach($totalVisit as $elVisit):
+								if(is_a($elVisit, "App\Models\Hopper\Visit")): ?>
+								<li>
+									<i class="fa fa-users bg-blue"></i>
+									<div class="timeline-item">
+									  <span class="time"><i class="fa fa-clock-o"></i> {{ $elVisit->created_at->diffForHumans() }}</span>
+									  <h3 class="timeline-header"><a target="_blank" href="{{ route('admin.visit.edit', [$elVisit->id] ) }}">Visit</a></h3>
+									  <div class="timeline-body">
+										  {{ $elVisit->design_notes }}
+									  </div>
+									  <div class="timeline-footer">
+										  @if($elVisit->blind_update)
+										  <div><span class="label label-info">Blind Update</span></div>
+										  @else
+										  <div>Visited by: <strong>{{ $elVisit->visitors or 'Unknown' }}</strong></div>
+										  @endif
+										  <a href="{{ route('admin.visit.edit', [$elVisit->id] ) }}" target="_blank" class="btn btn-primary btn-xs">Learn more</a>
+									  </div>
+									</div>
+								</li>
+								<?php elseif(is_a($elVisit, "\App\Models\History\History")): ?>
+								
+								{!! history()->buildItem($elVisit) !!}
+							
+							<?php endif; endforeach;  ?>
+							
+					@endforeach
+					</ul>
+				</div>
+			</div>
+		</div>s
+		</div>
+	</div>
     
     {!! Form::close() !!}
     
-    @if(isset($History))
-        @include('backend.eventsession.partials.timeline')    
-    @endif
+   
 	
 @endsection
 
