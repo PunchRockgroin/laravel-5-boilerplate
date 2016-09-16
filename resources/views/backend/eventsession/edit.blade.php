@@ -55,7 +55,11 @@
 										  <span class="time"><i class="fa fa-clock-o"></i> {{ \Carbon\Carbon::parse($elVisit['created_at'])->diffForHumans() }}</span>
 										  <h3 class="timeline-header"><a target="_blank" href="{{ route('admin.visit.edit', $elVisit['id'] ) }}">Visit</a></h3>
 										  <div class="timeline-body">
-											  {{ $elVisit['design_notes'] }}
+											  @if($elVisit['design_notes'])
+											  {{ $elVisit['design_notes']  }}
+											  @else 
+											  <span class='label label-info'>No notes associated</span>
+											  @endif
 										  </div>
 										  <div class="timeline-footer">
 											  @if($elVisit['blind_update'])
