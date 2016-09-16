@@ -25,41 +25,60 @@
 					<h3 class="box-title">Session visits</h3>
 				</div><!-- /.box-header -->
 				<div class="box-body">
+					@if($visits->count() )
 					<ul class="timeline">
+						
 					@foreach($visits as $visit)
 						<?php 
-							$theVisit = $visit->get();
-							$history = \App\Models\History\History::with('user', 'type')->where('entity_id', $visit->id)->latest()->get();
-//							debugbar()->info($history);
-							$totalVisit = $theVisit->merge($history)->sortByDesc('updated_at');							
+							$theVisit = collect([$visit->toArray()]);
+							
+							$history = collect(\App\Models\History\History::with('user', 'type')->where('entity_id', $visit->id)->latest()->get()->toArray());
+							//debugbar()->info($theVisit);
+							$totalVisit = $history->merge($theVisit)->sortByDesc('updated_at');			
+							//debugbar()->info($totalVisit);
 							foreach($totalVisit as $elVisit):
-								if(is_a($elVisit, "App\Models\Hopper\Visit")): ?>
-								<li>
-									<i class="fa fa-users bg-blue"></i>
-									<div class="timeline-item">
-									  <span class="time"><i class="fa fa-clock-o"></i> {{ $elVisit->created_at->diffForHumans() }}</span>
-									  <h3 class="timeline-header"><a target="_blank" href="{{ route('admin.visit.edit', [$elVisit->id] ) }}">Visit</a></h3>
-									  <div class="timeline-body">
-										  {{ $elVisit->design_notes }}
-									  </div>
-									  <div class="timeline-footer">
-										  @if($elVisit->blind_update)
-										  <div><span class="label label-info">Blind Update</span></div>
-										  @else
-										  <div>Visited by: <strong>{{ $elVisit->visitors or 'Unknown' }}</strong></div>
-										  @endif
-										  <a href="{{ route('admin.visit.edit', [$elVisit->id] ) }}" target="_blank" class="btn btn-primary btn-xs">Learn more</a>
-									  </div>
-									</div>
-								</li>
-								<?php elseif(is_a($elVisit, "\App\Models\History\History")): ?>
+								$elVisit = collect($elVisit);
+								debugbar()->info($elVisit); ?>
 								
-								{!! history()->buildItem($elVisit) !!}
+								@if( !empty( $elVisit['type_id'] ) )
+									<li>
+										<i class="fa fa-{{ $elVisit['icon'] }} {{ $elVisit['class'] }}"></i>
+										<div class="timeline-item">
+											<span class="time"><i class="fa fa-clock-o"></i> {{ \Carbon\Carbon::parse($elVisit['created_at'])->diffForHumans() }}</span>
+											<h3 class="timeline-header no-border"><strong>{{ $elVisit['user']['name'] }}</strong> {!! history()->renderDescription($elVisit['text'], $elVisit['assets']) !!}</h3>
+										</div>
+									</li>
+								@else
+									<li>
+										<i class="fa fa-users bg-blue"></i>
+										<div class="timeline-item">
+										  <span class="time"><i class="fa fa-clock-o"></i> {{ \Carbon\Carbon::parse($elVisit['created_at'])->diffForHumans() }}</span>
+										  <h3 class="timeline-header"><a target="_blank" href="{{ route('admin.visit.edit', $elVisit['id'] ) }}">Visit</a></h3>
+										  <div class="timeline-body">
+											  {{ $elVisit['design_notes'] }}
+										  </div>
+										  <div class="timeline-footer">
+											  @if($elVisit['blind_update'])
+											  <div><span class="label label-info">Blind Update</span></div>
+											  @else
+											  <div>Visited by: <strong>{{ $elVisit['visitors'] or 'Unknown' }}</strong></div>
+											  @endif
+											  <a href="{{ route('admin.visit.edit', $elVisit['id'] ) }}" target="_blank" class="btn btn-primary btn-xs">Learn more</a>
+										  </div>
+										</div>
+									</li>
+								@endif
+								
+						<?php	endforeach;  ?>
 							
-							<?php endif; endforeach;  ?>
-							
-					@endforeach
+					@endforeach	
+					<li>
+						<i class="fa fa-clock-o bg-gray"></i>
+					 </li>
 					</ul>
+					@else
+					<div class="alert alert-info">There are no visits associated with this Event Session </div>
+					@endif
 				</div>
 			</div>
 		</div>s
