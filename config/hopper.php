@@ -103,7 +103,7 @@ return [
       | Mime types that can legitimatley use the uploader(s)
       |
      */
-    'checkin_upload_mimes' => env('HOPPER_CHECKIN_UPLOAD_MIMES', 'pdf,ppt,pptx,txt'),
+    'checkin_upload_mimes' => env('HOPPER_CHECKIN_UPLOAD_MIMES', 'pdf,ppt,pptx,pptm,txt'),
     /*
       |--------------------------------------------------------------------------
       | Valid upload Mimes
