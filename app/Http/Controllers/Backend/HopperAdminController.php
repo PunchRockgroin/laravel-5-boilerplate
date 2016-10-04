@@ -364,20 +364,19 @@ class HopperAdminController extends Controller {
 		switch ( $action ) {
 			case 'reset-checkin':
 				$new_array		 = [ ];
-				$EventSessions	 = EventSession::where( 'checked_in', '=', true )->get();
+				$EventSessions	 = EventSession::where( 'checked_in', '=', 1 )->get();
+				
 				if ( !$EventSessions->isEmpty() ):
-//                    try {
-//                        foreach ($EventSessions->chunk(100) as $eventSessionChunk) {
-//                            foreach ($eventSessionChunk as $eventSession) {
-//                                $eventSession->update(['checked_in' => false]);
-//                                $new_array = Drive::matchFields($eventSession, config('drive.field_array_match'));
-////                        $drive->update_one_entry($new_array, $eventSession->session_id);
-//                            }
-//                        }
-//                    } catch (Exception $e) {
-//                        return redirect()->route('backend.hopper.admin.index')
-//                                        ->with('flash_warning', "Something Happened");
-//                    }
+                    try {
+                        foreach ($EventSessions->chunk(100) as $eventSessionChunk) {
+                            foreach ($eventSessionChunk as $eventSession) {
+                                $eventSession->update(['checked_in' => 0, 'check_in_datetime' => null]);
+                            }
+                        }
+                    } catch (Exception $e) {
+                        return redirect()->route('backend.hopper.admin.index')
+                                        ->with('flash_warning', "Something Happened");
+                    }
 					if($request->ajax()){
 						return response()->json( [
 							'success'	 => true,
