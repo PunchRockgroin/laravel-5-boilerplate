@@ -40,6 +40,9 @@ class EventServiceProvider extends ServiceProvider
      \App\Events\Backend\Hopper\FileOperation::class => [
              \App\Listeners\Backend\Hopper\FileOperationHandler::class,
      ],
+	 \App\Events\Backend\Hopper\IssueAlert::class => [
+             \App\Listeners\Backend\Hopper\IssueAlertHandler::class,
+     ],
     ];
 
 	/**

@@ -46,28 +46,8 @@ class EventSessionUpdatedHandler
 					'link' => ['admin.eventsession.edit', $event->eventsession->session_id, [$event->eventsession->id]]
 				]
 			);
-			
-			
-			
-//            $History = [
-//                'event' => $event->event,
-//                'user' => $event->user,
-//                'notes' => $event->notes,
-//                'tasks' => $event->tasks,
-//                'timestamp' => \Carbon\Carbon::now(),
-//            ];
-//
-//            $EventSession = \App\Models\Hopper\EventSession::find($event->id);
-//            if(count($EventSession)){
-//                $OldHistory = $EventSession->history;
-//                $OldHistory[] = $History;
-//                $EventSession->update(['history' => $OldHistory]);
-//            }                
-            
-
         } catch (Exception $e) {
             \Log::error($e);
-//            \Debugbar::addException($e);
         }
 
     }

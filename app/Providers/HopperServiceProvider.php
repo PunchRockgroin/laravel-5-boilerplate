@@ -75,6 +75,39 @@ class HopperServiceProvider extends ServiceProvider
             ]);
         
         });
+		
+		
+		
+		\Event::listen('illuminate.log', function($level, $message, $context) {
+			$issue_levels = explode(',',config('hopper.log.issuelevels', 'error,critical,alert,emergency'));
+			if(in_array($level, $issue_levels)){
+				//$message, $attachments, $target
+				$elmessage = 'New alert from the monitoring system';
+				$target = '@davidalberts';
+				//Must be array
+				$attachments = [
+					[
+						'fallback' => 'A logged event occured',
+						'text' => 'A logged event occured',
+						'color' => 'danger',
+						'fields' => [
+							[
+								'title' => 'Error level: '. title_case($level),
+								'value' => $message
+							]
+						]
+					]
+				];
+				event(new \App\Events\Backend\Hopper\IssueAlert(
+					$elmessage,
+					$target,
+					$attachments
+				));
+			}
+					
+			
+			
+		});
                 
         //Announce the creation of a new Event Session
 //        \App\Models\Hopper\EventSession::created(function ($eventsession) {
