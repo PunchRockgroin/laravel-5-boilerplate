@@ -19,6 +19,7 @@ class HopperEventSession {
     protected $hopper;
     protected $hopperfile;
     protected $hopperfileentity;
+	protected $hopperfilepdf;
 	
 	public $hopper_temporary_name;
     public $hopper_working_name;
@@ -31,11 +32,12 @@ class HopperEventSession {
      * @param HopperFileContract        $hopperfile
      */
     public function __construct(
-    HopperContract $hopper, HopperFileContract $hopperfile, \App\Services\Hopper\HopperFileEntity $hopperfileentity
+    HopperContract $hopper, HopperFileContract $hopperfile, \App\Services\Hopper\HopperFileEntity $hopperfileentity, Contracts\HopperFilePDFContract $hopperfilepdf
     ) {
         $this->hopper = $hopper;
         $this->hopperfile = $hopperfile;
         $this->hopperfileentity = $hopperfileentity;
+        $this->hopperfilepdf = $hopperfilepdf;
 		
 		$this->hopper_temporary_name = env('HOPPER_TEMPORARY_NAME', 'temporary/');
         $this->hopper_relics_name = env('HOPPER_RELICS_NAME', 'relics/');
@@ -98,12 +100,16 @@ class HopperEventSession {
 			$next_version_filename = $this->hopperfile->renameFileVersion($session_file['filename'], $session_file['nextVersion']);
 		}
 		
-		
-		
+		$session_pdf = false;
+
+		if(config('hopper.generate_pdf_mode') && $this->hopperfilepdf->checkIfPDFExists($session_file['filename'])){
+			$session_pdf = $this->hopperfilepdf->makePDFFilename($session_file['filename']);
+		}
 		
         $data = [
             'eventsession' => $eventsession,
 			'session_file' => $session_file,
+			'session_pdf' => $session_pdf,
 			'next_version_filename' => $this->hopperfile->renameFileVersion($session_file['filename'], $session_file['nextVersion']),
 			'visits' => $visits			
            // 'History' => $this->hopper->groupedHistory($eventsession->history),
@@ -156,10 +162,7 @@ class HopperEventSession {
     }
 
     public function createNewVisit(Request $request, HopperVisit $hoppervisit) {
-        
-		
-		
-		
+
         if (!$request->has('checkin_username')) {
             $request->merge(['checkin_username' => \Auth::user()->name]);
         }
@@ -196,7 +199,7 @@ class HopperEventSession {
 			$this->hopperfile->copyMasterToArchive($request->filename);
 			//Move the old master to archive
 			$this->hopperfile->moveMasterToArchive($request->currentfilename);
-			
+			//Store Visit
 			$visit = $hoppervisit->store($request->all());
 			//We're done here
             return $visit;
@@ -224,7 +227,7 @@ class HopperEventSession {
 			//$fileentity = \App\Models\Hopper\FileEntity::find($request->primary_file_entity_id);
 			//Update
 			//$updated_fileentity = $this->hopperfileentity->update($request, $fileentity);
-			//Otherwise, if there's a filename and an entity and the currentfilename (old file) does not equal the filename passed in the request
+		//Otherwise, if there's a filename and an entity and the currentfilename (old file) does not equal the filename passed in the request
         }elseif($request->filename && $request->currentfilename && ($request->currentfilename !== $request->filename)){
 			//Copy the current file in Master to Working
 			$this->hopperfile->copyMasterToWorking($request->currentfilename);
@@ -286,6 +289,24 @@ class HopperEventSession {
         }
         return $EventSession;
     }
+	
+	private function createPDF($request){
+		if(! config('hopper.generate_pdf_mode')){
+			return;
+		}
+		
+		$newPDFName = $this->hopperfilepdf->createPDF($request->filename);
+		
+		event(new \App\Events\Backend\Hopper\FileOperation(
+			$request->filename, "Event Session", $request->id,
+			' created a new PDF <strong>'.$newPDFName.'</strong> for <strong>$1</strong>',
+			'file',
+			'blue',
+			[
+				'link' => ['admin.eventsession.edit', $request->session_id, [$request->session_id] ],
+			] 
+		));
+	}
 
     public function parseDateTimeforEdit(&$data) {
         if (isset($data->dates_rooms) && is_array($data->dates_rooms)) {

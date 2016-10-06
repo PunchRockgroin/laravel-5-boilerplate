@@ -4,9 +4,12 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use App\Services\Hopper\Contracts\HopperContract;
+use App\Services\Hopper\Contracts\HopperFileContract;
+use App\Services\Hopper\Contracts\HopperFilePDFContract;
 
 use App\Services\Hopper\Hopper;
 use App\Services\Hopper\HopperFile;
+use App\Services\Hopper\File\HopperFilePDF;
 use App\Services\Hopper\HopperUser;
 
 class HopperServiceProvider extends ServiceProvider
@@ -74,9 +77,9 @@ class HopperServiceProvider extends ServiceProvider
         });
                 
         //Announce the creation of a new Event Session
-        \App\Models\Hopper\EventSession::created(function ($eventsession) {
-            //event(new \App\Events\Backend\Hopper\EventSessionUpdated($eventsession->id, 'created', 'I was born'));
-        });
+//        \App\Models\Hopper\EventSession::created(function ($eventsession) {
+//            //event(new \App\Events\Backend\Hopper\EventSessionUpdated($eventsession->id, 'created', 'I was born'));
+//        });
         
     }
 
@@ -105,6 +108,9 @@ class HopperServiceProvider extends ServiceProvider
         $this->app->bind('hopper.file', function ($app) {
             return new HopperFile($app);
         });
+		$this->app->bind('hopper.file.pdf', function ($app) {
+            return new HopperFilePDF($app);
+        });
         $this->app->bind('hopper.user', function ($app) {
             return new HopperUser($app);
         });
@@ -120,6 +126,7 @@ class HopperServiceProvider extends ServiceProvider
         $this->app->booting(function () {
             $loader = \Illuminate\Foundation\AliasLoader::getInstance();
             $loader->alias('Hopper', \App\Services\Hopper\Facades\Hopper::class);
+			$loader->alias('HopperFile', \App\Services\Hopper\Facades\HopperFile::class);
         });
     }
     
@@ -137,6 +144,11 @@ class HopperServiceProvider extends ServiceProvider
         $this->app->bind(
             \App\Services\Hopper\Contracts\HopperFileContract::class,
             \App\Services\Hopper\HopperFile::class
+        );
+		
+        $this->app->bind(
+            \App\Services\Hopper\Contracts\HopperFilePDFContract::class,
+            \App\Services\Hopper\File\HopperFilePDF::class
         );
 		
         $this->app->bind(
@@ -158,6 +170,7 @@ class HopperServiceProvider extends ServiceProvider
         [
             'App\Services\Hopper\Hopper',
             'App\Services\Hopper\HopperFile',
+			'App\Services\Hopper\File\HopperFilePDF',
             'App\Services\Hopper\HopperUser',
         ];
     }

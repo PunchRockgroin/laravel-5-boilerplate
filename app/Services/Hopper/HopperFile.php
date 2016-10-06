@@ -20,6 +20,8 @@ use App\Models\Hopper\FileEntity;
 use App\Services\Hopper\HopperDBX;
 //use App\Jobs\Hopper\CopyFile;
 use App\Services\Hopper\Contracts\HopperFileContract;
+use App\Services\Hopper\Contracts\HopperFilePDFContract;
+use App\Services\Hopper\File\HopperFilePDF;
 
 class HopperFile implements HopperFileContract {
 
@@ -33,10 +35,9 @@ class HopperFile implements HopperFileContract {
     public $hopper_working_name;
     public $hopper_master_name;
     public $hopper_archive_name;
+    public $hopper_pdfarchive_name;
 
     function __construct() {
-
-
         $this->storagepath = config('hopper.local_storage');
         $this->driver_storage_path = $this->getDriverStoragePath();
 
@@ -45,6 +46,7 @@ class HopperFile implements HopperFileContract {
         $this->hopper_working_name = env('HOPPER_WORKING_NAME', 'working/');
         $this->hopper_master_name = env('HOPPER_MASTER_NAME', '1_Master/');
         $this->hopper_archive_name = env('HOPPER_ARCHIVE_NAME', 'ZZ_Archive/');
+        $this->hopper_pdfarchive_name = env('HOPPER_PDFARCHIVE_NAME', 'pdf/');
     }
 
     public function getDriverStoragePath($disk = 'hopper') {
@@ -81,7 +83,7 @@ class HopperFile implements HopperFileContract {
     public function movefile($oldFilePath, $newFilePath, $sourcedisk = 'hopper', $targetdisk = 'hopper') {
         if ($this->copyfile($oldFilePath, $newFilePath, $sourcedisk, $targetdisk)) {
             //Storage::disk($disk)->delete($oldFilePath);
-			if(Storage::disk($targetdisk)->delete($oldFilePath)){
+			if(Storage::disk($sourcedisk)->delete($oldFilePath)){
 				return true;
 			}
         }
@@ -601,38 +603,38 @@ class HopperFile implements HopperFileContract {
     
     
     public function purgeDupesToArchive(){
-//        $masterFiles = $this->getAllInMaster();
-//        
-//        $masterFiles = $masterFiles->map(function ($item, $key) {
-//            $item = str_replace($this->hopper_master_name, '', $item);
-//            $file_array = $this->getFileParts($item);
-//            if(is_array($file_array)){
-//               $file_array['filename'] = $item;
-//                return $file_array; 
-//            }
-//            return $item;
-//        });
-//        
-//        $masterFiles = $masterFiles->reject(function ($item) {
-//            return !is_array($item);
-//        });
-////        debugbar()->info($masterFiles);
-//        $masterFiles = $masterFiles->groupBy('sessionID');
-//        $masterFiles = $masterFiles->reject(function ($item) {
-//            return $item->count() < 2;
-//        });
-////        debugbar()->info($masterFiles);
-//        foreach($masterFiles as $masterFilesWithDupes){
-//             $masterFilesWithDupes->pop();
-//             $masterFilesWithDupes = $masterFilesWithDupes->sortBy('version');
-//             foreach($masterFilesWithDupes as $dupeFile){
-//
-//				
-//				$this->movefile($this->hopper_master_name . $dupeFile['filename'], $this->hopper_archive_name . $dupeFile['filename']);
-//				
-//             }
-//             
-//        }
+        $masterFiles = $this->getAllInMaster();
+        
+        $masterFiles = $masterFiles->map(function ($item, $key) {
+            $item = str_replace($this->hopper_master_name, '', $item);
+            $file_array = $this->getFileParts($item);
+            if(is_array($file_array)){
+               $file_array['filename'] = $item;
+                return $file_array; 
+            }
+            return $item;
+        });
+        
+        $masterFiles = $masterFiles->reject(function ($item) {
+            return !is_array($item);
+        });
+//        debugbar()->info($masterFiles);
+        $masterFiles = $masterFiles->groupBy('sessionID');
+        $masterFiles = $masterFiles->reject(function ($item) {
+            return $item->count() < 2;
+        });
+//        debugbar()->info($masterFiles);
+        foreach($masterFiles as $masterFilesWithDupes){
+             $masterFilesWithDupes->pop();
+             $masterFilesWithDupes = $masterFilesWithDupes->sortBy('version');
+             foreach($masterFilesWithDupes as $dupeFile){
+
+				
+				$this->movefile($this->hopper_master_name . $dupeFile['filename'], $this->hopper_archive_name . $dupeFile['filename']);
+				
+             }
+             
+        }
         
 //        debugbar()->info($masterFiles);
         return true;
@@ -675,7 +677,7 @@ class HopperFile implements HopperFileContract {
 		if($currentFileExtension === 'txt'){
 			$currentFileExtension = 'pptx';
 		}
-		$newFileName = $currentFileNameArray->implode('_') . '.' . $currentFileExtension;		
+		$newFileName = $currentFileNameArray->implode('_') . '.' . strtolower($currentFileExtension);		
 		
         return $newFileName;
     }
@@ -731,17 +733,28 @@ class HopperFile implements HopperFileContract {
     
     /**
      * Filters valid files.
-     *
+     * @param $query string
+	 * @param $collection mixed
+	 * @param $mimes array
+	 * @param $exclude array
      * @return \Illuminate\Support\Collection
      */
-    public function filterValidFiles($query, $collection, $disk = 'hopper'){
-
-        $collection = $collection->filter(function ($item) use ($query) {
-				$fileparts = explode('/', $item);
+    public function filterValidFiles($query, $collection, $mimes = [], $exclude = []){
+		if(  empty( $mimes ) || !is_array( $mimes )){
+			$mimes = explode(',', config('hopper.checkin_upload_mimes'));
+		}
+		if(!($collection instanceof Illuminate\Database\Eloquent\Collection)) {
+			$collection = collect($collection);
+		}
+        $filtered = $collection->filter(function ($item) use ($query,$mimes,$exclude) {
+//				$fileparts = explode('/', $item);
+			
+				$filename = pathinfo($item, PATHINFO_FILENAME);
+				$ext = strtolower( pathinfo($item, PATHINFO_EXTENSION) );
 				
-				if(isset($fileparts[1])
-					&& str_is( $query, head( explode('_', $fileparts[1] ) ) )
-					&& in_array(pathinfo($item, PATHINFO_EXTENSION), explode(',', config('hopper.checkin_upload_mimes') ) )
+				if(isset($filename)
+					&& str_is( $query, head( explode('_', $filename ) ) )
+					&& in_array(  $ext, $mimes ) && !in_array( $ext, $exclude )
 				){
 					return true;				
 				}
@@ -749,7 +762,37 @@ class HopperFile implements HopperFileContract {
 			});
         
         
-        return $collection;
+        return $filtered;
+    }
+	
+	/**
+     * Filters valid file types.
+	 * 
+     * @param $collection mixed
+	 * @param $mimes array
+	 * @param $exclude array
+     * @return \Illuminate\Support\Collection
+     */
+    public function filterValidFileTypes($collection, $mimes = [], $exclude = []){
+		
+		if(  empty( $mimes ) || !is_array( $mimes )){
+			$mimes = explode(',', config('hopper.checkin_upload_mimes'));
+		}
+		
+		if(!($collection instanceof Illuminate\Database\Eloquent\Collection)) {
+			$collection = collect($collection);
+		}
+		
+        $filtered = $collection->filter(function ($item) use ($mimes, $exclude) {				
+				$ext = strtolower( pathinfo($item, PATHINFO_EXTENSION));
+				if(in_array( $ext, $mimes ) && !in_array( $ext, $exclude ) ){
+					return true;				
+				}
+				return false;
+			});
+        
+        
+        return $filtered;
     }
 	
     /**
@@ -780,5 +823,36 @@ class HopperFile implements HopperFileContract {
         
         return $collection;
     }
+	
+	/**
+	 * Taken from WP
+	 * Appends a trailing slash.
+	 *
+	 * Will remove trailing forward and backslashes if it exists already before adding
+	 * a trailing forward slash. This prevents double slashing a string or path.
+	 *
+	 * The primary use of this is for paths and thus should be used for paths. It is
+	 * not restricted to paths and offers no specific path support.
+	 *
+	 * @param string $string What to add the trailing slash to.
+	 * @return string String with trailing slash added.
+	 */
+	
+	public function trailingslashit( $string ) {
+		return $this->untrailingslashit( $string ) . '/';
+	}
+	/**
+	 * Taken from WP
+	 * Removes trailing forward slashes and backslashes if they exist.
+	 *
+	 * The primary use of this is for paths and thus should be used for paths. It is
+	 * not restricted to paths and offers no specific path support.
+	 *
+	 * @param string $string What to remove the trailing slashes from.
+	 * @return string String without the trailing slashes.
+	 */
+	public function untrailingslashit( $string ) {
+		return rtrim( $string, '/\\' );
+	}
 
 }

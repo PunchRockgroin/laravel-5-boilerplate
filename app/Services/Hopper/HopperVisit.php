@@ -20,6 +20,7 @@ class HopperVisit{
     
     protected $hopper;
     protected $hopperfile;
+	protected $hopperfilepdf;
     protected $hopperuser;
 
 
@@ -30,11 +31,13 @@ class HopperVisit{
     public function __construct(
         HopperContract $hopper,
         HopperFileContract $hopperfile,
+		Contracts\HopperFilePDFContract $hopperfilepdf,
 		HopperUserContract $hopperuser
     )
     {
         $this->hopper = $hopper;
         $this->hopperfile = $hopperfile;
+        $this->hopperfilepdf = $hopperfilepdf;
 		$this->hopperuser = $hopperuser;
     }
 
@@ -58,9 +61,6 @@ class HopperVisit{
      */
     public function store($data)
     {
-        //
-		
-		
         $visit = Visit::create($data);
 		//$id, $visit, $event, $icon = 'plus', $class = 'green'
 		event(new \App\Events\Backend\Hopper\VisitUpdated($visit->id, $visit, 'created visit'));
@@ -77,6 +77,8 @@ class HopperVisit{
 				] 
 			));
 		}
+		
+		$this->createPDF($data, $visit);
 		
         return $visit;
     }
@@ -199,7 +201,7 @@ class HopperVisit{
 		
 		
           if(isset($data['behavior']) && isset($data['filename']) && isset($data['newfile']) && $data['behavior'] === 'update_visit'){
-                
+                $this->hopperfile->copyTemporaryNewFileToRelics($data['filename'],$data['filename']); 
                 $path = $this->hopperfile->copyTemporaryNewFileToMaster($data['filename'], true);
 				event(new \App\Events\Backend\Hopper\FileOperation(
 					$data['filename'], "Visit", $visit->id,
@@ -213,7 +215,7 @@ class HopperVisit{
 				));
                 //$id, $event, $notes = '', $filename = null, $tasks = [], $user = 'Hopper', $request = null
                 //event(new \App\Events\Backend\Hopper\FileEntityUpdated($visit->file_entity->id, 'visit_behavior', 'Moved updated visit file '.$data['filename'].' to master', $data['filename'], ['update_path' => $path]));
-                
+                $this->createPDF($data, $visit);
 				$this->hopperfile->copyMasterToArchive($data['filename']);
                 //event(new \App\Events\Backend\Hopper\FileEntityUpdated($visit->file_entity->id, 'visit_behavior', 'Copied updated visit file '.$data['filename'].' to archive', $data['filename']));
                 return true;
@@ -229,6 +231,28 @@ class HopperVisit{
 		$visit->update($updates);
 		
     }
+	
+	private function createPDF($data, Visit $visit){
+		if(! config('hopper.generate_pdf_mode')){
+			return;
+		}
+		//Generally, we are creating from master
+		$masterpath = $this->hopperfilepdf->hopper_master_name;
+		
+		$newPDFName = $this->hopperfilepdf->createPDF($masterpath . $data['filename']);
+		
+		event(new \App\Events\Backend\Hopper\FileOperation(
+			$data['filename'], "Visit", $visit->id,
+			' created a new PDF <strong>$1</strong> from visit <strong>$2</strong>',
+			'file',
+			'blue',
+			[
+				'link' => ['admin.eventsession.edit', $newPDFName, [$visit->session_id] ],
+				'link2' => ['admin.visit.edit', $visit->id, [$visit->id] ],
+			] 
+		));
+		return true;
+	}
     
     public function parseForExport($Visits){
         if($Visits->isEmpty()){
@@ -241,4 +265,6 @@ class HopperVisit{
         }
         return $Visits;            
     }
+	
+	
 }

@@ -29,6 +29,13 @@
 			{!! Form::label('currentfilename', 'Current '.trans('fileentity.backend.form.filename.label'), ['class' => 'control-label']) !!}
 			{!! Form::text('currentfilename', isset($eventsession['session_files']->first()['filename']) ? $eventsession['session_files']->first()['filename'] : null, ['class' => 'form-control','readonly'=>'readonly', 'placeholder' => trans('fileentity.backend.form.filename.placeholder')]) !!}
 			<div class="help-block">The Current File in Master</div>
+			<div class='current-file-pdf-section @if(!config('hopper.generate_pdf_mode')) hidden @endif'>
+				@if($session_pdf) 
+				<p>This event session has a generated PDF: {{ $session_pdf }}</p>
+				@else
+				<div class="alert alert-warning"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> This event session does not have a generated PDF</div>
+				@endif
+			</div>
 		</div>
 		<div class='file-update-section hidden'>
 			<div class="form-group hidden">

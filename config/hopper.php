@@ -186,5 +186,14 @@ return [
       |
      */
     'client_mode' => env('HOPPER_CLIENT_MODE', true),
-	'client_version' => env('HOPPER_CLIENT_VERSION', '0.0.0')
+	'client_version' => env('HOPPER_CLIENT_VERSION', '0.0.0'),
+	/*
+      |--------------------------------------------------------------------------
+      | Generate PDF Mode
+      |--------------------------------------------------------------------------
+      |
+      | Puts hopper into Generate PDF mode
+      |
+     */
+    'generate_pdf_mode' => env('HOPPER_GENERATE_PDF_MODE', false),
 ];

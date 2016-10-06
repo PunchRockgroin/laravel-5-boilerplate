@@ -47,10 +47,14 @@ Interface HopperFileContract
 	
 	public function flushMasterCache($sourcedisk = 'hopper');
 	
-	public function filterValidFiles($query, $collection, $disk = 'hopper');
+	public function filterValidFiles($query, $collection, $mimes = [], $exclude = []);
+	
+	public function filterValidFileTypes($collection, $mimes = [], $exclude = []);
     
 	public function mapFileMeta($collection, $sourcedisk = 'hopper');
 //    public function parseDateTimeforEdit(&$data);
-    
+    public function trailingslashit( $string );
+	
+	public function untrailingslashit( $string );
 
 }
