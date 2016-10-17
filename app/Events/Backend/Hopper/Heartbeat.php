@@ -19,7 +19,7 @@ class Heartbeat extends Event
      *
      * @return void
      */
-    public function __construct($user, $timestamp = null, $data = [])
+    public function __construct($user = null, $timestamp = null, $data = [])
     {
         $this->user = $user;
         $this->timestamp = $timestamp;

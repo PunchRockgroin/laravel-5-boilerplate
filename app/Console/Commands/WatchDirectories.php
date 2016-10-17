@@ -18,7 +18,7 @@ class WatchDirectories extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Watches Directories';
 
     /**
      * Create a new command instance.

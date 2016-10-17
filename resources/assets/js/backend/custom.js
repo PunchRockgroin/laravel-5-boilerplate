@@ -41,6 +41,8 @@ if ( $( '#Hopper' ).length ) {
             currentVisit: { },
             inVisit: { },
             idleUsers: { },
+            online: true,
+            lastHeartBeatReceivedAt: moment(),
             hopperClient : false
         },
         computed: {
@@ -77,15 +79,33 @@ if ( $( '#Hopper' ).length ) {
                 // `event` is the native DOM event
                 alert( event.target.tagName );
             },
-            getHeartbeat: function ( event ) {
-                // GET request
-                this.$http( { url: window.hopper.heartbeat_status, method: 'GET' } ).then( function ( response ) {
-                    // success callback
-//                this.$set('message', response.data.message);
-
-                }, function ( response ) {
-                    // error callback
+            heartbeatListen: function (){
+                hopper_channel.bind( 'heartbeat', function ( data ) {
+                    hopperVue.$set( 'online', true );
+                    hopperVue.$set( 'lastHeartBeatReceivedAt',  moment() );
                 } );
+                setInterval(this.determineConnectionStatus, 1000);
+                
+            },
+            determineConnectionStatus: function() {
+                var lastHeartBeatReceivedSecondsAgo = moment().diff(this.lastHeartBeatReceivedAt, 'seconds');
+                this.online = lastHeartBeatReceivedSecondsAgo < 125;
+                if(!this.online){
+                    toastr.error('Please check your internet connection', 'It appears you are offline!', {
+                        positionClass: "toast-bottom-center",
+                        closeButton: false,
+                        preventDuplicates: true,
+                        timeOut: 60000, // Set timeOut and extendedTimeOut to 0 to make it sticky
+                        extendedTimeout: 0,
+                        tapToDismiss: false
+                    });
+                }else{
+                    toastr.clear();
+                }
+                
+            },
+            getHeartbeat: function ( event ) {
+                
             },
             getDashboardData: function ( event ) {
                 // GET request
@@ -258,9 +278,9 @@ if ( $( '#Hopper' ).length ) {
                     this.triggerRefresh();
                 } );
             },
-            notifyHopperClient: function (action, data ) {
+            notifyHopperClient: function (data) {
                     this.$http.post(window.hopper.routes.notify_client,{
-                        'action' : action,
+                        'action' : data.action,
                         'payload' : data
                     }).then( function ( response ) {
                         console.log(response);
@@ -270,8 +290,10 @@ if ( $( '#Hopper' ).length ) {
         },
         ready: function () {
 //        this.getHeartbeat();
+//            this.heartbeatListen();
             this.getUserStatusData();
 //          this.getUnassigned();
+            
         },
         watch: {
             Users: function () {

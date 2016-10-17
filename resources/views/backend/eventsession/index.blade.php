@@ -27,5 +27,6 @@
 
 
 @section('after-scripts-end')
+	@include('includes/partials/pusher')
     {!! $html->scripts() !!}
 @endsection

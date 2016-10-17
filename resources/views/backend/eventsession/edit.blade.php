@@ -38,7 +38,8 @@
 							//debugbar()->info($totalVisit);
 							foreach($totalVisit as $elVisit):
 								$elVisit = collect($elVisit);
-								debugbar()->info($elVisit); ?>
+								//debugbar()->info($elVisit); 
+								?>
 								
 								@if( !empty( $elVisit['type_id'] ) )
 									<li>
@@ -97,54 +98,63 @@
 
 
 @section('after-scripts-end')
-@include('includes/partials/pusher', ['params'=>'?originator='.$eventsession->session_id])
 <script>
-	
-	var hopper_presence_eventsession_channel = pusher.subscribe( 'presence-hopper_eventsession_channel' );
-	var hopper_channel = pusher.subscribe('private-hopper_channel');
-	
 	var pusherData = {
+		'action' : 'event_session',
 		'user_id' : '{{ auth()->user()->id . '-server' }}',
 		'session_id' : '{{ $eventsession->session_id }}',
 		'filename' : $('input#currentfilename').val(),
 		'next_version' : '{{ $next_version_filename }}'
 	};
+</script>
+@include('includes/partials/pusher', ['params'=>'?originator='.$eventsession->session_id])
+<script>
 	
-	var verifyID = function(id){
-		if( id.replace('-client','')  === '{{ auth()->user()->id }}' ){
-			return true;
-		}
-		return false;
-	}
+//	var hopper_presence_eventsession_channel = pusher.subscribe( 'presence-hopper_eventsession_channel' );
+	var hopper_channel = pusher.subscribe('private-hopper_channel');
+	
+//	var pusherData = {
+//		'user_id' : '{{ auth()->user()->id . '-server' }}',
+//		'session_id' : '{{ $eventsession->session_id }}',
+//		'filename' : $('input#currentfilename').val(),
+//		'next_version' : '{{ $next_version_filename }}'
+//	};
+	
+//	var verifyID = function(id){
+//		if( id.replace('-client','')  === '{{ auth()->user()->id }}' ){
+//			return true;
+//		}
+//		return false;
+//	}
 //	console.log(pusherData);
 	
-	hopper_presence_eventsession_channel.bind('pusher:subscription_succeeded', function(members) {
-		members.each(function(member) {
-		  // for example:
-		  if( verifyID(member.id) ){
-//			  console.log('Hopper Client is listening');
-			  hopperVue.hopperClient = true;
-			  hopperVue.notifyHopperClient('event_session', pusherData);
-		  }
-		});
-	  });
-	hopper_presence_eventsession_channel.bind('pusher:member_added', function(member) {
-
-		if( verifyID(member.id) ){
-			  //console.log('Awaken');
-			  hopperVue.hopperClient = true;
-			  hopperVue.notifyHopperClient('event_session', pusherData );
-		  }
-	  })
-
-	  hopper_presence_eventsession_channel.bind('pusher:member_removed', function(member) {
-		// for example:
-		if( verifyID(member.id) ){
-			  //console.log('Sleep');
-			  hopperVue.hopperClient = false;
-			  
-		  }
-	  });
+//	hopper_presence_eventsession_channel.bind('pusher:subscription_succeeded', function(members) {
+//		members.each(function(member) {
+//		  // for example:
+//		  if( verifyID(member.id) ){
+////			  console.log('Hopper Client is listening');
+//			  hopperVue.hopperClient = true;
+//			  hopperVue.notifyHopperClient('event_session', pusherData);
+//		  }
+//		});
+//	  });
+//	hopper_presence_eventsession_channel.bind('pusher:member_added', function(member) {
+//
+//		if( verifyID(member.id) ){
+//			  //console.log('Awaken');
+//			  hopperVue.hopperClient = true;
+//			  hopperVue.notifyHopperClient('event_session', pusherData );
+//		  }
+//	  })
+//
+//	  hopper_presence_eventsession_channel.bind('pusher:member_removed', function(member) {
+//		// for example:
+//		if( verifyID(member.id) ){
+//			  //console.log('Sleep');
+//			  hopperVue.hopperClient = false;
+//			  
+//		  }
+//	  });
 		
 	hopper_channel.bind('client-event', function(data){
 		

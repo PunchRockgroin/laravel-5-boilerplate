@@ -1,3 +1,4 @@
+
 <header class="main-header">
     {{ link_to_route('admin.dashboard', app_name(), [], ['class' => 'logo']) }}
 
@@ -8,7 +9,14 @@
 
         <div class="navbar-custom-menu">
             <ul class="nav navbar-nav">
-
+				
+				
+				<li>
+					<p class="nav navbar-text">
+						<span v-if="online" class="label label-info"><i class="fa fa-check" aria-hidden="true"></i> You are online</span>
+						<span v-else class="label label-danger"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Warning - You are offline</span>
+					</p> 
+				</li>
                 @if (false && config('locale.status') && count(config('locale.languages')) > 1)
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{ trans('menus.language-picker.language') }} <span class="caret"></span></a>

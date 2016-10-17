@@ -17,8 +17,9 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        // Commands\Inspire::class,
+        Commands\Inspire::class,
         Commands\WatchDirectories::class,
+        Commands\SendHeartbeat::class,
     ];
 
     /**
@@ -31,6 +32,7 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')->hourly();
 
+         $schedule->command('hopper:heartbeat')->everyMinute();
         /**
          * Laravel Backup Commands
          */

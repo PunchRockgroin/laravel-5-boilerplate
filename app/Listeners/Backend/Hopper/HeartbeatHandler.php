@@ -8,16 +8,21 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 use Illuminate\Support\Facades\Cache;
 
+use Vinkla\Pusher\PusherManager;
+
 class HeartbeatHandler
 {
+
+    protected $pusher;
     /**
      * Create the event listener.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(PusherManager $pusher)
     {
         //
+        $this->pusher = $pusher;
     }
 
     /**
@@ -28,16 +33,17 @@ class HeartbeatHandler
      */
     public function handle(Heartbeat $event)
     {
-       
+
+       $this->pusher->trigger('private-hopper_channel', 'heartbeat', ['message' => 'ok']);
         try {
-             Cache::forever('heartbeat-'.md5($event->user->email), json_encode([
-                    'route' => request()->route()->getName(),
-                    'parameters' => request()->segments(),
-                    'timestamp' => \Carbon\Carbon::now()->toIso8601String(),
-                ]));
+            //  Cache::forever('heartbeat-'.md5($event->user->email), json_encode([
+            //         'route' => request()->route()->getName(),
+            //         'parameters' => request()->segments(),
+            //         'timestamp' => \Carbon\Carbon::now()->toIso8601String(),
+            //     ]));
         } catch (Exception $e) {
-            \Log::error($e);
-//            \Debugbar::addException($e);
+            // \Log::error($e);
+            // \Debugbar::addException($e);
         }
     }
 }
