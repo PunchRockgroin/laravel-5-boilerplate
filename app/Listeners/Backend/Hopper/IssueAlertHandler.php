@@ -37,7 +37,7 @@ class IssueAlertHandler
 			return;
 		}
 		
-		$target = config('hopper.log.target', '@davidalberts');
+		$target = config('hopper.alert.target');
 		if( $this->validateString($event->target) ){
 			$target = $event->target;
 		}

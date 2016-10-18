@@ -33,17 +33,12 @@ class HeartbeatHandler
      */
     public function handle(Heartbeat $event)
     {
-
-       $this->pusher->trigger('private-hopper_channel', 'heartbeat', ['message' => 'ok']);
-        try {
-            //  Cache::forever('heartbeat-'.md5($event->user->email), json_encode([
-            //         'route' => request()->route()->getName(),
-            //         'parameters' => request()->segments(),
-            //         'timestamp' => \Carbon\Carbon::now()->toIso8601String(),
-            //     ]));
-        } catch (Exception $e) {
-            // \Log::error($e);
-            // \Debugbar::addException($e);
-        }
+		if(! config('hopper.heartbeat', false) ){
+			return;
+		}
+		//Use Pusher for Heartbeat
+		if(config('hopper.heartbeat_handler', false) === 'pusher'){
+			$this->pusher->trigger('private-hopper_channel', 'heartbeat', ['message' => 'ok']);
+		}
     }
 }

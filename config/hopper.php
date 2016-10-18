@@ -196,4 +196,28 @@ return [
       |
      */
     'generate_pdf_mode' => env('HOPPER_GENERATE_PDF_MODE', false),
+	/*
+      |--------------------------------------------------------------------------
+      | Generate PDF Mode
+      |--------------------------------------------------------------------------
+      |
+      | Puts hopper into Generate PDF mode
+      |
+     */
+    'alert' => [
+		'enable' => env('HOPPER_ALERT_ENABLE', false),
+		'target' => env('HOPPER_ALERT_TARGET', '#general'),
+	],
+	/*
+      |--------------------------------------------------------------------------
+      | Heartbeat
+      |--------------------------------------------------------------------------
+      |
+      | Sends a scheduled ping every minute via service
+      |
+     */
+	'heartbeat' => env('HOPPER_ENABLE_HEARTBEAT', false),
+	'heartbeat_provider' => 'pusher',
+	
+	
 ];

@@ -30,16 +30,17 @@ class HopperServiceProvider extends ServiceProvider
     {
         view()->composer(['backend.layouts.master'], function(){
             
-            $heartbeat_detector_enable = false;
-            $heartbeat_detector_routes = ['admin.dashboard'];
+//            $heartbeat_detector_enable = false;
+//            $heartbeat_detector_routes = ['admin.dashboard'];
 			
-			$pusher_presence_routes = ['admin.dashboard', 'admin.visit.edit'];
+//			$pusher_presence_routes = ['admin.dashboard', 'admin.visit.edit'];
                         
             javascript()->put([
                 'hopper' => [
                     'userid' => auth()->user()->id,
                     'username' => auth()->user()->name,
                     'email' => auth()->user()->email,
+					'heartbeat' => config('hopper.heartbeat'),
 					'routes' => [
 						'user_status' => route('admin.dashboard.user.status'),
 						'user_update' => route('admin.dashboard.user.update'),

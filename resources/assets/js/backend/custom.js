@@ -80,6 +80,11 @@ if ( $( '#Hopper' ).length ) {
                 alert( event.target.tagName );
             },
             heartbeatListen: function (){
+                
+                if(! hopper.heartbeat ){
+                    return;
+                }
+                
                 hopper_channel.bind( 'heartbeat', function ( data ) {
                     hopperVue.$set( 'online', true );
                     hopperVue.$set( 'lastHeartBeatReceivedAt',  moment() );
