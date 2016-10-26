@@ -20,6 +20,13 @@
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Lato:100,300,400,700" rel='stylesheet' type='text/css'>
+		
+		<!-- Scripts -->
+        <script>
+            window.Laravel = <?php echo json_encode([
+                'csrfToken' => csrf_token(),
+            ]); ?>
+        </script>
     </head>
     <body id="app-layout">
 

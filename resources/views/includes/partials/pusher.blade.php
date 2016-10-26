@@ -15,17 +15,20 @@ var verifyID = function(id){
 	}
 	return false;
 }
+
 var hopper_presence_channel = pusher.subscribe( 'presence-hopper_channel' );
 var hopper_channel = pusher.subscribe('private-hopper_channel');
 
 hopperVue.heartbeatListen();
 
 hopper_presence_channel.bind('pusher:subscription_succeeded', function(members) {
-	
+		
+		console.log(members);
+		
 		members.each(function(member) {
 		  // for example:
 		  if( verifyID(member.id) ){
-//			  console.log('Hopper Client is listening');
+			  
 			  hopperVue.hopperClient = true;
 			  hopperVue.notifyHopperClient(pusherData);
 		  }
@@ -33,6 +36,8 @@ hopper_presence_channel.bind('pusher:subscription_succeeded', function(members) 
 	  });
 hopper_presence_channel.bind('pusher:member_added', function(member) {
 
+	console.log(member);
+	
 	if( verifyID(member.id) ){
 		  //console.log('Awaken');
 		  hopperVue.hopperClient = true;
@@ -41,6 +46,7 @@ hopper_presence_channel.bind('pusher:member_added', function(member) {
   })
 
 hopper_presence_channel.bind('pusher:member_removed', function(member) {
+  console.log(member);
   // for example:
   if( verifyID(member.id) ){
 		//console.log('Sleep');

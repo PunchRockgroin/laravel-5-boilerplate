@@ -1,8 +1,8 @@
-<div class="col-md-4 col-lg-3 " class="animated" transition="zoom">
+<div class="col-md-4 col-lg-3 animated" transition="zoom">
 	<!-- Widget: user widget style 2 -->
 	<div class="box box-widget widget-user-2" data-mh="user-group">
 		<!-- Add the bg color to the header using any of the bg-* classes -->
-		<div class="widget-user-header user-group bg-@{{ user.statusclass }}">
+		<div class="widget-user-header user-group" v-bind:class="userStatusClass(user.statusclass)">
 			<div class="widget-user-image">
 				<img class="img-circle" v-bind:src="user.gravatar" alt="User Avatar">
 			</div>

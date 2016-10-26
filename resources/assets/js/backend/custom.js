@@ -18,326 +18,318 @@ $( function () {
     }
 } );
 
-Vue.transition( 'bounce', {
-    enterClass: 'bounceInLeft',
-    leaveClass: 'bounceOutRight'
-} );
-Vue.transition( 'zoom', {
-    enterClass: 'zoomIn',
-    leaveClass: 'zoomOut'
-} );
-
-Vue.http.headers.common['X-CSRF-TOKEN'] = document.querySelector( 'meta[name="_token"]' ).getAttribute( 'content' );
-
-if ( $( '#Hopper' ).length ) {
-    hopperVue = new Vue( {
-        el: '#Hopper',
-        data: {
-            message: '',
-            Users: { },
-            Visits: { },
-            Unassigned: { },
-            currentUser: { },
-            currentVisit: { },
-            inVisit: { },
-            idleUsers: { },
-            online: true,
-            lastHeartBeatReceivedAt: moment(),
-            hopperClient : false
-        },
-        computed: {
-            idleGraphicOperators: function () {
-                var filter = Vue.filter('filterBy');
-                return filter(this.Users, 'true', 'idle');
-            },
-            activeGraphicOperators: function () {
-                var filter = Vue.filter('filterBy');
-                return filter(this.Users, 'false', 'idle');
-            }
-        },
-        filters: {
-            moment: function ( date ) {
-                return moment( date ).format( 'MMMM Do YYYY, h:mm:ss a' );
-            },
-            join: function ( elem ) {
-                return elem.join();
-            }
-        },
-        methods: {
-            moment: function ( date ) {
-                return moment( date );
-            },
-            date: function ( date ) {
-                return moment( date ).format( 'MMMM Do YYYY, h:mm:ss a' );
-            },
-            dateFromNow: function ( date ) {
-                return moment( date ).fromNow();
-            },
-            greet: function ( event ) {
-                // `this` inside methods point to the Vue instance
-                alert( 'Hello ' + window.hopper.username + '!' );
-                // `event` is the native DOM event
-                alert( event.target.tagName );
-            },
-            heartbeatListen: function (){
-                
-                if(! hopper.heartbeat ){
-                    return;
-                }
-                
-                hopper_channel.bind( 'heartbeat', function ( data ) {
-                    hopperVue.$set( 'online', true );
-                    hopperVue.$set( 'lastHeartBeatReceivedAt',  moment() );
-                } );
-                setInterval(this.determineConnectionStatus, 1000);
-                
-            },
-            determineConnectionStatus: function() {
-                var lastHeartBeatReceivedSecondsAgo = moment().diff(this.lastHeartBeatReceivedAt, 'seconds');
-                this.online = lastHeartBeatReceivedSecondsAgo < 125;
-                if(!this.online){
-                    toastr.error('Please check your internet connection', 'It appears you are offline!', {
-                        positionClass: "toast-bottom-center",
-                        closeButton: false,
-                        preventDuplicates: true,
-                        timeOut: 60000, // Set timeOut and extendedTimeOut to 0 to make it sticky
-                        extendedTimeout: 0,
-                        tapToDismiss: false
-                    });
-                }else{
-                    toastr.clear();
-                }
-                
-            },
-            getHeartbeat: function ( event ) {
-                
-            },
-            getDashboardData: function ( event ) {
-                // GET request
-                this.$http( { url: window.hopper.routes.heartbeat_data, method: 'GET' } ).then( function ( response ) {
-                    // success callback
-//                console.log(response.data.payload);
-                    this.$set( 'message', response.data.message );
-                    this.$set( 'inVisit', response.data.payload.inVisit );
-//                console.log(response.data.payload);
-//                var arr = Object.keys(response.data.payload.groups).map(function (key) {return response.data.payload.groups[key]});
-                    var otherUsers = [ ];
-                    _.forEach( response.data.payload.groups, function ( value ) {
-                        _.forEach( value, function ( subvalue ) {
-                            otherUsers.push( subvalue );
-                        } );
-                    } );
-                    this.$set( 'idleUsers', otherUsers );
-
-                }, function ( response ) {
-                    // error callback
-                } );
-            },
-            getUserStatusData: function ( event ) {
-                this.$http( { url: window.hopper.routes.user_status, method: 'GET' } ).then( function ( response ) {
-                    // success callback
-
-                    this.Users = response.data.payload;
-//                  console.log(this.Users);
-//                console.log(response.data.payload);
-//                var arr = Object.keys(response.data.payload.groups).map(function (key) {return response.data.payload.groups[key]});
-//                  var active = [];
-//                  var idle = [];
-//                _.forEach(response.data.payload, function (user) {
-//                    if(user.state === 'active'){
-//                        active.push(user);
-//                    }else{
-//                        idle.push(user);
+//if ( $( '#Hopper' ).length ) {
+//    hopperVue = new Vue( {
+//        el: '#Hopper',
+//        data: {
+//            message: '',
+//            Users: { },
+//            Visits: { },
+//            Unassigned: { },
+//            Currentuser: { },
+//            currentVisit: { },
+//            inVisit: { },
+//            idleUsers: { },
+//            online: true,
+//            lastHeartBeatReceivedAt: moment(),
+//            hopperClient : false
+//        },
+//        computed: {
+//            idleGraphicOperators: function () {
+////                var filter = Vue.filter('filterBy');
+////                return filter(this.Users, 'true', 'idle');
+//                var self = this;
+//                console.log(self.Users);
+//                return self.Users.filter(function (user) {
+//                  return user.idle === 'true'
+//                })
+//            },
+//            activeGraphicOperators: function () {
+////                var filter = Vue.filter('filterBy');
+////                return filter(this.Users, 'false', 'idle');
+//                  var self = this
+//                  console.log(self.Users);
+//                  return self.Users.filter(function (user) {
+//                      return user.idle === 'false'
+//                  })
+//            }
+//        },
+//        filters: {
+//            moment: function ( date ) {
+//                return moment( date ).format( 'MMMM Do YYYY, h:mm:ss a' );
+//            },
+//            join: function ( elem ) {
+//                return elem.join();
+//            }
+//        },
+//        methods: {
+//            moment: function ( date ) {
+//                return moment( date );
+//            },
+//            date: function ( date ) {
+//                return moment( date ).format( 'MMMM Do YYYY, h:mm:ss a' );
+//            },
+//            dateFromNow: function ( date ) {
+//                return moment( date ).fromNow();
+//            },
+//            greet: function ( event ) {
+//                // `this` inside methods point to the Vue instance
+//                alert( 'Hello ' + window.hopper.username + '!' );
+//                // `event` is the native DOM event
+//                alert( event.target.tagName );
+//            },
+//            heartbeatListen: function (){
+//                
+//                if(! hopper.heartbeat ){
+//                    return;
+//                }
+//                
+//                hopper_channel.bind( 'heartbeat', function ( data ) {
+//                    hopperVue.$set( 'online', true );
+//                    hopperVue.$set( 'lastHeartBeatReceivedAt',  moment() );
+//                } );
+//                setInterval(this.determineConnectionStatus, 1000);
+//                
+//            },
+//            determineConnectionStatus: function() {
+//                var lastHeartBeatReceivedSecondsAgo = moment().diff(this.lastHeartBeatReceivedAt, 'seconds');
+//                this.online = lastHeartBeatReceivedSecondsAgo < 125;
+//                if(!this.online){
+//                    toastr.error('Please check your internet connection', 'It appears you are offline!', {
+//                        positionClass: "toast-bottom-center",
+//                        closeButton: false,
+//                        preventDuplicates: true,
+//                        timeOut: 60000, // Set timeOut and extendedTimeOut to 0 to make it sticky
+//                        extendedTimeout: 0,
+//                        tapToDismiss: false
+//                    });
+//                }else{
+//                    toastr.clear();
+//                }
+//                
+//            },
+//            getHeartbeat: function ( event ) {
+//                
+//            }, 
+//            getDashboardData: function ( event ) {
+//                // GET request
+//                this.$http( { url: window.hopper.routes.heartbeat_data, method: 'GET' } ).then( function ( response ) {
+//                    // success callback
+////                console.log(response.data.payload);
+//                    this.$set( 'message', response.data.message );
+//                    this.$set( 'inVisit', response.data.payload.inVisit );
+////                console.log(response.data.payload);
+////                var arr = Object.keys(response.data.payload.groups).map(function (key) {return response.data.payload.groups[key]});
+//                    var otherUsers = [ ];
+//                    _.forEach( response.data.payload.groups, function ( value ) {
+//                        _.forEach( value, function ( subvalue ) {
+//                            otherUsers.push( subvalue );
+//                        } );
+//                    } );
+//                    this.$set( 'idleUsers', otherUsers );
+//
+//                }, function ( response ) {
+//                    // error callback
+//                } );
+//            },
+//            getUserStatusData: function ( event ) {
+//                this.$http( { url: window.hopper.routes.user_status, method: 'GET' } ).then( function ( response ) {
+//                    // success callback
+//
+//                    this.Users = response.data.payload;
+////                  console.log(this.Users);
+////                console.log(response.data.payload);
+////                var arr = Object.keys(response.data.payload.groups).map(function (key) {return response.data.payload.groups[key]});
+////                  var active = [];
+////                  var idle = [];
+////                _.forEach(response.data.payload, function (user) {
+////                    if(user.state === 'active'){
+////                        active.push(user);
+////                    }else{
+////                        idle.push(user);
+////                    }
+////
+//////                    _.forEach(value, function (subvalue) {
+//////                        otherUsers.push(subvalue);
+//////                    });
+////                });
+////                this.$set('activeUsers', active);
+////                this.$set('idleUsers', idle);
+//
+//
+//                }, function ( response ) {
+//                    // error callback
+//                } );
+//            },
+//            updateUserStatus: function ( user ) {
+//                var index = _.findIndex( this.Users, { uid: user.uid } );
+//                this.Users.$set( index, user );
+//            },
+//            setBehaviorData: function ( members ) {
+//                var elGroups = _.groupBy( members, function ( member ) {
+//                    return member.heartbeat.route;
+//                } );
+//                var inVisit = _.filter( members, function ( member ) {
+//                    return member.heartbeat.route == 'admin.visit.edit';
+//                } );
+//                var idleUsers = _.filter( members, function ( member ) {
+//                    return member.heartbeat.route != 'admin.visit.edit';
+//                } );
+//                this.$set( 'inVisit', inVisit );
+//                this.$set( 'idleUsers', idleUsers );
+//            },
+//            getMemberHeartbeat: function ( member ) {
+//                this.$http( { url: window.hopper.heartbeat_user + '/' + member.id, method: 'GET' } ).then( function ( response ) {
+//                    // success callback
+////            console.log(response.data.payload);
+////                    this.$set('message', response.data.message);
+////                    this.$set('inVisit', response.data.payload.inVisit);
+////    //                console.log(response.data.payload);
+////    //                var arr = Object.keys(response.data.payload.groups).map(function (key) {return response.data.payload.groups[key]});
+////                    var otherUsers = [];
+////                    _.forEach(response.data.payload.groups, function (value) {
+////                        _.forEach(value, function (subvalue) {
+////                            otherUsers.push(subvalue);
+////                        });
+////                    });
+////                    this.$set('idleUsers', otherUsers);
+//
+//                }, function ( response ) {
+//                    // error callback
+//                    //console.log( response );
+//                } );
+//            },
+////        addMember: function()
+//            getPusherPresence: function ( event ) {
+//                var PresenceChannel = pusher.subscribe( "presence-test_channel" );
+//                PresenceChannel.bind( 'pusher:subscription_succeeded', function ( members ) {
+////                console.log(members);
+////                hopperVue.setBehaviorData(members.members);
+//                    hopperVue.getDashboardData();
+//                } );
+//
+//                PresenceChannel.bind( 'pusher:member_added', function ( member ) {
+//                    // for example:
+////                console.log(member);
+////                console.log(hopperVue.inVisit);
+//
+////                console.log(hopperVue.idleUsers);
+////                _.each(hopperVue.idleUsers, function(user){
+////                    console.log(user.heartbeat.route);
+////                })
+////                hopperVue.setBehaviorData(members.members);
+//                    hopperVue.getDashboardData();
+//                    hopperVue.getMemberHeartbeat( member );
+//                } );
+//                PresenceChannel.bind( 'pusher:member_removed', function ( member ) {
+//                    // for example:
+////                console.log(member);
+////                console.log(hopperVue.inVisit);
+////                _.each(hopperVue.idleUsers, function(user){
+////                    console.log(user.heartbeat.route);
+////                })
+////                hopperVue.setBehaviorData(members.members);
+//                    hopperVue.getDashboardData();
+//                    hopperVue.getMemberHeartbeat( member );
+//                } );
+//            },
+//            toggleUserStatus: function ( id, event ) {
+//                this.$http( { url: window.hopper.routes.user_update + '/' + id, method: 'POST' } ).then( function ( response ) {
+//                    // success callback
+//                    if ( response.data.message === 'ok' ) {
+//                        var payload = response.data.payload;
+////                  console.log(payload);
+//                        toastr.success( payload.user.name + ' state changed to: <strong>' + payload.user.state + '</strong>', 'Hopper Says' );
+//                    } else {
+//                        toastr.error( 'Something happened', 'Hopper Says' );
+//                        //console.log( response.data );
 //                    }
 //
-////                    _.forEach(value, function (subvalue) {
-////                        otherUsers.push(subvalue);
-////                    });
-//                });
-//                this.$set('activeUsers', active);
-//                this.$set('idleUsers', idle);
+//                }, function ( response ) {
+//                    // error callback
+//                    //console.log( response );
+//                } );
+//            },
 
 
-                }, function ( response ) {
-                    // error callback
-                } );
-            },
-            updateUserStatus: function ( user ) {
-                var index = _.findIndex( this.Users, { uid: user.uid } );
-                this.Users.$set( index, user );
-            },
-            setBehaviorData: function ( members ) {
-                var elGroups = _.groupBy( members, function ( member ) {
-                    return member.heartbeat.route;
-                } );
-                var inVisit = _.filter( members, function ( member ) {
-                    return member.heartbeat.route == 'admin.visit.edit';
-                } );
-                var idleUsers = _.filter( members, function ( member ) {
-                    return member.heartbeat.route != 'admin.visit.edit';
-                } );
-                this.$set( 'inVisit', inVisit );
-                this.$set( 'idleUsers', idleUsers );
-            },
-            getMemberHeartbeat: function ( member ) {
-                this.$http( { url: window.hopper.heartbeat_user + '/' + member.id, method: 'GET' } ).then( function ( response ) {
-                    // success callback
-//            console.log(response.data.payload);
-//                    this.$set('message', response.data.message);
-//                    this.$set('inVisit', response.data.payload.inVisit);
-//    //                console.log(response.data.payload);
-//    //                var arr = Object.keys(response.data.payload.groups).map(function (key) {return response.data.payload.groups[key]});
-//                    var otherUsers = [];
-//                    _.forEach(response.data.payload.groups, function (value) {
-//                        _.forEach(value, function (subvalue) {
-//                            otherUsers.push(subvalue);
-//                        });
-//                    });
-//                    this.$set('idleUsers', otherUsers);
-
-                }, function ( response ) {
-                    // error callback
-                    console.log( response );
-                } );
-            },
-//        addMember: function()
-            getPusherPresence: function ( event ) {
-                var PresenceChannel = pusher.subscribe( "presence-test_channel" );
-                PresenceChannel.bind( 'pusher:subscription_succeeded', function ( members ) {
-//                console.log(members);
-//                hopperVue.setBehaviorData(members.members);
-                    hopperVue.getDashboardData();
-                } );
-
-                PresenceChannel.bind( 'pusher:member_added', function ( member ) {
-                    // for example:
-//                console.log(member);
-//                console.log(hopperVue.inVisit);
-
-//                console.log(hopperVue.idleUsers);
-//                _.each(hopperVue.idleUsers, function(user){
-//                    console.log(user.heartbeat.route);
-//                })
-//                hopperVue.setBehaviorData(members.members);
-                    hopperVue.getDashboardData();
-                    hopperVue.getMemberHeartbeat( member );
-                } );
-                PresenceChannel.bind( 'pusher:member_removed', function ( member ) {
-                    // for example:
-//                console.log(member);
-//                console.log(hopperVue.inVisit);
-//                _.each(hopperVue.idleUsers, function(user){
-//                    console.log(user.heartbeat.route);
-//                })
-//                hopperVue.setBehaviorData(members.members);
-                    hopperVue.getDashboardData();
-                    hopperVue.getMemberHeartbeat( member );
-                } );
-            },
-            toggleUserStatus: function ( id, event ) {
-                this.$http( { url: window.hopper.routes.user_update + '/' + id, method: 'POST' } ).then( function ( response ) {
-                    // success callback
-                    if ( response.data.message === 'ok' ) {
-                        var payload = response.data.payload;
-//                  console.log(payload);
-                        toastr.success( payload.user.name + ' state changed to: <strong>' + payload.user.state + '</strong>', 'Hopper Says' );
-                    } else {
-                        toastr.error( 'Something happened', 'Hopper Says' );
-                        //console.log( response.data );
-                    }
-
-                }, function ( response ) {
-                    // error callback
-                    //console.log( response );
-                } );
-            },
-            triggerRefresh: function () {
-                this.getUserStatusData();
-                $( '#dataTableBuilder' ).DataTable().ajax.reload();
-            },
-            getUnassigned: function ( event ) {
-                this.$http( { url: window.hopper.routes.visit_unassigned, method: 'GET' } ).then( function ( response ) {
-                    this.Unassigned = response.data.payload;
-                } );
-            },
-            assignUserToVisitModal: function ( user, event ) {
-                this.$http( { url: window.hopper.routes.visit_unassigned, method: 'GET' } ).then( function ( response ) {
-                    this.Unassigned = response.data.payload;
-                    this.currentUser = user;
-//                $('#UnAssigned').
-                    console.log( user.name );
-                    console.log( response.data.payload );
-//                this.$set('Unassigned', response.data.payload);
-                    $( '.user-assignment-modal' ).modal( 'show' );
-                } );
-            },
-            assignVisitToUserModal: function ( visit ) {
-                this.currentVisit = visit;
-                $( '.visit-assignment-modal' ).modal( 'show' );
-            },
-            assignUserToVisit: function ( user, visit, event ) {
-                var $el = $( event.target );
-                $el.find( '.btn-content' ).html( '<i class="fa fa-spinner fa-spin fa-fw"></i> Assigning' ).parent().addClass( 'btn-warning' );
-                this.$http.post( window.hopper.routes.visit_assign + '/' + visit.id, { assignment_user_id: user.id } ).then( function ( response ) {
-                    $el.find( '.btn-content' ).html( '<i class="fa fa-check"></i> Assigned' ).parent().removeClass( 'btn-warning' ).addClass( 'btn-success' );
-                    this.triggerRefresh();
-                } );
-            },
-            notifyHopperClient: function (data) {
-                    this.$http.post(window.hopper.routes.notify_client,{
-                        'action' : data.action,
-                        'payload' : data
-                    }).then( function ( response ) {
-                        console.log(response);
-                    } );
-            },
-            
-        },
-        ready: function () {
-//        this.getHeartbeat();
-//            this.heartbeatListen();
-            this.getUserStatusData();
-//          this.getUnassigned();
-            
-        },
-        watch: {
-            Users: function () {
-                //code here executes whenever the Users array changes
-                //and runs AFTER the dom is updated, could use this in
-                //the parent component
-                $( '.user-group' ).matchHeight();
-
-            }
-        }
-    } );
-
-}
-
-$( function () {
-    $( '.user-status-refresh' ).on( 'click', function () {
-        hopperVue.getUserStatusData();
-    } );
-
-    var hopperChannel;
-
-    if ( 'undefined' !== typeof pusher ) {
-        hopperChannel = pusher.subscribe( 'hopper_channel' );
-        hopperChannel.bind( 'user_status', function ( data ) {
-            if ( data.message === 'update' ) {
-                hopperVue.triggerRefresh();
-            }
-        } );
-        hopperChannel.bind( 'visit_status', function ( data ) {
-            if ( data.message === 'update' ) {
-                hopperVue.triggerRefresh();
-            }
-        } );
-        $( document ).on( "click", ".assign-visit-to-user", function () {
-            var $el = $( this );
-            hopperVue.assignVisitToUserModal( $el.data('id') );
-        } );
-    }
-} );
+//            assignUserToVisitModal: function ( user, event ) {
+//                this.$http( { url: window.hopper.routes.visit_unassigned, method: 'GET' } ).then( function ( response ) {
+//                    this.Unassigned = response.data.payload;
+//                    this.Currentuser = user;
+////                $('#UnAssigned').
+//                    //console.log( user.name );
+//                    //console.log( response.data.payload );
+////                this.$set('Unassigned', response.data.payload);
+//                    $( '.user-assignment-modal' ).modal( 'show' );
+//                } );
+//            },
+//            assignVisitToUserModal: function ( visit ) {
+//                this.currentVisit = visit;
+//                $( '.visit-assignment-modal' ).modal( 'show' );
+//            },
+//            assignUserToVisit: function ( user, visit, event ) {
+//                var $el = $( event.target );
+//                $el.find( '.btn-content' ).html( '<i class="fa fa-spinner fa-spin fa-fw"></i> Assigning' ).parent().addClass( 'btn-warning' );
+//                this.$http.post( window.hopper.routes.visit_assign + '/' + visit.id, { assignment_user_id: user.id } ).then( function ( response ) {
+//                    $el.find( '.btn-content' ).html( '<i class="fa fa-check"></i> Assigned' ).parent().removeClass( 'btn-warning' ).addClass( 'btn-success' );
+//                    this.triggerRefresh();
+//                } );
+//            },
+//            notifyHopperClient: function (data) {
+//                    this.$http.post(window.hopper.routes.notify_client,{
+//                        'action' : data.action,
+//                        'payload' : data
+//                    }).then( function ( response ) {
+//                        //console.log(response);
+//                    } );
+//            },
+//            
+//        },
+//        ready: function () {
+////        this.getHeartbeat();
+////            this.heartbeatListen();
+//            this.getUserStatusData();
+////          this.getUnassigned();
+//            
+//        },
+//        watch: {
+//            Users: function () {
+//                //code here executes whenever the Users array changes
+//                //and runs AFTER the dom is updated, could use this in
+//                //the parent component
+//                $( '.user-group' ).matchHeight();
+//
+//            }
+//        }
+//    } );
+//
+//}
+//
+//$( function () {
+//    $( '.user-status-refresh' ).on( 'click', function () {
+//        hopperVue.getUserStatusData();
+//    } );
+//
+//    var hopperChannel;
+//
+//    if ( 'undefined' !== typeof pusher ) {
+//        hopperChannel = pusher.subscribe( 'hopper_channel' );
+//        hopperChannel.bind( 'user_status', function ( data ) {
+//            if ( data.message === 'update' ) {
+//                hopperVue.triggerRefresh();
+//            }
+//        } );
+//        hopperChannel.bind( 'visit_status', function ( data ) {
+//            if ( data.message === 'update' ) {
+//                hopperVue.triggerRefresh();
+//            }
+//        } );
+//        $( document ).on( "click", ".assign-visit-to-user", function () {
+//            var $el = $( this );
+//            hopperVue.assignVisitToUserModal( $el.data('id') );
+//        } );
+//    }
+//} );
 
 $( function () {
 
@@ -412,7 +404,7 @@ var getNextVersion = function ( postdata, $target ) {
             $target.val( resp.payload.newfilename );
 
         } else {
-            console.log( resp.payload.message );
+            //console.log( resp.payload.message );
         }
         return resp.payload;
     } );
@@ -428,6 +420,7 @@ var setCurrentFile = function ( session_file_option, $target ) {
 };
 
 $( function () {
+    
     if ( $( 'div#file-upload' ).length ) {
         var baseUrl = "",
             token = $( 'meta[name="_token"]' ).attr( 'content' ),
@@ -562,11 +555,7 @@ $( function () {
                 session_id: $session_id.val() || false,
             }
         } );
-        Dropzone.options.fileEntityUploadDz = {
-            accept: function ( file, done ) {
-
-            }
-        };
+       
     }
 
     $( 'input#visitorsNames' ).click( function () {
@@ -584,7 +573,7 @@ $( function () {
             ;
 
 
-//        Dropzone.autoDiscover = true;
+        
         var visitDropzone = new Dropzone( document.body, {
             url: baseUrl + "/admin/files/upload",
             previewsContainer: "div#visit-upload",
@@ -710,11 +699,6 @@ $( function () {
 
             }
         } );
-        Dropzone.options.visitDropzone = {
-            accept: function ( file, done ) {
-
-            }
-        };
     }
 
     $( "input.bootstrap-checkbox-switch" ).bootstrapSwitch().on( 'switchChange.bootstrapSwitch', function ( event, state ) {
@@ -816,7 +800,7 @@ $( function () {
             legend = $el.data( 'legendTarget' ),
             options = $el.data();
         var settings = $.extend( { }, lineOptions, options );
-        console.log( values );
+        //console.log( values );
         if ( values ) {
             lineChart = new Chart( lineChartCanvas ).Line( values, settings );
             if ( $( legend ).length ) {
@@ -863,7 +847,7 @@ $( function () {
             legend = $el.data( 'legendTarget' ),
             options = $el.data();
         var settings = $.extend( { }, pieOptions, options );
-        console.log( values );
+        //console.log( values );
         if ( values ) {
             pieChart = new Chart( pieChartCanvas ).Doughnut( values, settings );
             if ( $( legend ).length ) {

@@ -30,10 +30,11 @@ class PusherController extends Controller
     {
 		
 		$presence_data = [
+			'id' => auth()->user()->id,
 			'name' => auth()->user()->name,
 			'email' => auth()->user()->email,
-			'originator' => $request->get('originator'),
-			'target' => $request->get('target'),
+			'route' => $request->get('route'),
+//			'target' => $request->get('target'),
 			'client_version' => config('hopper.client_version'),
 		];
 		

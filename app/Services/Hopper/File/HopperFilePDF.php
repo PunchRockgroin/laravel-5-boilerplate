@@ -176,7 +176,7 @@ class HopperFilePDF implements HopperFilePDFContract{
 				return $newPDFName;
 				
 			} catch (ProcessFailedException $e) {
-				\Log::info($e->getMessage());
+				\Log::error($e->getMessage());
 				return false;
 			}
 

@@ -36,46 +36,48 @@ class HopperServiceProvider extends ServiceProvider
 //			$pusher_presence_routes = ['admin.dashboard', 'admin.visit.edit'];
                         
             javascript()->put([
+				'Laravel' => csrf_token(),
                 'hopper' => [
                     'userid' => auth()->user()->id,
                     'username' => auth()->user()->name,
                     'email' => auth()->user()->email,
 					'heartbeat' => config('hopper.heartbeat'),
+					'heartbeat_provider' => config('hopper.heartbeat_provider'),
 					'routes' => [
 						'user_status' => route('admin.dashboard.user.status'),
 						'user_update' => route('admin.dashboard.user.update'),
-						'heartbeat_status' => route('backend.heartbeat.status'),
-						'heartbeat_data' => route('admin.dashboard.data'),
-						'heartbeat_user' => '/admin/dashboard/heartbeat',
+//						'heartbeat_status' => route('backend.heartbeat.status'),
+//						'heartbeat_data' => route('admin.dashboard.data'),
+//						'heartbeat_user' => '/admin/dashboard/heartbeat',
 						'visit_assignments' => route('admin.visit.assignments'),
 						'visit_unassigned' => route('admin.visit.unassigned'),
 						'visit_assign' => route('admin.visit.assign', ''),
 						'notify_client' => route('backend.hopper.admin.notify-client'),
 					],
 					'user_status_uri' => route('admin.dashboard.user.status'),
-                    'heartbeat_status' => route('backend.heartbeat.status'),
-                    'heartbeat_data' => route('admin.dashboard.data'),
-                    'heartbeat_user' => '/admin/dashboard/heartbeat',
-                    'heartbeat_detector_enable' => (in_array(request()->route()->getName(), $heartbeat_detector_routes) ? true : false),
-                    'pusher_presence_enable' => (in_array(request()->route()->getName(), $pusher_presence_routes) ? true : false),
+//                    'heartbeat_status' => route('backend.heartbeat.status'),
+//                    'heartbeat_data' => route('admin.dashboard.data'),
+//                    'heartbeat_user' => '/admin/dashboard/heartbeat',
+//                    'heartbeat_detector_enable' => (in_array(request()->route()->getName(), $heartbeat_detector_routes) ? true : false),
+//                    'pusher_presence_enable' => (in_array(request()->route()->getName(), $pusher_presence_routes) ? true : false),
                 ],
             ]);
         });
         //Views we track
-        view()->composer([
-            'backend.fileentity.edit',
-            'backend.visit.edit',
-        ], function(){
-            javascript()->put([
-                'heartbeat' => [
-                    'user' => auth()->user()->email,
-                    'url' => route('backend.heartbeat.index'),
-                    'route' => request()->route()->getName(),
-                    'parameters' => request()->segments()
-                ],
-            ]);
-        
-        });
+//        view()->composer([
+//            'backend.fileentity.edit',
+//            'backend.visit.edit',
+//        ], function(){
+//            javascript()->put([
+//                'heartbeat' => [
+//                    'user' => auth()->user()->email,
+//                    'url' => route('backend.heartbeat.index'),
+//                    'route' => request()->route()->getName(),
+//                    'parameters' => request()->segments()
+//                ],
+//            ]);
+//        
+//        });
 		
 		
 		

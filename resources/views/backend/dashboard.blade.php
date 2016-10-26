@@ -142,29 +142,28 @@
 				</div><!-- /.box tools -->
 			</div><!-- /.box-header -->
 			<div class="box-body">
-				 <button class="btn user-status-refresh"><i class="fa fa-refresh"></i> Trigger Refresh</button>
+				 <button @click="triggerRefresh" class="btn user-status-refresh"><i class="fa fa-refresh"></i> Trigger Refresh</button>
 			</div><!-- /.box-body -->
 		</div><!--box box-success-->
 	</div>
 </div>
-
-@include('backend.hopper.dashboard.partials.userbehavior')
+<user-behavior 
+	v-bind:Users="Users" 
+	v-bind:Currentuser="Currentuser" 
+	v-bind:Currentvisit="Currentvisit" 
+	v-bind:Unassigned="Unassigned" ></user-behavior>
 <div class='row'>
 <div class="col-xs-12">
 <div class="callout callout-warning">
-<h4>Hopper Assignments is in Alpha</h4>
-<p>Your milage may vary.</p>
+	<h4>Hopper Assignments is in Alpha</h4>
+	<p>Your milage may vary.</p>
 </div>
 </div>
 </div>
-
-
 @endsection
 @section('before-scripts-end')
-@include('backend.hopper.dashboard.partials.userassignmentmodal')
-@include('backend.hopper.dashboard.partials.visitassignmentmodal')
 @endsection
 @section('after-scripts-end')
 @include('includes/partials/pusher')
- {!! $AssignmentHTML->scripts() !!}
+{!! $AssignmentHTML->scripts() !!}
 @endsection

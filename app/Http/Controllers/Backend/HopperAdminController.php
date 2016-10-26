@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\File;
 use Carbon\Carbon as Carbon;
 use App\Services\Hopper\Excel\EventSessionImport;
 use App\Services\Hopper\Contracts\HopperFileContract;
+use App\Services\Hopper\Contracts\HopperFilePDFContract;
 
 use Vinkla\Pusher\Facades\Pusher;
 
@@ -38,12 +39,14 @@ class HopperAdminController extends Controller {
 	private $hopperfileentity;
 	private $hopperstats;
 	private $hopperfile;
+	private $hopperfilepdf;
 	private $eventsessionimport;
 
 	public function __construct(
 	\Illuminate\Support\MessageBag $messagebag, HopperEventSession $hoppereventsession, HopperVisit $hoppervisit,
  HopperFileEntity $hopperfileentity, HopperStats $hopperstats,
- HopperFileContract $hopperfile
+ HopperFileContract $hopperfile,
+ HopperFilePDFContract $hopperfilepdf
 //             EventSessionImport $eventsessionimport
 	) {
 		$this->messagebag			 = $messagebag;
@@ -52,6 +55,7 @@ class HopperAdminController extends Controller {
 		$this->hopperfileentity		 = $hopperfileentity;
 		$this->hopperstats			 = $hopperstats;
 		$this->hopperfile			 = $hopperfile;
+		$this->hopperfilepdf		 = $hopperfilepdf;
 //        $this->eventsessionimport = $eventsessionimport;
 	}
 
@@ -79,6 +83,15 @@ class HopperAdminController extends Controller {
 				}
 			} );
 		} 
+
+//		$this->hopperfilepdf->createPDFBatch(env('HOPPER_MASTER_NAME', '1_Master/'));
+		
+		
+//		$this->hopperfile->createPDFTest('B10054_[Fri1130]_[Ann1]_LCC09.pptx');
+		
+		
+		\Log::error("Some Message");
+		
 		return view( 'backend.hopper.admin.index', $data );
 	}
 

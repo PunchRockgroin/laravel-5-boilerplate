@@ -12,7 +12,7 @@
 				
 				
 				<li>
-					<p class="nav navbar-text">
+					<p v-cloak class="nav navbar-text">
 						<span v-if="online" class="label label-info"><i class="fa fa-check" aria-hidden="true"></i> You are online</span>
 						<span v-else class="label label-danger"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Warning - You are offline</span>
 					</p> 

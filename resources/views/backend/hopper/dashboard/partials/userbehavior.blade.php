@@ -12,8 +12,9 @@
 		  </div>
 		</div>
 	</div>
+	
 	<template v-for="user in idleGraphicOperators" track-by="uid">
-		@include('backend.hopper.dashboard.partials.usercard')
+	    <user-card :user="user"></user-card>
 	</template>
 </div>
 
@@ -24,7 +25,7 @@
 </div>
 <div class="row">
 	<template v-for="user in activeGraphicOperators" track-by="uid">
-		@include('backend.hopper.dashboard.partials.usercard')
+		<user-card :user="user"></user-card>
 	</template>
 </div>
 
