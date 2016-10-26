@@ -1,4 +1,4 @@
-@extends('backend.layouts.master')
+@extends('backend.layouts.app')
 
 @section('title', app_name() .' | '. trans('fileentity.backend.admin.title') .' | '. trans('fileentity.backend.admin.create'))
 

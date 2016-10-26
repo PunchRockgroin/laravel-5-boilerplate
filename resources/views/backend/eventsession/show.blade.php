@@ -1,4 +1,4 @@
-@extends('backend.layouts.master')
+@extends('backend.layouts.app')
 
 @section('title', app_name() .' | '. trans('eventsession.backend.admin.title') .' | '. trans('eventsession.backend.admin.show'))
 

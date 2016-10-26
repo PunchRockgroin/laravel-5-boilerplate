@@ -1,7 +1,5 @@
 <?php namespace App\Repositories\Backend\History;
 
-use App\Models\History\History;
-
 /**
  * Interface HistoryContract
  * @package App\Repositories\Backend\History
@@ -20,30 +18,31 @@ interface HistoryContract {
 	public function log($type, $text, $entity_id = null, $icon = null, $class = null,  $assets = null);
 
 	/**
-	 * @param int $limit
+	 * @param null $limit
 	 * @param bool $paginate
 	 * @param int $pagination
 	 * @return mixed
 	 */
-	public function render($limit = null, $paginate = false, $pagination = 10);
+	public function render($limit = null, $paginate = true, $pagination = 10);
 
 	/**
 	 * @param $type
-	 * @param int $limit
+	 * @param null $limit
 	 * @param bool $paginate
 	 * @param int $pagination
 	 * @return mixed
 	 */
-	public function renderType($type, $limit = null, $paginate = false, $pagination = 10);
+	public function renderType($type, $limit = null, $paginate = true, $pagination = 10);
 
 	/**
+	 * @param $type
 	 * @param $entity_id
-	 * @param int $limit
+	 * @param null $limit
 	 * @param bool $paginate
 	 * @param int $pagination
 	 * @return mixed
 	 */
-	public function renderEntity($entity_id, $limit = null, $paginate = false, $pagination = 10);
+	public function renderEntity($type, $entity_id, $limit = null, $paginate = true, $pagination = 10);
 
 	/**
 	 * @param $text
@@ -53,14 +52,18 @@ interface HistoryContract {
 	public function renderDescription($text, $assets = false);
 
 	/**
-	 * @param $items
+	 * @param $history
+	 * @param bool $paginate
 	 * @return mixed
 	 */
-	public function buildList($history);
+	public function buildList($history, $paginate = true);
 
 	/**
-	 * @param History $historyItem
+	 * @param $query
+	 * @param $limit
+	 * @param $paginate
+	 * @param $pagination
 	 * @return mixed
 	 */
-	public function buildItem(History $historyItem);
+	public function buildPagination($query, $limit, $paginate, $pagination);
 }

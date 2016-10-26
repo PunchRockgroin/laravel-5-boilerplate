@@ -1,4 +1,4 @@
-@extends('backend.layouts.master')
+@extends('backend.layouts.app')
 
 @section('title', app_name() .' | '. trans('visit.backend.sidebar.title') .' | '. trans('visit.backend.sidebar.index'))
 

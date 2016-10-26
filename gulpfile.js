@@ -3,8 +3,22 @@ const elixir = require('laravel-elixir');
 require('laravel-elixir-vue-2');
 require('./elixir-extensions');
 
+/*
+ |--------------------------------------------------------------------------
+ | Elixir Asset Management
+ |--------------------------------------------------------------------------
+ |
+ | Elixir provides a clean, fluent API for defining some basic Gulp tasks
+ | for your Laravel application. By default, we are compiling the Sass
+ | file for your application as well as publishing vendor resources.
+ |
+ */
 
-elixir(mix => {
+elixir((mix) => {
+    /**
+     * Copy needed files from /node directories
+     * to /public directory.
+     */
     mix.copy(
        'node_modules/font-awesome/fonts',
        'public/build/fonts/font-awesome'

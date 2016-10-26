@@ -9,7 +9,12 @@ use Illuminate\Support\Facades\DB;
  */
 class UserTableSeeder extends Seeder
 {
-    public function run()
+	/**
+	 * Run the database seed.
+	 *
+	 * @return void
+	 */
+	public function run()
     {
         if (DB::connection()->getDriverName() == 'mysql') {
             DB::statement('SET FOREIGN_KEY_CHECKS=0;');
@@ -27,9 +32,9 @@ class UserTableSeeder extends Seeder
         //Add the master administrator, user id of 1
         $users = [
             [
-                'name'              => 'David Alberts',
-                'email'             => 'dave@lightsourcecreative.com',
-                'password'          => bcrypt('173a0cf52f87115284b9afd84b464762'),
+                'name'              => 'Admin Istrator',
+                'email'             => 'admin@admin.com',
+                'password'          => bcrypt('1234'),
                 'confirmation_code' => md5(uniqid(mt_rand(), true)),
                 'confirmed'         => true,
                 'created_at'        => Carbon::now(),

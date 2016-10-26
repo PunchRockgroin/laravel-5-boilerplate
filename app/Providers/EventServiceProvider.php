@@ -5,6 +5,10 @@ namespace App\Providers;
 use Illuminate\Contracts\Events\Dispatcher as DispatcherContract;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
+/**
+ * Class EventServiceProvider
+ * @package App\Providers
+ */
 class EventServiceProvider extends ServiceProvider
 {
     /**
@@ -66,12 +70,12 @@ class EventServiceProvider extends ServiceProvider
 		/**
 		 * Access Subscribers
 		 */
-        \App\Listeners\Backend\Access\User\UserEventListener::class,
+		\App\Listeners\Backend\Access\User\UserEventListener::class,
 		\App\Listeners\Backend\Access\Role\RoleEventListener::class,
-    ];
+	];
 
     /**
-     * Register any other events for your application.
+     * Register any events for your application.
      *
      * @param  \Illuminate\Contracts\Events\Dispatcher  $events
      * @return void
